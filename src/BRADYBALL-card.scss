@@ -15,10 +15,10 @@
 }
 
 @font-face {
-    font-family: 'Courier New';
-    src: local('Courier New'), local('CourierNew'), 
-         url('path/to/courier-new.woff2') format('woff2'),
-         url('path/to/courier-new.woff') format('woff');
+    font-family: 'Courier New Bold';
+    src: local('Courier New Bold'), local('CourierNewBold'), 
+         url('/assets/fonts/CourierNewPS-BoldMT.woff2') format('woff2'),
+         url('/assets/fonts/CourierNewPS-BoldMT.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
@@ -26,13 +26,17 @@
 @font-face {
     font-family: 'Helvetica Neue LT Std Regular';
     src: local('Helvetica Neue LT Std Regular'), local('HelveticaNeueLTStd-Regular'), 
-         url('path/to/helvetica-neue-lt-std-regular.woff2') format('woff2'),
-         url('path/to/helvetica-neue-lt-std-regular.woff') format('woff');
+         url('/assets/fonts/Helvetica Neue LT Std 55 Roman.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
 
-.bb-text {
+.bb-text-helvetica {
     font-family: 'Helvetica Neue LT Std Regular';
+    color: var(--bb-black-color);
+}
+
+.bb-text-courier-new-bold {
+    font-family: 'Courier New Bold';
     color: var(--bb-black-color);
 }
