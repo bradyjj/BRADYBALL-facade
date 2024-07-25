@@ -4,17 +4,21 @@ import { BRADYBALLCardScreenComponent } from "./components/BRADYBALL-card-screen
 import { PlayerSearchComponent } from "./components/player-search/player-search.component";
 import { BRADYBALLCardRoutingModule } from "./BRADYBALL-card-routing.module";
 import { SharedModule } from "../shared/shared.module";
+import { RadarChartComponent } from "./components/radar-chart/radar-chart.component";
+import { StatLineComponent } from "./components/stat-line/stat-line.component";
 
 @NgModule({
     imports: [
         SharedModule,
-        BRADYBALLCardRoutingModule
+        BRADYBALLCardRoutingModule,
     ],
     exports: [],
     declarations: [
         BRADYBALLCardScreenComponent,
         BRADYBALLCardPageComponent,
-        PlayerSearchComponent
+        PlayerSearchComponent,
+        RadarChartComponent,
+        StatLineComponent
     ],
     providers: [],  
 })
