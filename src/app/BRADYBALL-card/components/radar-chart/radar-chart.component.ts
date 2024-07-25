@@ -1,60 +1,38 @@
-import { Component, Input, OnInit, ElementRef } from '@angular/core';
+import { Component, Input, ElementRef, SimpleChanges, OnChanges } from '@angular/core';
 import * as d3 from 'd3';
+import { RadarChartPlayerData, RadarChartDataPoint } from '../../models/radar-chart-player.model';
 
 @Component({
     selector: 'radar-chart',
     templateUrl: './radar-chart.component.html',
     styleUrls: ['./radar-chart.component.scss'],
 })
-export class RadarChartComponent implements OnInit {
-    @Input() data: any[] = [];
-
-    response: any = {
-        "data": [
-            {
-                "PlayerName": "Kylian Mbappé",
-                "League": "FRA-Ligue 1",
-                "Team": "Paris S-G",
-                "Nation": "FRA",
-                "Position": "FW",
-                "Age": 25,
-                "Born": 1998,
-                "MatchesPlayed": 29,
-                "MinutesPlayed": 2158,
-                "90sPlayed": 24,
-                "ExpectedAssistsP90": 0.24,
-                "NonPenExpectedGoalsP90": 0.6,
-                "NonPenGoalsP90": 0.88,
-                "ShotsOnTargetP90": 2.09,
-                "ShotsP90": 4.67,
-                "AerialPct": 0,
-                "ShotCreatingActionsP90": 4.04,
-                "ProgPassesP90": 5.08,
-                "BallWonP90": 0.12,
-                "SuccessfulTakeOnsP90": 2.54,
-                "TakeOnPct": 45.9
-            }
-        ]
-    }
+export class RadarChartComponent implements OnChanges {
+    @Input() data!: RadarChartPlayerData;
 
     private svg: any;
-    private margin = 50;
-    private width = 500;
-    private height = 500;
+    private margin = 100;
+    private width = 800;
+    private height = 800;
     private radius = Math.min(this.width, this.height) / 2 - this.margin;
-    private color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    chartReady: boolean = false;
 
     constructor(private elementRef: ElementRef) { }
 
-    ngOnInit() {
-        if (this.data.length === 0 && this.response.data.length > 0) {
-            this.data = this.response.data;
+    ngOnChanges(changes: SimpleChanges) {
+        console.log('RadarChart OnChanges:', changes);
+        if (changes['data'] && this.data) {
+            console.log('RadarChart Data:', this.data);
+            this.createSvg();
+            this.drawChart();
         }
-        this.createSvg();
-        this.drawChart();
     }
 
     private createSvg(): void {
+        d3.select(this.elementRef.nativeElement).select('svg').remove();
+        this.svg = d3.select(this.elementRef.nativeElement)
+            .append('svg')
         this.svg = d3.select(this.elementRef.nativeElement)
             .append('svg')
             .attr('width', this.width)
@@ -64,40 +42,44 @@ export class RadarChartComponent implements OnInit {
     }
 
     private drawChart(): void {
-        const features = [
-            "ExpectedAssistsP90", "NonPenExpectedGoalsP90", "NonPenGoalsP90",
-            "ShotsOnTargetP90", "ShotsP90", "AerialPct", "ShotCreatingActionsP90",
-            "ProgPassesP90", "BallWonP90", "SuccessfulTakeOnsP90", "TakeOnPct"
-        ];
+        if (!this.data || !this.data.dataPoints || this.data.dataPoints.length === 0) {
+            console.error('No data available for radar chart');
+            this.chartReady = false;
+            return;
+        }
+        const dataPoints = this.data.dataPoints;
+        const angleStep = (Math.PI * 2) / dataPoints.length;
 
-        // Helper function to check if a value is a valid number
-        const isValidNumber = (value: any): value is number =>
-            typeof value === 'number' && !isNaN(value) && isFinite(value);
+        // Create scales for each feature
+        const featureScales = dataPoints.reduce((scales, point) => {
+            scales[point.key] = d3.scaleLinear()
+                .domain([0, point.scale])
+                .range([0, this.radius]);
+            return scales;
+        }, {} as { [key: string]: d3.ScaleLinear<number, number> });
 
-        const radialScale = d3.scaleLinear()
-            .domain([0, d3.max(this.data, d =>
-                Math.max(...features.map(f => isValidNumber(d[f]) ? d[f] : 0))
-            ) || 1]) // Use 1 as fallback if all values are invalid
-            .range([0, this.radius]);
-
-        const angleScale = d3.scalePoint()
-            .range([0, Math.PI * 2])
-            .domain(features);
-
-        // draw circular grid
+        // Draw circular grid
         const circles = [0.2, 0.4, 0.6, 0.8, 1];
         circles.forEach(r => {
             this.svg.append('circle')
                 .attr('cx', 0)
                 .attr('cy', 0)
-                .attr('r', radialScale(r))
-                .attr('stroke', 'gray')
+                .attr('r', this.radius * r)
+                .attr('stroke', 'lightgray')
                 .attr('fill', 'none');
+
+            // Add scale labels
+            this.svg.append('text')
+                .attr('x', 5)
+                .attr('y', -this.radius * r)
+                .text(r * 100 + '%')
+                .attr('font-size', '12px')
+                .attr('fill', 'gray');
         });
 
-        // draw axis
-    features.forEach(f => {
-            const angle = angleScale(f);
+        // Draw axes and labels
+        dataPoints.forEach((point, index) => {
+            const angle = index * angleStep;
             const lineCoordinates = d3.pointRadial(angle, this.radius);
             this.svg.append('line')
                 .attr('x1', 0)
@@ -106,29 +88,55 @@ export class RadarChartComponent implements OnInit {
                 .attr('y2', lineCoordinates[1])
                 .attr('stroke', 'gray');
 
-            const labelCoordinates = d3.pointRadial(angle, this.radius + 20);
+            const labelRadius = this.radius + 40;
+            const labelAngle = angle - Math.PI / 2;
+            const labelX = labelRadius * Math.cos(labelAngle);
+            const labelY = labelRadius * Math.sin(labelAngle);
+
             this.svg.append('text')
-                .attr('x', labelCoordinates[0])
-                .attr('y', labelCoordinates[1])
-                .text(f)
-                .attr('text-anchor', 'middle');
+                .attr('x', labelX)
+                .attr('y', labelY)
+                .text(point.label)
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .attr('font-size', '14px')
+                .attr('font-family', 'Courier New Bold')
+                .attr('font-weight', 'bold')
+                .attr('fill', 'var(--bb-black-color)')
+                .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${labelX}, ${labelY})`);
         });
 
-        // draw data
-        const line = d3.lineRadial()
-            .angle(d => angleScale(d.axis))
-            .radius(d => radialScale(d.value))
+        // Draw data
+        const line = d3.lineRadial<RadarChartDataPoint>()
+            .angle((d, i) => i * angleStep)
+            .radius(d => featureScales[d.key](d.value))
             .curve(d3.curveLinearClosed);
 
-        this.data.forEach((d, i) => {
-            const dataPoints = features.map(f => ({ axis: f, value: d[f] }));
+        this.svg.append('path')
+            .datum(dataPoints)
+            .attr('d', line)
+            .attr('stroke', dataPoints[0].color)
+            .attr('fill', dataPoints[0].color)
+            .attr('fill-opacity', 0.3);
 
-            this.svg.append('path')
-                .datum(dataPoints)
-                .attr('d', line)
-                .attr('stroke', this.color(i.toString()))
-                .attr('fill', this.color(i.toString()))
-                .attr('fill-opacity', 0.3);
-        });
+        // Add title with player name and season
+        this.svg.append('text')
+            .attr('x', 0)
+            .attr('y', -this.height / 2 + 20)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '18px')
+            .attr('font-weight', 'bold')
+            .text(`${this.data.player} - ${this.data.season}`);
+
+        // Add additional player info
+        const infoText = `${this.data.position} | ${this.data.team} | ${this.data.league}`;
+        this.svg.append('text')
+            .attr('x', 0)
+            .attr('y', -this.height / 2 + 45)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '14px')
+            .text(infoText);
+
+        this.chartReady = true;
     }
 }

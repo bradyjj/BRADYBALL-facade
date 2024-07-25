@@ -6,11 +6,13 @@ import { BRADYBALLCardRoutingModule } from "./BRADYBALL-card-routing.module";
 import { SharedModule } from "../shared/shared.module";
 import { RadarChartComponent } from "./components/radar-chart/radar-chart.component";
 import { StatLineComponent } from "./components/stat-line/stat-line.component";
+import { CommonModule } from "@angular/common";
 
 @NgModule({
     imports: [
         SharedModule,
         BRADYBALLCardRoutingModule,
+        CommonModule
     ],
     exports: [],
     declarations: [

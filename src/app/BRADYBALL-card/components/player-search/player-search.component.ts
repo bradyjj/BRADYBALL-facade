@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SupabaseService } from '../../../shared/services/supabase.service';
 import { Player } from '../../models/player.model';
 import { PlayerStat } from '../../models/player-stat.model';
+import { RadarChartDataPoint, RadarChartPlayerData } from '../../models/radar-chart-player.model';
 
 @Component({
     selector: 'player-search',
@@ -25,15 +26,17 @@ export class PlayerSearchComponent implements OnInit {
     playerPlayingTimeData: any;
     playerMiscData: any;
     combinedPlayerData: { [season: string]: PlayerStat } = {};
+    radarChartModel: RadarChartPlayerData = RadarChartPlayerData.createDefault();
 
     constructor(private supabaseService: SupabaseService) { }
 
-    ngOnInit(): void {
-        this.fetchPlayerData(this.playerName);
+    async ngOnInit(): Promise<void> {
+        await this.fetchPlayerData(this.playerName);
+        this.createRadarChartModel();
     }
 
-    private fetchPlayerData(player: string): void {
-        Promise.all([
+    private fetchPlayerData(player: string): Promise<void> {
+        return Promise.all([
             this.supabaseService.getPlayerStandardData(player),
             this.supabaseService.getPlayerShootingData(player),
             this.supabaseService.getPlayerPassingData(player),
@@ -93,5 +96,100 @@ export class PlayerSearchComponent implements OnInit {
             });
         });
         console.log('Combined Player Data:', this.combinedPlayerData);
+    }
+
+    private createRadarChartModel(): void {
+        const latestSeason = Object.keys(this.combinedPlayerData).sort().pop();
+        if (!latestSeason) return;
+
+        const playerData = this.combinedPlayerData[latestSeason];
+
+        const dataPoints: RadarChartDataPoint[] = [
+            {
+                key: 'ExpectedAssistsP90',
+                value: 0.24,
+                scale: 1,
+                color: 'var(--bb-red-purple-color)',
+                label: 'Expected Assists'
+            },
+            {
+                key: 'NonPenExpectedGoalsP90',
+                value: 0.6,
+                scale: 1,
+                color: 'var(--bb-violet-color)',
+                label: 'Non-Pen xG'
+            },
+            {
+                key: 'NonPenGoalsP90',
+                value: 0.88,
+                scale: 1,
+                color: 'var(--bb-green-color)',
+                label: 'Non-Pen Goals'
+            },
+            {
+                key: 'ShotsOnTargetP90',
+                value: 2.09,
+                scale: 5,
+                color: 'var(--bb-turquoise-color)',
+                label: 'Shots on Target'
+            },
+            {
+                key: 'ShotsP90',
+                value: 4.67,
+                scale: 5,
+                color: 'var(--bb-green-2-color)',
+                label: 'Shots'
+            },
+            {
+                key: 'AerialPct',
+                value: 0,
+                scale: 100,
+                color: 'var(--bb-red-purple-color)',
+                label: 'Aerial %'
+            },
+            {
+                key: 'ShotCreatingActionsP90',
+                value: 4.04,
+                scale: 10,
+                color: 'var(--bb-violet-color)',
+                label: 'Shot-Creating Actions'
+            },
+            {
+                key: 'ProgPassesP90',
+                value: 5.08,
+                scale: 10,
+                color: 'var(--bb-green-color)',
+                label: 'Progressive Passes'
+            },
+            {
+                key: 'BallWonP90',
+                value: 0.12,
+                scale: 5,
+                color: 'var(--bb-turquoise-color)',
+                label: 'Possession Won'
+            },
+            {
+                key: 'TakeOnPct',
+                value: 2.54,
+                scale: 100,
+                color: 'var(--bb-green-2-color)',
+                label: 'Take-On %'
+            }
+        ];
+
+        this.radarChartModel = {
+            player: playerData.player,
+            league: playerData.league,
+            season: playerData.season,
+            team: playerData.team,
+            age: playerData.age,
+            position: playerData.position,
+            born: playerData.born,
+            nation: playerData.nation,
+            minutes_90s: playerData.minutes_90s,
+            dataPoints: dataPoints
+        };
+
+        console.log('Radar Chart Model:', this.radarChartModel);
     }
 }

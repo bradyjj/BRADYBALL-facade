@@ -1,3 +1,7 @@
-<div class="container">
-    <div id="radarChart"></div>
-</div>
+<div class="radar-chart-container">
+    <div *ngIf="!chartReady" class="loading-indicator">
+      <p>Loading chart...</p>
+    </div>
+  
+    <div *ngIf="chartReady" #chartContainer></div>
+  </div>
