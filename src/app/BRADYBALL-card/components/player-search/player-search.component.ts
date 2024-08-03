@@ -108,7 +108,7 @@ export class PlayerSearchComponent implements OnInit {
             {
                 key: 'ExpectedAssistsP90',
                 value: 0.24,
-                scale: 1,
+                scale: .5,
                 color: 'var(--bb-red-purple-color)',
                 label: 'Expected Assists'
             },
@@ -129,7 +129,7 @@ export class PlayerSearchComponent implements OnInit {
             {
                 key: 'ShotsOnTargetP90',
                 value: 2.09,
-                scale: 5,
+                scale: 2.5,
                 color: 'var(--bb-turquoise-color)',
                 label: 'Shots on Target'
             },
@@ -142,7 +142,7 @@ export class PlayerSearchComponent implements OnInit {
             },
             {
                 key: 'AerialPct',
-                value: 0,
+                value: 33,
                 scale: 100,
                 color: 'var(--bb-red-purple-color)',
                 label: 'Aerial %'
@@ -150,27 +150,27 @@ export class PlayerSearchComponent implements OnInit {
             {
                 key: 'ShotCreatingActionsP90',
                 value: 4.04,
-                scale: 10,
+                scale: 8,
                 color: 'var(--bb-violet-color)',
                 label: 'Shot-Creating Actions'
             },
             {
                 key: 'ProgPassesP90',
                 value: 5.08,
-                scale: 10,
+                scale: 9,
                 color: 'var(--bb-green-color)',
                 label: 'Progressive Passes'
             },
             {
                 key: 'BallWonP90',
-                value: 0.12,
+                value: 3.3,
                 scale: 5,
                 color: 'var(--bb-turquoise-color)',
                 label: 'Possession Won'
             },
             {
                 key: 'TakeOnPct',
-                value: 2.54,
+                value: 45.9,
                 scale: 100,
                 color: 'var(--bb-green-2-color)',
                 label: 'Take-On %'
@@ -180,7 +180,7 @@ export class PlayerSearchComponent implements OnInit {
         this.radarChartModel = {
             player: playerData.player,
             league: playerData.league,
-            season: playerData.season,
+            season: "2023-24",
             team: playerData.team,
             age: playerData.age,
             position: playerData.position,

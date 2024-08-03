@@ -7,12 +7,16 @@ import { SharedModule } from "../shared/shared.module";
 import { RadarChartComponent } from "./components/radar-chart/radar-chart.component";
 import { StatLineComponent } from "./components/stat-line/stat-line.component";
 import { CommonModule } from "@angular/common";
+import { HttpClientModule } from "@angular/common/http";
+import { FontService } from "../../assets/fonts/font.service";
+import { BRADYBALLCardUtil } from "./util/BRADYBALL-card.util";
 
 @NgModule({
     imports: [
         SharedModule,
         BRADYBALLCardRoutingModule,
-        CommonModule
+        CommonModule,
+        HttpClientModule
     ],
     exports: [],
     declarations: [
@@ -22,6 +26,9 @@ import { CommonModule } from "@angular/common";
         RadarChartComponent,
         StatLineComponent
     ],
-    providers: [],  
+    providers: [
+        FontService,
+        BRADYBALLCardUtil
+    ],
 })
 export class BRADYBALLCardModule { }

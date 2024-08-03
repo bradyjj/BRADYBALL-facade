@@ -1,42 +1,91 @@
-:root {
-    --bb-black-color: #000000;
+@font-face {
+    font-family: 'Pinegrove';
+    src: local('Pinegrove'), 
+         url('/assets/fonts/pinegrove.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
 
+:root {
+    // Base Colors
+    --bb-black-color: #000000;
     --bb-white-color: #ffffff;
 
-    --bb-red-purple-color: #550e37;
+    // Main colors
+    --bb-brown-gold-color: #b07c29;
+    --bb-red-color: #972828;
+    --bb-dark-red-burgundy-color: #681e1e;
+    --bb-orange-color: #ff5b00;
 
-    --bb-violet-color: #3e09bf;
+    // Accent Colors
+    --bb-blue-color: #405e9b;
+    --bb-cream-off-white-color: #f8f5e3;
+    --bb-green-color: #59c135;
 
-    --bb-green-color: #6ff429;
-
-    --bb-turquoise-color: #44d1d1;
-
-    --bb-green-2-color: #59f516;
-}
-
-@font-face {
-    font-family: 'Courier New Bold';
-    src: local('Courier New Bold'), local('CourierNewBold'), 
-         url('/assets/fonts/CourierNewPS-BoldMT.woff2') format('woff2'),
-         url('/assets/fonts/CourierNewPS-BoldMT.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Helvetica Neue LT Std Regular';
-    src: local('Helvetica Neue LT Std Regular'), local('HelveticaNeueLTStd-Regular'), 
-         url('/assets/fonts/Helvetica Neue LT Std 55 Roman.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
+    --font-courier-new-bold: 'Courier Prime', sans-serif;
+    --font-helvetica: 'Helvetica Neue', sans-serif;
+    --font-pinegrove: 'Pinegrove';
+    --font-special-elite: 'Special Elite', sans-serif;
+    --font-league-spartan: 'League Spartan', sans-serif;
+    --font-noto-serf: 'Noto Serif', serif;
+    --font-lato: 'Lato', sans-serif;
+    --font-playfair-display: 'Playfair Display', serif;
+    --font-EB-garamond: 'EB Garamond', serif;
+    --font-avro: 'Avro', sans-serif;
+    --font-monteserrat: 'Montserrat', sans-serif;
 }
 
 .bb-text-helvetica {
-    font-family: 'Helvetica Neue LT Std Regular';
+    font-family: var(--font-helvetica);
     color: var(--bb-black-color);
 }
 
 .bb-text-courier-new-bold {
-    font-family: 'Courier New Bold';
+    font-family: var(--font-courier-new-bold);
+    color: var(--bb-black-color);
+}
+
+.bb-text-pinegrove {
+    font-family: var(--font-pinegrove);
+    color: var(--bb-black-color);
+}
+
+.bb-text-special-elite {
+    font-family: var(--font-special-elite);
+    color: var(--bb-black-color);
+}
+
+.bb-text-league-spartan {
+    font-family: var(--font-league-spartan);
+    color: var(--bb-black-color);
+}
+
+.bb-text-noto-serif {
+    font-family: var(--font-noto-serf);
+    color: var(--bb-black-color);
+}
+
+.bb-text-lato {
+    font-family: var(--font-lato);
+    color: var(--bb-black-color);
+}
+
+.bb-text-playfair-display {
+    font-family: var(--font-playfair-display);
+    color: var(--bb-black-color);
+}
+
+.bb-text-EB-garamond {
+    font-family: var(--font-EB-garamond);
+    color: var(--bb-black-color);
+}
+
+.bb-text-avro {
+    font-family: var(--font-avro);
+    color: var(--bb-black-color);
+}
+
+.bb-text-monteserrat {
+    font-family: var(--font-monteserrat);
     color: var(--bb-black-color);
 }
