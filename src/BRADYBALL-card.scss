@@ -1,7 +1,7 @@
 @font-face {
     font-family: 'Pinegrove';
-    src: local('Pinegrove'), 
-         url('/assets/fonts/pinegrove.woff2') format('woff2');
+    src: local('Pinegrove'),
+        url('/assets/fonts/pinegrove.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
 }
@@ -88,4 +88,16 @@
 .bb-text-monteserrat {
     font-family: var(--font-monteserrat);
     color: var(--bb-black-color);
+}
+
+html,
+body,
+app-root {
+    background-color: var(--bb-cream-off-white-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container, .row {
+    background-color: var(--bb-cream-off-white-color);
 }

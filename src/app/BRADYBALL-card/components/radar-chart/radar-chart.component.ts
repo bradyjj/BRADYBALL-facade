@@ -169,15 +169,18 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.angleStep = (Math.PI * 2) / dataPoints.length;
 
         this.createRadarAreaMasks();
-        this.drawAbstractSoccerPitch();
+        //this.drawAbstractSoccerPitch();
 
         this.createBlurFilters();
         this.drawCircularGrid();
-        this.drawAxesAndLabels(dataPoints, angleStep, featureScales);
-        this.createRandomGradient();
+        //this.createRandomGradient();
+        this.createBaseGradient();
+        //this.createMottledGradient();
         this.drawDataArea(dataPoints, angleStep, featureScales);
-        this.addDataPoints(dataPoints, angleStep, featureScales);
-        this.addTitleAndInfo();
+        //this.addDataPoints(dataPoints, angleStep, featureScales);
+        //this.addTitleAndInfo();
+        //this.drawAbstractSoccerPitch();
+        this.drawAxesAndLabels(dataPoints, angleStep, featureScales);
         this.moveChartDown();
 
         this.chartReady = true;
@@ -236,7 +239,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
         numberFilter.append('feGaussianBlur')
             .attr('in', 'SourceGraphic')
-            .attr('stdDeviation', '0.75');
+            .attr('stdDeviation', '.3');
 
         const labelFilter = this.svg.append('defs')
             .append('filter')
@@ -244,7 +247,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
         labelFilter.append('feGaussianBlur')
             .attr('in', 'SourceGraphic')
-            .attr('stdDeviation', '0.4');
+            .attr('stdDeviation', '0.1');
     }
 
     private drawCircularGrid(): void {
@@ -297,13 +300,24 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     private drawAxis(angle: number): void {
-        const lineCoordinates = d3.pointRadial(angle, this.radius);
-        this.chartGroup.append('line')
-            .attr('x1', 0)
-            .attr('y1', 0)
-            .attr('x2', lineCoordinates[0])
-            .attr('y2', lineCoordinates[1])
-            .attr('stroke', 'black');
+        const lineCoordinates = d3.pointRadial(angle, this.radius * 1.1);
+        const squigglePoints = 100; // Number of points to create the squiggly effect
+        const squiggleData = Array.from({ length: squigglePoints }, (_, i) => {
+            const proportion = i / (squigglePoints - 1);
+            const noise = (Math.sin(proportion * 20 * Math.PI) + Math.cos(proportion * 10 * Math.PI)) * 1.2;
+            return [
+                (proportion * lineCoordinates[0]) + noise,
+                (proportion * lineCoordinates[1]) + noise
+            ];
+        });
+
+        const lineFunction = d3.line().curve(d3.curveBasis);
+
+        this.chartGroup.append('path')
+            .attr('d', lineFunction(squiggleData as [number, number][]))
+            .attr('stroke', 'black')
+            .attr('stroke-width', () => Math.random() * .75 + 0.5) // Varying thickness for hand-drawn effect
+            .attr('fill', 'none');
     }
 
     private drawScaleLabels(point: RadarChartDataPoint, angle: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
@@ -355,7 +369,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         else if (circleIndex === 0) {
             if (Math.random() < firstCircleLargerSizeProbability) {
                 return firstCircleLargeSizes[Math.floor(Math.random() * firstCircleLargeSizes.length)];
-            } 
+            }
             else {
                 return Math.random() * (smallerSizeMax - smallerSizeMin) + smallerSizeMin;
             }
@@ -363,7 +377,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         else {
             if (Math.random() < regularLargerSizeProbability) {
                 return largeSizes[Math.floor(Math.random() * largeSizes.length)];
-            } 
+            }
             else {
                 return Math.random() * (smallerSizeMax - smallerSizeMin) + smallerSizeMin;
             }
@@ -383,7 +397,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .attr('font-size', '16px')
-            .attr('font-family', "'Avro'")
+            .attr('font-family', "Courier Prime")
             .attr('font-weight', 'bold')
             .attr('fill', 'black')
             .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${labelX}, ${labelY})`)
@@ -399,24 +413,62 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('r', '50%');
 
         const colors = [
-            { offset: '0%', color: '#f8f5e3' },
-            { offset: '20%', color: '#bf5700' },
-            { offset: '40%', color: '#972828' },
-            { offset: '60%', color: '#681e1e' },
-            { offset: '70%', color: '#8B0000' },
-            { offset: '80%', color: '#FF8C00' },
-            { offset: '90%', color: '#8B4513' },
-            { offset: '100%', color: '#405e9b' }
+            { offset: '0%', color: '#FFFFFF' },     // Bright white center
+            { offset: '10%', color: '#FFF5E6' },    // Warm off-white
+            { offset: '20%', color: '#FFD700' },    // Yellow
+            { offset: '30%', color: '#FF4500' },    // Orange-red
+            { offset: '48%', color: '#8B0000' },    // Dark red
+            { offset: '50%', color: '#660000' },    // Very dark red
+            { offset: '52%', color: '#000000' },    // Black circle
+            { offset: '54%', color: '#660000' },    // Very dark red
+            { offset: '56%', color: '#8B0000' },    // Dark red
+            { offset: '65%', color: '#FF4500' },    // Orange-red
+            { offset: '73%', color: '#FFD700' },    // Back to yellow (vibrant but worn)
+            { offset: '79%', color: '#FF4500' },    // Orange-red
+            { offset: '85%', color: '#8B0000' },    // Dark red again
+            { offset: '90%', color: '#000000' },    // Thin black ring
+            { offset: '92%', color: '#4AC6FF' },    // Vivid sky blue (from image)
+            { offset: '96%', color: '#1E5AA8' },    // Medium blue (from image)
+            { offset: '100%', color: '#0080FF' },   // Bright blue (from image)
         ];
 
         colors.forEach(stop => {
             gradient.append('stop')
                 .attr('offset', stop.offset)
                 .attr('stop-color', stop.color)
-                .attr('stop-opacity', 0.8);
+                .attr('stop-opacity', stop.offset === '80%' || stop.offset === '90%' ? .9 : 0.85);
         });
 
         this.addNoiseFilter();
+        this.addTextureOverlay();
+    }
+
+    private addTextureOverlay(): void {
+        const texture = this.svg.append('defs')
+            .append('pattern')
+            .attr('id', 'texturePattern')
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr('width', '100')
+            .attr('height', '100');
+
+        texture.append('rect')
+            .attr('width', '100')
+            .attr('height', '100')
+            .attr('fill', 'url(#vintageGradient)');
+
+        texture.append('filter')
+            .attr('id', 'textureFilter')
+            .append('feTurbulence')
+            .attr('type', 'fractalNoise')
+            .attr('baseFrequency', '0.01')
+            .attr('numOctaves', '5');
+
+        texture.append('rect')
+            .attr('width', '100')
+            .attr('height', '100')
+            .attr('fill', 'transparent')
+            .attr('filter', 'url(#textureFilter)')
+            .attr('opacity', '0.3');
     }
 
     private createRandomGradient(type: 'defense' | 'attack' | 'mixed' = 'mixed'): void {
@@ -492,17 +544,93 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('stroke-width', 2);
     }
 
+    private createGoldStarGradients(): void {
+        const defs = this.svg.append('defs');
+
+        // Main gold gradient (more Brazilian gold)
+        const goldGradient = defs.append('radialGradient')
+            .attr('id', 'goldGradient')
+            .attr('cx', '50%')
+            .attr('cy', '50%')
+            .attr('r', '50%');
+
+        goldGradient.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#FFD700'); // Brighter gold
+
+        goldGradient.append('stop')
+            .attr('offset', '50%')
+            .attr('stop-color', '#FFA500'); // Orange-gold
+
+        goldGradient.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#DAA520'); // Goldenrod
+
+        // Shine gradient
+        const shineGradient = defs.append('linearGradient')
+            .attr('id', 'shineGradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '100%');
+
+        shineGradient.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', 'rgba(255, 255, 255, 0.8)');
+
+        shineGradient.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', 'rgba(255, 255, 255, 0)');
+    }
+
+    private create3DGoldStar(): string {
+        const starPoints = 5;
+        const outerRadius = 35;
+        const innerRadius = outerRadius * 0.5;
+        let path = '';
+
+        for (let i = 0; i < starPoints * 2; i++) {
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const angle = (Math.PI / starPoints) * i;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            path += (i === 0 ? 'M' : 'L') + `${x},${y} `;
+        }
+        path += 'Z';
+
+        return path;
+    }
+
     private addDataPoints(dataPoints: RadarChartDataPoint[], angleStep: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
+        this.createGoldStarGradients();
+
         dataPoints.forEach((point, index) => {
             const angle = index * angleStep;
             const [x, y] = d3.pointRadial(angle, featureScales[point.key](point.value));
 
-            this.chartGroup.append('circle')
-                .attr('cx', x)
-                .attr('cy', y)
-                .attr('r', 4)
-                .attr('fill', 'black')
-                .attr('stroke', 'black');
+            const starPath = this.create3DGoldStar();
+
+            const starGroup = this.chartGroup.append('g')
+                .attr('transform', `translate(${x}, ${y})`);
+
+            // Shadow for 3D effect
+            starGroup.append('path')
+                .attr('d', starPath)
+                .attr('fill', 'rgba(0, 0, 0, 0.3)')
+                .attr('transform', 'translate(2, 2)');
+
+            // Main star
+            starGroup.append('path')
+                .attr('d', starPath)
+                .attr('fill', 'url(#goldGradient)')
+                .attr('stroke', '#B8860B') // Dark golden rod for outline
+                .attr('stroke-width', 0.5);
+
+            // Shine effect
+            starGroup.append('path')
+                .attr('d', starPath)
+                .attr('fill', 'url(#shineGradient)')
+                .attr('opacity', 0.7);
         });
     }
 
@@ -600,9 +728,11 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         const sixYardBoxHeight = penaltyAreaHeight * 0.4;
         const arcRadius = penaltyAreaHeight * 0.2;
 
+        const yOffset = 16; // Adjust this value to move the pitch up or down
+
         const bgGroup = this.svg.append('g')
             .attr('class', 'soccer-pitch-background')
-            .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
+            .attr('transform', `translate(${this.width / 2}, ${this.height / 2 + yOffset})`);
 
         // Draw penalty areas
         [-1, 1].forEach(direction => {

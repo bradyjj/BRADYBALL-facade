@@ -1,8 +1,8 @@
-<div class="radar-chart-container">
-    <div *ngIf="!chartReady" class="loading-indicator">
-      <p>Loading chart...</p>
-    </div>
-  
-    <div *ngIf="chartReady" #chartContainer></div>
-    <button (click)="saveSVG()">Save Chart as SVG</button>
+<div class="container d-flex justify-content-center align-items-center">
+  <div *ngIf="!chartReady" class="loading-indicator">
+    <p>Loading chart...</p>
   </div>
+
+  <div *ngIf="chartReady" #chartContainer></div>
+  <button (click)="saveSVG()">Save Chart as SVG</button>
+</div>
