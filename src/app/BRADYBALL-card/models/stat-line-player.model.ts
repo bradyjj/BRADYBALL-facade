@@ -12,6 +12,9 @@ export interface StatLineRow {
 
 export interface StatLineData {
     player: string;
+    title?: string;
+    information1?: string;
+    information2?: string;
     rows: StatLineRow[];
 }
 
@@ -19,6 +22,7 @@ export namespace StatLineData {
     export function createDefault(): StatLineData {
         return {
             player: '',
+            title: 'RECENT CAREER PERFORMANCE',
             rows: []
         };
     }

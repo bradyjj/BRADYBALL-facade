@@ -2,7 +2,6 @@ import { Component, Input, ElementRef, SimpleChanges, OnChanges, AfterViewInit, 
 import * as d3 from 'd3';
 import { RadarChartPlayerData, RadarChartDataPoint } from '../../models/radar-chart-player.model';
 import { FontService } from '../../../../assets/fonts/font.service';
-import { forkJoin } from 'rxjs';
 import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
 
 @Component({
@@ -21,12 +20,8 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     private height = 800;
     private radius = Math.min(this.width, this.height) / 2 - this.margin;
 
-    private helveticaNeueBase64: string = '';
-    private courierNewBoldBase64: string = '';
-
     chartReady: boolean = false;
 
-    private colorPalette: string[] = [];
     private radarAreaPath: string = '';
     private featureScales: { [key: string]: d3.ScaleLinear<number, number>; } = {};
     private angleStep: number = 0;
@@ -34,24 +29,14 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     constructor(private elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
 
     ngOnInit(): void {
-        this.defineColorPallette();
-        forkJoin({
-            helvetica: this.fontService.getBase64Font('assets/fonts/Helvetica Neue LT Std 55 Roman.woff'),
-            courier: this.fontService.getBase64Font('assets/fonts/CourierNewPS-BoldMT.woff2')
-        }).subscribe(result => {
-            this.helveticaNeueBase64 = result.helvetica;
-            this.courierNewBoldBase64 = result.courier;
-            if (this.data) {
-                this.createSvg();
-                this.drawChart();
-            }
-        });
+        if (this.data) {
+            this.createSvg();
+            this.drawChart();
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        console.log('RadarChart OnChanges:', changes);
         if (changes['data'] && this.data) {
-            console.log('RadarChart Data:', this.data);
             this.createSvg();
             this.drawChart();
         }
@@ -64,34 +49,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         }
     }
 
-    private inlineFonts(): string {
-        return `
-            @font-face {
-                font-family: 'Helvetica Neue LT Std';
-                src: url(data:application/font-woff;charset=utf-8;base64,${this.helveticaNeueBase64}) format('woff');
-            }
-            @font-face {
-                font-family: 'Courier New Bold';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.courierNewBoldBase64}) format('woff2');
-                font-weight: bold;
-            }
-            text {
-                font-family: 'Helvetica Neue LT Std', 'Courier New Bold';
-            }
-        `;
-    }
-
-    private defineColorPallette(): void {
-        this.colorPalette = [
-            this.BRADYBALLUtil.getCssVariableValue('--bb-brown-gold-color'),
-            this.BRADYBALLUtil.getCssVariableValue('--bb-red-color'),
-            this.BRADYBALLUtil.getCssVariableValue('--bb-dark-red-burgundy-color'),
-            this.BRADYBALLUtil.getCssVariableValue('--bb-orange-color'),
-            this.BRADYBALLUtil.getCssVariableValue('--bb-cream-off-white-color')
-        ]
-    }
-
-
     private createSvg(): void {
         d3.select(this.elementRef.nativeElement).select('svg').remove();
         this.svg = d3.select(this.elementRef.nativeElement)
@@ -102,52 +59,78 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.titleGroup = this.svg.append('g');
         this.chartGroup = this.svg.append('g')
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
-
-        this.inlineFonts();
     }
 
     saveSVG() {
-        if (!this.helveticaNeueBase64 || !this.courierNewBoldBase64) {
-            console.error('Fonts not loaded yet');
-            return;
-        }
+        // Load only the Pinegrove font
+        this.fontService.getBase64Font('/assets/fonts/pinegrove.woff2').subscribe(pinegroveFont => {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const newSvg = document.createElementNS(svgNS, "svg");
+            newSvg.setAttribute('width', this.width.toString());
+            newSvg.setAttribute('height', this.height.toString());
+            newSvg.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+    
+            // Clone the entire SVG content
+            const svgContent = this.svg.node().cloneNode(true);
+            newSvg.appendChild(svgContent);
+    
+            // Add embedded styles
+            const style = document.createElementNS(svgNS, "style");
+            style.textContent = this.getEmbeddedStyles(pinegroveFont);
+            newSvg.insertBefore(style, newSvg.firstChild);
+    
+            // Convert the SVG to a string
+            const serializer = new XMLSerializer();
+            let svgString = serializer.serializeToString(newSvg);
+    
+            // Add XML declaration
+            svgString = '<?xml version="1.0" standalone="no"?>\n' + svgString;
+    
+            // Create a Blob with the SVG string
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    
+            // Create a download link and trigger the download
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(svgBlob);
+            link.download = 'radar_chart.svg';
+            link.click();
+        });
+    }
 
-        const svgNS = "http://www.w3.org/2000/svg";
-        const newSvg = document.createElementNS(svgNS, "svg");
-        newSvg.setAttribute('width', this.width.toString());
-        newSvg.setAttribute('height', this.height.toString());
-        newSvg.setAttribute('xmlns', "http://www.w3.org/2000/svg");
+    private getEmbeddedStyles(pinegroveFont: string): string {
+        return `
+            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=EB+Garamond&family=Helvetica+Neue&family=Lato&family=League+Spartan&family=Montserrat&family=Noto+Serif&family=Playfair+Display&family=Special+Elite&display=swap');
 
-        // Clone the entire SVG content
-        const svgContent = this.svg.node().cloneNode(true);
-        newSvg.appendChild(svgContent);
-
-        // Add inline fonts
-        const styleElement = document.createElementNS(svgNS, "style");
-        styleElement.textContent = this.inlineFonts() + `
-        text {
-            font-family: 'Helvetica Neue LT Std', 'Courier New Bold';
-        }
-    `;
-        newSvg.insertBefore(styleElement, newSvg.firstChild);
-
-        // Convert the SVG to a string
-        const serializer = new XMLSerializer();
-        let svgString = serializer.serializeToString(newSvg);
-
-        // Add XML declaration
-        svgString = '<?xml version="1.0" standalone="no"?>\n' + svgString;
-
-        console.log('SVG string:', svgString); // Log the SVG string for debugging
-
-        // Create a Blob with the SVG string
-        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-
-        // Create a download link and trigger the download
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(svgBlob);
-        link.download = 'radar_chart.svg';
-        link.click();
+            @font-face {
+                font-family: 'Pinegrove';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${pinegroveFont}) format('woff2');
+                font-weight: normal;
+                font-style: normal;
+            }
+            
+            :root {
+                --bb-black-color: #000000;
+                --bb-white-color: #ffffff;
+                --bb-brown-gold-color: #b07c29;
+                --bb-red-color: #972828;
+                --bb-dark-red-burgundy-color: #681e1e;
+                --bb-orange-color: #ff5b00;
+                --bb-blue-color: #405e9b;
+                --bb-cream-off-white-color: #f8f5e3;
+                --bb-green-color: #59c135;
+            }
+            .bb-text-helvetica { font-family: 'Helvetica Neue', sans-serif; }
+            .bb-text-courier-new-bold { font-family: 'Courier Prime', sans-serif; font-weight: 700; }
+            .bb-text-pinegrove { font-family: 'Pinegrove', sans-serif; }
+            .bb-text-special-elite { font-family: 'Special Elite', sans-serif; }
+            .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; }
+            .bb-text-noto-serif { font-family: 'Noto Serif', serif; }
+            .bb-text-lato { font-family: 'Lato', sans-serif; }
+            .bb-text-playfair-display { font-family: 'Playfair Display', serif; }
+            .bb-text-EB-garamond { font-family: 'EB Garamond', serif; }
+            .bb-text-avro { font-family: 'Avro', sans-serif; }
+            .bb-text-monteserrat { font-family: 'Montserrat', sans-serif; }
+        `;
     }
 
     private drawChart(): void {
@@ -168,20 +151,16 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.featureScales = featureScales;
         this.angleStep = (Math.PI * 2) / dataPoints.length;
 
-        this.createRadarAreaMasks();
-        //this.drawAbstractSoccerPitch();
-
         this.createBlurFilters();
         this.drawCircularGrid();
-        //this.createRandomGradient();
         this.createBaseGradient();
-        //this.createMottledGradient();
         this.drawDataArea(dataPoints, angleStep, featureScales);
+        this.drawAxesAndLabels(dataPoints, angleStep, featureScales);
+
         //this.addDataPoints(dataPoints, angleStep, featureScales);
         //this.addTitleAndInfo();
+        //this.createRadarAreaMasks();
         //this.drawAbstractSoccerPitch();
-        this.drawAxesAndLabels(dataPoints, angleStep, featureScales);
-        this.moveChartDown();
 
         this.chartReady = true;
     }
@@ -800,10 +779,5 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('stroke', color)
             .attr('stroke-width', width)
             .attr('stroke-opacity', opacity);
-    }
-
-    private moveChartDown(): void {
-        const chartTranslateY = 15;
-        this.chartGroup.attr('transform', `translate(${this.width / 2}, ${this.height / 2 + chartTranslateY})`);
     }
 }

@@ -3,7 +3,7 @@ import { SupabaseService } from '../../../shared/services/supabase.service';
 import { Player } from '../../models/player.model';
 import { PlayerStat } from '../../models/player-stat.model';
 import { RadarChartDataPoint, RadarChartPlayerData } from '../../models/radar-chart-player.model';
-import { StatLineData, StatLineDataPoint } from '../../models/stat-line-player.model';
+import { StatLineData } from '../../models/stat-line-player.model';
 
 @Component({
     selector: 'player-search',
@@ -65,18 +65,6 @@ export class PlayerSearchComponent implements OnInit {
             this.playerPlayingTimeData = results[9];
             this.playerMiscData = results[10];
 
-            console.log('Player Standard Data:', this.playerStandardData);
-            console.log('Player Shooting Data:', this.playerShootingData);
-            console.log('Player Passing Data:', this.playerPassingData);
-            console.log('Player Passing Types Data:', this.playerPassingTypesData);
-            console.log('Player Defense Data:', this.playerDefenseData);
-            console.log('Player Possession Data:', this.playerPossessionData);
-            console.log('Player Goal Shot Creation Data:', this.playerGoalShotCreationData);
-            console.log('Player Keeper Data:', this.playerKeeperData);
-            console.log('Player Keeper Adv Data:', this.playerKeeperAdvData);
-            console.log('Player Playing Time Data:', this.playerPlayingTimeData);
-            console.log('Player Misc Data:', this.playerMiscData);
-
             this.combinePlayerData(results);
         }).catch(error => {
             console.error('Error fetching player data:', error);
@@ -99,7 +87,6 @@ export class PlayerSearchComponent implements OnInit {
                 };
             });
         });
-        console.log('Combined Player Data:', this.combinedPlayerData);
     }
 
     private createStatLineDataModel(): void {
@@ -110,6 +97,7 @@ export class PlayerSearchComponent implements OnInit {
     private getMockData(): StatLineData {
         return {
             player: "Kylian Mbappé",
+            title: "RECENT CAREER PERFORMANCE",
             rows: [
                 {
                     season: "2023-24",
@@ -196,7 +184,9 @@ export class PlayerSearchComponent implements OnInit {
                         { key: "GoalsOverExpected", label: "G-xG", value: 3.6 }
                     ]
                 }
-            ]
+            ],
+            information1: "*Denotes led league",
+            information2: "#Denotes led top 5 leagues"
         };
     }
 
@@ -209,49 +199,49 @@ export class PlayerSearchComponent implements OnInit {
         const dataPoints: RadarChartDataPoint[] = [
             {
                 key: 'ExpectedAssistsP90',
-                value: 0.1,
-                scale: 0.5,
+                value: 0.5,
+                scale: .5,
                 color: 'var(--bb-red-purple-color)',
                 label: 'Expected Assists'
             },
             {
                 key: 'NonPenExpectedGoalsP90',
-                value: 0.2,
+                value: 1,
                 scale: 1,
                 color: 'var(--bb-violet-color)',
                 label: 'Non-Pen xG'
             },
             {
                 key: 'NonPenGoalsP90',
-                value: 0.8,
+                value: 1,
                 scale: 1,
                 color: 'var(--bb-green-color)',
                 label: 'Non-Pen Goals'
             },
             {
                 key: 'ShotsOnTargetP90',
-                value: 2.4,
+                value: 2.5,
                 scale: 2.5,
                 color: 'var(--bb-turquoise-color)',
                 label: 'Shots on Target'
             },
             {
                 key: 'ShotsP90',
-                value: 0.7,
+                value: 5,
                 scale: 5,
                 color: 'var(--bb-green-2-color)',
                 label: 'Shots'
             },
             {
                 key: 'AerialPct',
-                value: 95,
+                value: 100,
                 scale: 100,
                 color: 'var(--bb-red-purple-color)',
                 label: 'Aerial %'
             },
             {
                 key: 'ShotCreatingActionsP90',
-                value: 7.5,
+                value: 8,
                 scale: 8,
                 color: 'var(--bb-violet-color)',
                 label: 'Shot-Creating Actions'
@@ -265,20 +255,19 @@ export class PlayerSearchComponent implements OnInit {
             },
             {
                 key: 'BallWonP90',
-                value: 0.2,
+                value: 5,
                 scale: 5,
                 color: 'var(--bb-turquoise-color)',
                 label: 'Possession Won'
             },
             {
                 key: 'TakeOnPct',
-                value: 30,
+                value: 100,
                 scale: 100,
                 color: 'var(--bb-green-2-color)',
                 label: 'Take-On %'
             }
         ];
-        
 
         this.radarChartModel = {
             player: playerData.player,
@@ -292,7 +281,5 @@ export class PlayerSearchComponent implements OnInit {
             minutes_90s: playerData.minutes_90s,
             dataPoints: dataPoints
         };
-
-        console.log('Radar Chart Model:', this.radarChartModel);
     }
 }
