@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, SimpleC
 import * as d3 from 'd3';
 import { FontService } from '../../../../assets/fonts/font.service';
 import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
-import { StatLineData, StatLineRow, StatLineDataPoint } from '../../models/stat-line-player.model';
+import { StatLineData } from '../../models/stat-line-player.model';
 
 @Component({
     selector: 'stat-line',
@@ -13,19 +13,25 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     @Input() data!: StatLineData;
 
     private svg: any;
-    private margin = { top: 60, right: 40, bottom: 60, left: 40 };
+    private margin = { top: 90, right: 35, bottom: 75, left: 35 };
     private cellPadding = 15;
     private rowHeight = 40;
     private fontSize = 14;
-    private headerFontSize = 16;
+    private headerFontSize = 15;
     private width: number = 0;
     private height: number = 0;
+    private bloodRedColor = '#BB0000';
+    private stripeOpacity = 0.15;
 
     tableReady: boolean = false;
 
-    constructor(private elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
+    private fonts: { [key: string]: string } = {};
 
-    ngOnInit(): void { }
+    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
+
+    ngOnInit(): void {
+        this.loadFonts();
+    }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['data'] && this.data) {
@@ -58,6 +64,7 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             .append('g')
             .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
 
+        this.drawBackground(layout);
         this.drawBorder();
         this.drawTitle();
         this.drawGridLines(layout);
@@ -95,6 +102,49 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         return 0;
     }
 
+    private drawBackground(layout: any): void {
+        const stripeHeight = this.rowHeight * (this.data.rows.length + 1);
+        const totalWidth = layout.totalWidth;
+
+        // Create a gradient for the faded paint effect
+        const gradient = this.svg.append('defs')
+            .append('linearGradient')
+            .attr('id', 'fade-gradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '100%');
+
+        gradient.append('stop')
+            .attr('offset', '0%')
+            .attr('style', 'stop-color:#BB0000;stop-opacity:0.35');
+
+        gradient.append('stop')
+            .attr('offset', '100%')
+            .attr('style', 'stop-color:#BB0000;stop-opacity:0.05');
+
+        // Apply the gradient as the background
+        this.svg.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', totalWidth)
+            .attr('height', stripeHeight)
+            .attr('fill', 'url(#fade-gradient)');
+
+        // Add vertical stripes for the worn paint effect
+        const stripeWidth = 20;
+        for (let x = 0; x < totalWidth; x += stripeWidth) {
+            this.svg.append('line')
+                .attr('x1', x)
+                .attr('y1', 0)
+                .attr('x2', x)
+                .attr('y2', stripeHeight)
+                .attr('stroke', this.bloodRedColor)
+                .attr('stroke-width', 0)
+                .attr('opacity', 0.05);
+        }
+    }
+
     private drawBorder(): void {
         const borderRadius = 10;
         this.svg.append('rect')
@@ -106,74 +156,86 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('ry', borderRadius)
             .attr('fill', 'none')
             .attr('stroke', this.BRADYBALLUtil.getCssVariableValue('--bb-black-color'))
-            .attr('stroke-width', 4);
+            .attr('stroke-width', 5);
     }
 
     private drawTitle(): void {
-        if (this.data.player) {
+        if (this.data.title) {
+            const titleText = this.data.title.toUpperCase();
+            const firstLetter = titleText.charAt(0);
+            const restOfTitle = titleText.slice(1);
+
+            const fontSize = 48;
+            const smallerFontSize = fontSize * 0.45;
+            const titleYOffset = -this.margin.top / 2 + 15;
+            const letterSpacing = 1; // Adjust this value to increase or decrease spacing
+
+            const tempText = this.svg.append('text')
+                .attr('font-family', 'Times New Roman, serif')
+                .attr('font-size', `${smallerFontSize}px`)
+                .attr('letter-spacing', `${letterSpacing}px`)
+                .text(restOfTitle);
+            const restOfTitleWidth = tempText.node().getComputedTextLength();
+            tempText.remove();
+
+            const underlineWidth = restOfTitleWidth + fontSize * 0.8;
+
             this.svg.append('text')
-                .attr('x', this.width / 2 - this.margin.left)
-                .attr('y', -this.margin.top / 2)
-                .attr('text-anchor', 'middle')
-                .attr('font-family', 'Courier Prime')
-                .attr('font-size', '20px')
-                .attr('font-weight', 'bold')
+                .attr('x', this.margin.left)
+                .attr('y', titleYOffset)
+                .attr('text-anchor', 'start')
+                .attr('class', 'bb-text-eb-garamond bb-text-bold')
+                .attr('font-size', `${fontSize}px`)
                 .attr('fill', 'black')
-                .text(this.data.title);
+                .text(firstLetter);
+
+            this.svg.append('line')
+                .attr('x1', this.margin.left + fontSize * 0.85)
+                .attr('y1', titleYOffset - 1.5)
+                .attr('x2', this.margin.left + underlineWidth + 7)
+                .attr('y2', titleYOffset - 1.5)
+                .attr('stroke', 'black')
+                .attr('stroke-width', 3.5);
+
+            this.svg.append('text')
+                .attr('x', this.margin.left + fontSize * 0.70)
+                .attr('y', titleYOffset - fontSize * 0.25)
+                .attr('text-anchor', 'start')
+                .attr('class', 'bb-text-merriweather bb-text-bold')
+                .attr('font-size', `${smallerFontSize}px`)
+                .attr('fill', 'black')
+                .attr('letter-spacing', `${letterSpacing}px`)
+                .text(restOfTitle);
+
+            const diamondSize = 8;
+            const xOffset = 13;
+            const yOffset = 2;
+            this.svg.append('path')
+                .attr('d', `M${this.margin.left + underlineWidth + xOffset},${titleYOffset - diamondSize / 2 - yOffset} 
+                            L${this.margin.left + underlineWidth + xOffset + diamondSize / 2},${titleYOffset - yOffset} 
+                            L${this.margin.left + underlineWidth + xOffset},${titleYOffset + diamondSize / 2 - yOffset} 
+                            L${this.margin.left + underlineWidth + xOffset - diamondSize / 2},${titleYOffset - yOffset} Z`)
+                .attr('fill', 'black');
         }
     }
 
     private drawGridLines(layout: any): void {
-        // Horizontal grid lines
-        for (let i = 1; i <= this.data.rows.length; i++) {
-            const isHeaderLine = i === 1;
-            const isCareerRow = i === this.data.rows.length;
-
-            if (isHeaderLine || !isCareerRow) {
-                this.drawHandDrawnLine(
-                    0,
-                    i * this.rowHeight,
-                    layout.totalWidth,
-                    i * this.rowHeight,
-                    isHeaderLine || isCareerRow ? 2 : 1
-                );
-            }
+        for (let i = 0; i <= this.data.rows.length; i++) {
+            this.svg.append('line')
+                .attr('x1', 0)
+                .attr('y1', i * this.rowHeight)
+                .attr('x2', layout.totalWidth)
+                .attr('y2', i * this.rowHeight)
+                .attr('stroke', 'black')
+                .attr('stroke-width', i <= 1 || i === this.data.rows.length ? 2 : 1);
         }
-    }
-
-    private drawHandDrawnLine(x1: number, y1: number, x2: number, y2: number, strokeWidth: number = 1): void {
-        const lineFunction = d3.line().curve(d3.curveBasis);
-        const points = this.generateHandDrawnPoints(x1, y1, x2, y2);
-
-        this.svg.append('path')
-            .attr('d', lineFunction(points))
-            .attr('stroke', 'black')
-            .attr('stroke-width', strokeWidth)
-            .attr('fill', 'none');
-    }
-
-    private generateHandDrawnPoints(x1: number, y1: number, x2: number, y2: number): [number, number][] {
-        const points: [number, number][] = [];
-        const numPoints = 10;
-        const randomness = 1;
-
-        for (let i = 0; i <= numPoints; i++) {
-            const t = i / numPoints;
-            const x = x1 + (x2 - x1) * t + (Math.random() - 0.5) * randomness;
-            const y = y1 + (y2 - y1) * t + (Math.random() - 0.5) * randomness;
-            points.push([x, y]);
-        }
-
-        return points;
     }
 
     private drawTableContent(layout: any): void {
         const headers = ['Season', ...this.data.rows[0].dataPoints.map(dp => dp.label)];
 
-        // Draw headers
         this.drawRow(headers, 0, layout.columnWidths, true);
 
-        // Draw data rows
         this.data.rows.forEach((row, index) => {
             const rowData = [row.season, ...row.dataPoints.map(dp => dp.value.toString())];
             this.drawRow(rowData, index + 1, layout.columnWidths, false, row.season.toLowerCase() === 'career');
@@ -185,29 +247,32 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         rowData.forEach((cellValue, columnIndex) => {
             const yPosition = (rowIndex + 0.5) * this.rowHeight;
             if (!isCareer || (isCareer && columnIndex !== 1 && columnIndex !== 2)) {
-                this.drawCell(cellValue, xPosition, columnWidths[columnIndex], yPosition, isHeader);
+                this.drawCell(cellValue, xPosition, columnWidths[columnIndex], yPosition, isHeader, isCareer);
             }
             xPosition += columnWidths[columnIndex];
         });
     }
 
-    private drawCell(value: string, x: number, width: number, y: number, isHeader: boolean = false): void {
-        this.svg.append('text')
+    private drawCell(value: string, x: number, width: number, y: number, isHeader: boolean = false, isCareer: boolean = false): void {
+        const text = this.svg.append('text')
             .attr('x', x + width / 2)
             .attr('y', y)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'middle')
-            .attr('font-family', 'Courier Prime')
-            .attr('font-size', isHeader ? `${this.headerFontSize}px` : `${this.fontSize}px`)
-            .attr('font-weight', isHeader ? 'bold' : 'normal')
+            .attr('class', 'bb-text-courier-prime')
+            .attr('font-size', isHeader || isCareer ? `${this.headerFontSize}px` : `${this.fontSize}px`)
             .attr('fill', 'black')
             .text(value);
+
+        if (isHeader || isCareer) {
+            text.classed('bb-text-bold', true);
+        }
     }
 
     private drawBottomInformation(): void {
-        const bottomY = this.height - this.margin.top - this.margin.bottom + 30;
+        const bottomY = this.height - this.margin.top - this.margin.bottom + 38;
         const centerX = this.width / 2 - this.margin.left;
-        const maxWidth = (this.width - this.margin.left - this.margin.right) / 2 - 10;
+        const maxWidth = (this.width - this.margin.left - this.margin.right) / 2 - 20;
 
         if (this.data.information1) {
             this.wrapText(this.data.information1, centerX / 2, bottomY, maxWidth, 'middle');
@@ -228,13 +293,14 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             .attr("x", x)
             .attr("y", y)
             .attr("text-anchor", anchor)
-            .attr("font-family", "Courier Prime")
+            .attr("class", "bb-text-courier-prime")
             .attr("font-size", "14px")
             .attr("fill", "black")
             .attr("dominant-baseline", "middle")
             .append("tspan")
             .attr("x", x)
             .attr("dy", dy + "em");
+
 
         let word: string | undefined;
         while (word = words.pop()) {
@@ -248,7 +314,7 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
                     .attr("x", x)
                     .attr("y", y)
                     .attr("text-anchor", anchor)
-                    .attr("font-family", "Courier Prime")
+                    .attr("class", "bb-text-courier-prime")
                     .attr("font-size", "14px")
                     .attr("fill", "black")
                     .attr("dominant-baseline", "middle")
@@ -256,38 +322,75 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
                     .attr("x", x)
                     .attr("dy", ++lineNumber * lineHeight + dy + "em")
                     .text(word);
+
             }
         }
     }
 
-    saveSVG(): void {
-        const svgElement = this.elementRef.nativeElement.querySelector('svg');
-        this.BRADYBALLUtil.saveSVG(svgElement, 'stat_line.svg', ['courier-prime.woff2']);
+    private loadFonts(): void {
+        const fontFiles = [
+            'courier-prime-regular.woff2',
+            'courier-prime-bold.woff2',
+            'eb-garamond-regular.woff2',
+            'eb-garamond-bold.woff2',
+            'merriweather-regular.woff2',
+            'merriweather-bold.woff2'
+        ];
+
+        this.fontService.getFonts(fontFiles).subscribe(fonts => {
+            this.fonts = fonts;
+        });
     }
 
-    private getEmbeddedStyles(courierPrimeFont: string): string {
-        return `
+    saveSVG(): void {
+        const svgElement = this.elementRef.nativeElement.querySelector('svg');
+
+        // Add a style element to the SVG
+        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleElement.textContent = `
             @font-face {
                 font-family: 'Courier Prime';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${courierPrimeFont}) format('woff2');
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-regular.woff2']}) format('woff2');
                 font-weight: normal;
                 font-style: normal;
             }
-            
-            :root {
-                --bb-black-color: #000000;
-                --bb-white-color: #ffffff;
-                --bb-brown-gold-color: #b07c29;
-                --bb-red-color: #972828;
-                --bb-dark-red-burgundy-color: #681e1e;
-                --bb-orange-color: #ff5b00;
-                --bb-blue-color: #405e9b;
-                --bb-cream-off-white-color: #f8f5e3;
-                --bb-green-color: #59c135;
+            @font-face {
+                font-family: 'Courier Prime';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-bold.woff2']}) format('woff2');
+                font-weight: bold;
+                font-style: normal;
             }
-            text {
-                font-family: 'Courier Prime', monospace;
+            @font-face {
+                font-family: 'EB Garamond';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['eb-garamond-regular.woff2']}) format('woff2');
+                font-weight: normal;
+                font-style: normal;
             }
+            @font-face {
+                font-family: 'EB Garamond';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['eb-garamond-bold.woff2']}) format('woff2');
+                font-weight: bold;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Merriweather';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['merriweather-regular.woff2']}) format('woff2');
+                font-weight: normal;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Merriweather';
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['merriweather-bold.woff2']}) format('woff2');
+                font-weight: bold;
+                font-style: normal;
+            }
+            .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
+            .bb-text-eb-garamond { font-family: 'EB Garamond', serif; }
+            .bb-text-merriweather { font-family: 'Merriweather', serif; }
+            .bb-text-bold { font-weight: bold; }
         `;
+        svgElement.insertBefore(styleElement, svgElement.firstChild);
+
+        this.BRADYBALLUtil.saveCombinedSVG([svgElement], 'stat_line.svg', this.fonts);
     }
 }

@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SupabaseService } from '../../../shared/services/supabase.service';
 import { Player } from '../../models/player.model';
 import { PlayerStat } from '../../models/player-stat.model';
 import { RadarChartDataPoint, RadarChartPlayerData } from '../../models/radar-chart-player.model';
 import { StatLineData } from '../../models/stat-line-player.model';
+import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
+import { StatLineComponent } from '../stat-line/stat-line.component';
+import { RadarChartComponent } from '../radar-chart/radar-chart.component';
 
 @Component({
     selector: 'player-search',
@@ -11,6 +14,9 @@ import { StatLineData } from '../../models/stat-line-player.model';
     styleUrls: ['./player-search.component.scss'],
 })
 export class PlayerSearchComponent implements OnInit {
+
+    @ViewChild(StatLineComponent) statLine!: StatLineComponent;
+    @ViewChild(RadarChartComponent) radarChart!: RadarChartComponent;
 
     playerName: string = "Kylian Mbappé";
     player = new Player();
@@ -31,7 +37,7 @@ export class PlayerSearchComponent implements OnInit {
 
     statLineModel: StatLineData = StatLineData.createDefault();
 
-    constructor(private supabaseService: SupabaseService) { }
+    constructor(private supabaseService: SupabaseService, public BRADYBALLUtil: BRADYBALLCardUtil) { }
 
     async ngOnInit(): Promise<void> {
         await this.fetchPlayerData(this.playerName);
@@ -185,8 +191,8 @@ export class PlayerSearchComponent implements OnInit {
                     ]
                 }
             ],
-            information1: "*Denotes led league",
-            information2: "#Denotes led top 5 leagues"
+            information1: "* Led FRA-Ligue 1",
+            information2: "# Led Big 5 European Leagues"
         };
     }
 
@@ -281,5 +287,10 @@ export class PlayerSearchComponent implements OnInit {
             minutes_90s: playerData.minutes_90s,
             dataPoints: dataPoints
         };
+    }
+
+    saveCombinedSVG() {
+        const statLineSVG = this.statLine.elementRef.nativeElement.querySelector('svg');
+        const radarChartSVG = this.radarChart.elementRef.nativeElement.querySelector('svg');
     }
 }

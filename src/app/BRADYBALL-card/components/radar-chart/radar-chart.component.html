@@ -1,8 +1,6 @@
-<div class="container d-flex justify-content-center align-items-center">
-  <div *ngIf="!chartReady" class="loading-indicator">
-    <p>Loading chart...</p>
+<div class="container">
+  <div class="card-body">
+      <div *ngIf="chartReady" #chartContainer></div>
+      <button class="btn btn-primary" (click)="saveSVG()">Save Chart as SVG</button>
   </div>
-
-  <div *ngIf="chartReady" #chartContainer></div>
-  <button (click)="saveSVG()">Save Chart as SVG</button>
 </div>

@@ -1,48 +1,45 @@
-@font-face {
-    font-family: 'Pinegrove';
-    src: local('Pinegrove'),
-        url('/assets/fonts/pinegrove.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-}
-
 :root {
-    // Base Colors
+    /* Base Colors */
     --bb-black-color: #000000;
     --bb-white-color: #ffffff;
-
-    // Main colors
+    
+    /* Main colors */
     --bb-brown-gold-color: #b07c29;
     --bb-red-color: #972828;
     --bb-dark-red-burgundy-color: #681e1e;
     --bb-orange-color: #ff5b00;
-
-    // Accent Colors
+    
+    /* Accent Colors */
     --bb-blue-color: #405e9b;
     --bb-cream-off-white-color: #f8f5e3;
     --bb-green-color: #59c135;
-
-    --font-courier-new-bold: 'Courier Prime', sans-serif;
-    --font-helvetica: 'Helvetica Neue', sans-serif;
-    --font-pinegrove: 'Pinegrove';
+    
+    --font-pinegrove: 'Pinegrove', sans-serif;
     --font-special-elite: 'Special Elite', sans-serif;
     --font-league-spartan: 'League Spartan', sans-serif;
-    --font-noto-serf: 'Noto Serif', serif;
-    --font-lato: 'Lato', sans-serif;
-    --font-playfair-display: 'Playfair Display', serif;
-    --font-EB-garamond: 'EB Garamond', serif;
-    --font-avro: 'Avro', sans-serif;
-    --font-monteserrat: 'Montserrat', sans-serif;
+    --font-eb-garamond: 'EB Garamond', serif;
+    --font-merriweather: 'Merriweather', serif;
+    --font-courier-prime: 'Courier Prime', monospace;
 }
 
-.bb-text-helvetica {
-    font-family: var(--font-helvetica);
-    color: var(--bb-black-color);
+.bb-text-bold {
+    font-weight: bold;
 }
 
-.bb-text-courier-new-bold {
-    font-family: var(--font-courier-new-bold);
-    color: var(--bb-black-color);
+.bb-text-semibold {
+    font-weight: 600;
+}
+
+.bb-text-medium {
+    font-weight: 500;
+}
+
+.bb-text-extra-bold {
+    font-weight: 800;
+}
+
+.bb-text-black {
+    font-weight: 900;
 }
 
 .bb-text-pinegrove {
@@ -60,39 +57,22 @@
     color: var(--bb-black-color);
 }
 
-.bb-text-noto-serif {
-    font-family: var(--font-noto-serf);
+.bb-text-eb-garamond {
+    font-family: var(--font-eb-garamond);
     color: var(--bb-black-color);
 }
 
-.bb-text-lato {
-    font-family: var(--font-lato);
+.bb-text-merriweather {
+    font-family: var(--font-merriweather);
     color: var(--bb-black-color);
 }
 
-.bb-text-playfair-display {
-    font-family: var(--font-playfair-display);
+.bb-text-courier-prime {
+    font-family: var(--font-courier-prime);
     color: var(--bb-black-color);
 }
 
-.bb-text-EB-garamond {
-    font-family: var(--font-EB-garamond);
-    color: var(--bb-black-color);
-}
-
-.bb-text-avro {
-    font-family: var(--font-avro);
-    color: var(--bb-black-color);
-}
-
-.bb-text-monteserrat {
-    font-family: var(--font-monteserrat);
-    color: var(--bb-black-color);
-}
-
-html,
-body,
-app-root {
+html, body, app-root {
     background-color: var(--bb-cream-off-white-color);
     margin: 0;
     padding: 0;

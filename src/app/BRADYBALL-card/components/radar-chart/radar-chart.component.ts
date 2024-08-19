@@ -26,9 +26,12 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     private featureScales: { [key: string]: d3.ScaleLinear<number, number>; } = {};
     private angleStep: number = 0;
 
-    constructor(private elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
+    private fonts: { [key: string]: string } = {};
+
+    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
 
     ngOnInit(): void {
+        this.loadFonts();
         if (this.data) {
             this.createSvg();
             this.drawChart();
@@ -49,6 +52,20 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         }
     }
 
+    private loadFonts(): void {
+        const fontFiles = [
+            'pinegrove.woff2',
+            'courier-prime-regular.woff2',
+            'courier-prime-bold.woff2',
+            'league-spartan-regular.woff2',
+            'league-spartan-bold.woff2'
+        ];
+    
+        this.fontService.getFonts(fontFiles).subscribe(fonts => {
+            this.fonts = fonts;
+        });
+    }
+
     private createSvg(): void {
         d3.select(this.elementRef.nativeElement).select('svg').remove();
         this.svg = d3.select(this.elementRef.nativeElement)
@@ -61,76 +78,26 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
     }
 
-    saveSVG() {
-        // Load only the Pinegrove font
-        this.fontService.getBase64Font('/assets/fonts/pinegrove.woff2').subscribe(pinegroveFont => {
-            const svgNS = "http://www.w3.org/2000/svg";
-            const newSvg = document.createElementNS(svgNS, "svg");
-            newSvg.setAttribute('width', this.width.toString());
-            newSvg.setAttribute('height', this.height.toString());
-            newSvg.setAttribute('xmlns', "http://www.w3.org/2000/svg");
-    
-            // Clone the entire SVG content
-            const svgContent = this.svg.node().cloneNode(true);
-            newSvg.appendChild(svgContent);
-    
-            // Add embedded styles
-            const style = document.createElementNS(svgNS, "style");
-            style.textContent = this.getEmbeddedStyles(pinegroveFont);
-            newSvg.insertBefore(style, newSvg.firstChild);
-    
-            // Convert the SVG to a string
-            const serializer = new XMLSerializer();
-            let svgString = serializer.serializeToString(newSvg);
-    
-            // Add XML declaration
-            svgString = '<?xml version="1.0" standalone="no"?>\n' + svgString;
-    
-            // Create a Blob with the SVG string
-            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    
-            // Create a download link and trigger the download
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(svgBlob);
-            link.download = 'radar_chart.svg';
-            link.click();
-        });
-    }
+    saveSVG(): void {
+        const svgElement = this.elementRef.nativeElement.querySelector('svg');
 
-    private getEmbeddedStyles(pinegroveFont: string): string {
-        return `
-            @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=EB+Garamond&family=Helvetica+Neue&family=Lato&family=League+Spartan&family=Montserrat&family=Noto+Serif&family=Playfair+Display&family=Special+Elite&display=swap');
-
+        // Add a style element to the SVG
+        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleElement.textContent = `
             @font-face {
                 font-family: 'Pinegrove';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${pinegroveFont}) format('woff2');
-                font-weight: normal;
+                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['pinegrove.woff2']}) format('woff2');
+                font-weight: 400 700;
                 font-style: normal;
             }
-            
-            :root {
-                --bb-black-color: #000000;
-                --bb-white-color: #ffffff;
-                --bb-brown-gold-color: #b07c29;
-                --bb-red-color: #972828;
-                --bb-dark-red-burgundy-color: #681e1e;
-                --bb-orange-color: #ff5b00;
-                --bb-blue-color: #405e9b;
-                --bb-cream-off-white-color: #f8f5e3;
-                --bb-green-color: #59c135;
-            }
-            .bb-text-helvetica { font-family: 'Helvetica Neue', sans-serif; }
-            .bb-text-courier-new-bold { font-family: 'Courier Prime', sans-serif; font-weight: 700; }
             .bb-text-pinegrove { font-family: 'Pinegrove', sans-serif; }
-            .bb-text-special-elite { font-family: 'Special Elite', sans-serif; }
+            .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
             .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; }
-            .bb-text-noto-serif { font-family: 'Noto Serif', serif; }
-            .bb-text-lato { font-family: 'Lato', sans-serif; }
-            .bb-text-playfair-display { font-family: 'Playfair Display', serif; }
-            .bb-text-EB-garamond { font-family: 'EB Garamond', serif; }
-            .bb-text-avro { font-family: 'Avro', sans-serif; }
-            .bb-text-monteserrat { font-family: 'Montserrat', sans-serif; }
+            .bb-text-bold { font-weight: bold; }
         `;
+        svgElement.insertBefore(styleElement, svgElement.firstChild);
+
+        this.BRADYBALLUtil.saveCombinedSVG([svgElement], 'radar_chart.svg', this.fonts);
     }
 
     private drawChart(): void {
@@ -315,17 +282,22 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             let baseOpacity = 0.8;
             const randomOpacity = Math.random() * 0.5 + baseOpacity;
 
-            this.chartGroup.append('text')
+            const text = this.chartGroup.append('text')
                 .attr('x', x)
                 .attr('y', y)
                 .text((point.scale * r).toFixed(1))
                 .attr('font-size', `${randomSize}px`)
-                .attr('font-family', "'Pinegrove'")
-                .attr('fill', `black`)
+                .attr('class', 'bb-text-pinegrove')
+                .attr('fill', 'black')
                 .attr('text-anchor', 'middle')
                 .attr('dominant-baseline', 'middle')
                 .style('opacity', randomOpacity)
                 .style('filter', 'url(#number-blur-filter)');
+
+            // Randomly apply bold weight to some labels
+            if (Math.random() > 0.5) {
+                text.classed('bb-text-bold', true);
+            }
         });
     }
 
@@ -376,8 +348,8 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
             .attr('font-size', '16px')
-            .attr('font-family', "Courier Prime")
-            .attr('font-weight', 'bold')
+            .attr('class', 'bb-text-courier-prime bb-text-bold')
+            .classed('bb-text-bold', true)
             .attr('fill', 'black')
             .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${labelX}, ${labelY})`)
             .style('filter', 'url(#label-blur-filter)');
@@ -619,8 +591,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('y', 35)
             .attr('text-anchor', 'middle')
             .attr('font-size', '18px')
-            .attr('font-weight', 'bold')
-            .attr('font-family', "'League Spartan'")
+            .attr('class', 'bb-text-league-spartan bb-text-bold')
             .attr('fill', 'black')
             .text(`${this.data.player} - ${this.data.season}`);
 
@@ -630,7 +601,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('y', 55)
             .attr('text-anchor', 'middle')
             .attr('font-size', '14px')
-            .attr('font-family', "'League Spartan'")
+            .attr('class', 'bb-text-courier-prime')
             .attr('fill', 'black')
             .text(infoText);
     }
