@@ -6,6 +6,7 @@ import { RouterModule } from "@angular/router";
 import { APP_ROUTES, AppRoutingModule } from "./app.routing";
 import { BRADYBALLCardRoutingModule } from "./BRADYBALL-card/BRADYBALL-card-routing.module";
 import { HttpClientModule } from "@angular/common/http";
+import { FontService } from "../assets/fonts/font.service";
 
 @NgModule({
     declarations: [
@@ -19,7 +20,7 @@ import { HttpClientModule } from "@angular/common/http";
         BRADYBALLCardModule,
         RouterModule.forRoot(APP_ROUTES, {useHash: true})
     ],
-    providers: [],
+    providers: [FontService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

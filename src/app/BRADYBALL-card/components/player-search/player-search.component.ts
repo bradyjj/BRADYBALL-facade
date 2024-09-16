@@ -1,7 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { SupabaseService } from '../../../shared/services/supabase.service';
 import { Player } from '../../models/player.model';
 import { PlayerStat } from '../../models/player-stat.model';
+import { RadarChartDataPoint, RadarChartPlayerData } from '../../models/radar-chart-player.model';
+import { StatLineData } from '../../models/stat-line-player.model';
+import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
+import { StatLineComponent } from '../stat-line/stat-line.component';
+import { RadarChartComponent } from '../radar-chart/radar-chart.component';
 
 @Component({
     selector: 'player-search',
@@ -9,6 +14,9 @@ import { PlayerStat } from '../../models/player-stat.model';
     styleUrls: ['./player-search.component.scss'],
 })
 export class PlayerSearchComponent implements OnInit {
+
+    @ViewChild(StatLineComponent) statLine!: StatLineComponent;
+    @ViewChild(RadarChartComponent) radarChart!: RadarChartComponent;
 
     playerName: string = "Kylian Mbappé";
     player = new Player();
@@ -25,15 +33,20 @@ export class PlayerSearchComponent implements OnInit {
     playerPlayingTimeData: any;
     playerMiscData: any;
     combinedPlayerData: { [season: string]: PlayerStat } = {};
+    radarChartModel: RadarChartPlayerData = RadarChartPlayerData.createDefault();
 
-    constructor(private supabaseService: SupabaseService) { }
+    statLineModel: StatLineData = StatLineData.createDefault();
 
-    ngOnInit(): void {
-        this.fetchPlayerData(this.playerName);
+    constructor(private supabaseService: SupabaseService, public BRADYBALLUtil: BRADYBALLCardUtil) { }
+
+    async ngOnInit(): Promise<void> {
+        await this.fetchPlayerData(this.playerName);
+        this.createRadarChartModel();
+        this.createStatLineDataModel();
     }
 
-    private fetchPlayerData(player: string): void {
-        Promise.all([
+    private fetchPlayerData(player: string): Promise<void> {
+        return Promise.all([
             this.supabaseService.getPlayerStandardData(player),
             this.supabaseService.getPlayerShootingData(player),
             this.supabaseService.getPlayerPassingData(player),
@@ -58,18 +71,6 @@ export class PlayerSearchComponent implements OnInit {
             this.playerPlayingTimeData = results[9];
             this.playerMiscData = results[10];
 
-            console.log('Player Standard Data:', this.playerStandardData);
-            console.log('Player Shooting Data:', this.playerShootingData);
-            console.log('Player Passing Data:', this.playerPassingData);
-            console.log('Player Passing Types Data:', this.playerPassingTypesData);
-            console.log('Player Defense Data:', this.playerDefenseData);
-            console.log('Player Possession Data:', this.playerPossessionData);
-            console.log('Player Goal Shot Creation Data:', this.playerGoalShotCreationData);
-            console.log('Player Keeper Data:', this.playerKeeperData);
-            console.log('Player Keeper Adv Data:', this.playerKeeperAdvData);
-            console.log('Player Playing Time Data:', this.playerPlayingTimeData);
-            console.log('Player Misc Data:', this.playerMiscData);
-
             this.combinePlayerData(results);
         }).catch(error => {
             console.error('Error fetching player data:', error);
@@ -92,6 +93,170 @@ export class PlayerSearchComponent implements OnInit {
                 };
             });
         });
-        console.log('Combined Player Data:', this.combinedPlayerData);
+    }
+
+    private createStatLineDataModel(): void {
+        this.statLineModel = this.getMockData();
+    }
+
+
+    private getMockData(): StatLineData {
+        return {
+            player: "Kylian Mbappé",
+            title: "RECENT CAREER PERFORMANCE",
+            rows: [
+                {
+                    season: "2023-24",
+                    dataPoints: [
+                        { key: "Team", label: "Team", value: "Paris S-G" },
+                        { key: "League", label: "League", value: "FRA-Ligue 1" },
+                        { key: "Age", label: "Age", value: 25 },
+                        { key: "MatchesPlayed", label: "Matches", value: 29 },
+                        { key: "90sPlayed", label: "90s", value: 24 },
+                        { key: "Goals", label: "Goals", value: 27 },
+                        { key: "Assists", label: "Assists", value: 7 },
+                        { key: "GoalsAndAssits", label: "G+A", value: 34 },
+                        { key: "NonPenGoals", label: "nP-Goals", value: 21 },
+                        { key: "NonPenExpectedGoals", label: "npxG", value: 14.5 },
+                        { key: "ExpectedAssists", label: "xA", value: 5.7 },
+                        { key: "GoalsOverExpected", label: "G-xG", value: 6.5 }
+                    ]
+                },
+                {
+                    season: "2022-23",
+                    dataPoints: [
+                        { key: "Team", label: "Team", value: "Paris S-G" },
+                        { key: "League", label: "League", value: "FRA-Ligue 1" },
+                        { key: "Age", label: "Age", value: 23 },
+                        { key: "MatchesPlayed", label: "Matches", value: 34 },
+                        { key: "90sPlayed", label: "90s", value: 31.3 },
+                        { key: "Goals", label: "Goals", value: 29 },
+                        { key: "Assists", label: "Assists", value: 5 },
+                        { key: "GoalsAndAssits", label: "G+A", value: 34 },
+                        { key: "NonPenGoals", label: "nP-Goals", value: 26 },
+                        { key: "NonPenExpectedGoals", label: "npxG", value: 22.2 },
+                        { key: "ExpectedAssists", label: "xA", value: 7.4 },
+                        { key: "GoalsOverExpected", label: "G-xG", value: 3.8 }
+                    ]
+                },
+                {
+                    season: "Career",
+                    dataPoints: [
+                        { key: "Team", label: "Team", value: "" },
+                        { key: "League", label: "League", value: "" },
+                        { key: "Age", label: "Age", value: 21 },
+                        { key: "MatchesPlayed", label: "Matches", value: 31 },
+                        { key: "90sPlayed", label: "90s", value: 26.4 },
+                        { key: "Goals", label: "Goals", value: 27 },
+                        { key: "Assists", label: "Assists", value: 7 },
+                        { key: "GoalsAndAssits", label: "G+A", value: 34 },
+                        { key: "NonPenGoals", label: "nP-Goals", value: 21 },
+                        { key: "NonPenExpectedGoals", label: "npxG", value: 17.4 },
+                        { key: "ExpectedAssists", label: "xA", value: 4.8 },
+                        { key: "GoalsOverExpected", label: "G-xG", value: 3.6 }
+                    ]
+                }
+            ],
+            information1: "* Led FRA-Ligue 1",
+            information2: "# Led Big 5 European Leagues"
+        };
+    }
+
+    private createRadarChartModel(): void {
+        const latestSeason = Object.keys(this.combinedPlayerData).sort().pop();
+        if (!latestSeason) return;
+
+        const playerData = this.combinedPlayerData[latestSeason];
+
+        const dataPoints: RadarChartDataPoint[] = [
+            {
+                key: 'ExpectedAssistsP90',
+                value: 0.5,
+                scale: .5,
+                color: 'var(--bb-red-purple-color)',
+                label: 'Expected Assists'
+            },
+            {
+                key: 'NonPenExpectedGoalsP90',
+                value: 1,
+                scale: 1,
+                color: 'var(--bb-violet-color)',
+                label: 'Non-Pen xG'
+            },
+            {
+                key: 'NonPenGoalsP90',
+                value: 1,
+                scale: 1,
+                color: 'var(--bb-green-color)',
+                label: 'Non-Pen Goals'
+            },
+            {
+                key: 'ShotsOnTargetP90',
+                value: 2.5,
+                scale: 2.5,
+                color: 'var(--bb-turquoise-color)',
+                label: 'Shots on Target'
+            },
+            {
+                key: 'ShotsP90',
+                value: 5,
+                scale: 5,
+                color: 'var(--bb-green-2-color)',
+                label: 'Shots'
+            },
+            {
+                key: 'AerialPct',
+                value: 100,
+                scale: 100,
+                color: 'var(--bb-red-purple-color)',
+                label: 'Aerial %'
+            },
+            {
+                key: 'ShotCreatingActionsP90',
+                value: 8,
+                scale: 8,
+                color: 'var(--bb-violet-color)',
+                label: 'Shot Creations'
+            },
+            {
+                key: 'ProgPassesP90',
+                value: 9,
+                scale: 9,
+                color: 'var(--bb-green-color)',
+                label: 'Progressive Passes'
+            },
+            {
+                key: 'BallWonP90',
+                value: 5,
+                scale: 5,
+                color: 'var(--bb-turquoise-color)',
+                label: 'Possession Won'
+            },
+            {
+                key: 'TakeOnPct',
+                value: 100,
+                scale: 100,
+                color: 'var(--bb-green-2-color)',
+                label: 'Take-On %'
+            }
+        ];
+
+        this.radarChartModel = {
+            player: playerData.player,
+            league: playerData.league,
+            season: "2023-24",
+            team: playerData.team,
+            age: playerData.age,
+            position: playerData.position,
+            born: playerData.born,
+            nation: playerData.nation,
+            minutes_90s: playerData.minutes_90s,
+            dataPoints: dataPoints
+        };
+    }
+
+    saveCombinedSVG() {
+        const statLineSVG = this.statLine.elementRef.nativeElement.querySelector('svg');
+        const radarChartSVG = this.radarChart.elementRef.nativeElement.querySelector('svg');
     }
 }

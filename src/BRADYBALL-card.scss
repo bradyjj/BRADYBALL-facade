@@ -1,0 +1,83 @@
+:root {
+    /* Base Colors */
+    --bb-black-color: #000000;
+    --bb-white-color: #ffffff;
+    
+    /* Main colors */
+    --bb-brown-gold-color: #b07c29;
+    --bb-red-color: #972828;
+    --bb-dark-red-burgundy-color: #681e1e;
+    --bb-orange-color: #ff5b00;
+    
+    /* Accent Colors */
+    --bb-blue-color: #405e9b;
+    --bb-cream-off-white-color: #f8f5e3;
+    --bb-green-color: #59c135;
+    
+    --font-pinegrove: 'Pinegrove', sans-serif;
+    --font-special-elite: 'Special Elite', sans-serif;
+    --font-league-spartan: 'League Spartan', sans-serif;
+    --font-eb-garamond: 'EB Garamond', serif;
+    --font-merriweather: 'Merriweather', serif;
+    --font-courier-prime: 'Courier Prime', monospace;
+}
+
+.bb-text-bold {
+    font-weight: bold;
+}
+
+.bb-text-semibold {
+    font-weight: 600;
+}
+
+.bb-text-medium {
+    font-weight: 500;
+}
+
+.bb-text-extra-bold {
+    font-weight: 800;
+}
+
+.bb-text-black {
+    font-weight: 900;
+}
+
+.bb-text-pinegrove {
+    font-family: var(--font-pinegrove);
+    color: var(--bb-black-color);
+}
+
+.bb-text-special-elite {
+    font-family: var(--font-special-elite);
+    color: var(--bb-black-color);
+}
+
+.bb-text-league-spartan {
+    font-family: var(--font-league-spartan);
+    color: var(--bb-black-color);
+}
+
+.bb-text-eb-garamond {
+    font-family: var(--font-eb-garamond);
+    color: var(--bb-black-color);
+}
+
+.bb-text-merriweather {
+    font-family: var(--font-merriweather);
+    color: var(--bb-black-color);
+}
+
+.bb-text-courier-prime {
+    font-family: var(--font-courier-prime);
+    color: var(--bb-black-color);
+}
+
+html, body, app-root {
+    background-color: var(--bb-white-color);
+    margin: 0;
+    padding: 0;
+}
+
+.container, .row {
+    background-color: var(--bb-white-color);
+}
