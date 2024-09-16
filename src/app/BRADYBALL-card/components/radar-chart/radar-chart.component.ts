@@ -13,7 +13,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     @Input() data!: RadarChartPlayerData;
 
     private svg: any;
-    private titleGroup: any;
     private chartGroup: any;
     private margin = 100;
     private width = 800;
@@ -22,7 +21,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
     chartReady: boolean = false;
 
-    private radarAreaPath: string = '';
     private featureScales: { [key: string]: d3.ScaleLinear<number, number>; } = {};
     private angleStep: number = 0;
 
@@ -60,8 +58,8 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             'league-spartan-regular.woff2',
             'league-spartan-bold.woff2'
         ];
-    
-        this.fontService.getFonts(fontFiles).subscribe(fonts => {
+
+        this.fontService.loadFonts(fontFiles).subscribe(fonts => {
             this.fonts = fonts;
         });
     }
@@ -73,7 +71,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('width', this.width)
             .attr('height', this.height);
 
-        this.titleGroup = this.svg.append('g');
         this.chartGroup = this.svg.append('g')
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
     }
@@ -106,28 +103,18 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             this.chartReady = false;
             return;
         }
-        const dataPoints = this.data.dataPoints;
-        const angleStep = (Math.PI * 2) / dataPoints.length;
+        this.featureScales = this.createFeatureScales(this.data.dataPoints);
+        this.angleStep = (Math.PI * 2) / this.data.dataPoints.length;
 
         this.clearSvg();
         this.createVintageFilter();
         this.setBackground();
         this.recreateGroups();
-
-        const featureScales = this.createFeatureScales(dataPoints);
-        this.featureScales = featureScales;
-        this.angleStep = (Math.PI * 2) / dataPoints.length;
-
         this.createBlurFilters();
         this.drawCircularGrid();
         this.createBaseGradient();
-        this.drawDataArea(dataPoints, angleStep, featureScales);
-        this.drawAxesAndLabels(dataPoints, angleStep, featureScales);
-
-        //this.addDataPoints(dataPoints, angleStep, featureScales);
-        //this.addTitleAndInfo();
-        //this.createRadarAreaMasks();
-        //this.drawAbstractSoccerPitch();
+        this.drawDataArea(this.data.dataPoints);
+        this.drawAxesAndLabels(this.data.dataPoints);
 
         this.chartReady = true;
     }
@@ -164,7 +151,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     private recreateGroups(): void {
-        this.titleGroup = this.svg.append('g');
         this.chartGroup = this.svg.append('g')
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
     }
@@ -236,11 +222,11 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('fill', 'none');
     }
 
-    private drawAxesAndLabels(dataPoints: RadarChartDataPoint[], angleStep: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
+    private drawAxesAndLabels(dataPoints: RadarChartDataPoint[]): void {
         dataPoints.forEach((point, index) => {
-            const angle = index * angleStep;
+            const angle = index * this.angleStep;
             this.drawAxis(angle);
-            this.drawScaleLabels(point, angle, featureScales);
+            this.drawScaleLabels(point, angle, this.featureScales);
             this.drawLabel(point, angle);
         });
     }
@@ -347,9 +333,9 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .text(point.label)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'central')
-            .attr('font-size', '16px')
-            .attr('class', 'bb-text-courier-prime bb-text-bold')
-            .classed('bb-text-bold', true)
+            .attr('font-size', '20px')
+            .attr('class', 'bb-text-courier-prime bb-text-extra-bold')
+            .classed('bb-text-extra-bold', true)
             .attr('fill', 'black')
             .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${labelX}, ${labelY})`)
             .style('filter', 'url(#label-blur-filter)');
@@ -480,11 +466,11 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('mode', 'multiply');
     }
 
-    private drawDataArea(dataPoints: RadarChartDataPoint[], angleStep: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
+    private drawDataArea(dataPoints: RadarChartDataPoint[]): void {
         const area = d3.areaRadial<RadarChartDataPoint>()
-            .angle((d, i) => i * angleStep)
+            .angle((d, i) => i * this.angleStep)
             .innerRadius(0)
-            .outerRadius(d => featureScales[d.key](d.value))
+            .outerRadius(d => this.featureScales[d.key](d.value))
             .curve(d3.curveLinearClosed);
 
         this.chartGroup.append('path')
@@ -495,260 +481,4 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('stroke-width', 2);
     }
 
-    private createGoldStarGradients(): void {
-        const defs = this.svg.append('defs');
-
-        // Main gold gradient (more Brazilian gold)
-        const goldGradient = defs.append('radialGradient')
-            .attr('id', 'goldGradient')
-            .attr('cx', '50%')
-            .attr('cy', '50%')
-            .attr('r', '50%');
-
-        goldGradient.append('stop')
-            .attr('offset', '0%')
-            .attr('stop-color', '#FFD700'); // Brighter gold
-
-        goldGradient.append('stop')
-            .attr('offset', '50%')
-            .attr('stop-color', '#FFA500'); // Orange-gold
-
-        goldGradient.append('stop')
-            .attr('offset', '100%')
-            .attr('stop-color', '#DAA520'); // Goldenrod
-
-        // Shine gradient
-        const shineGradient = defs.append('linearGradient')
-            .attr('id', 'shineGradient')
-            .attr('x1', '0%')
-            .attr('y1', '0%')
-            .attr('x2', '100%')
-            .attr('y2', '100%');
-
-        shineGradient.append('stop')
-            .attr('offset', '0%')
-            .attr('stop-color', 'rgba(255, 255, 255, 0.8)');
-
-        shineGradient.append('stop')
-            .attr('offset', '100%')
-            .attr('stop-color', 'rgba(255, 255, 255, 0)');
-    }
-
-    private create3DGoldStar(): string {
-        const starPoints = 5;
-        const outerRadius = 35;
-        const innerRadius = outerRadius * 0.5;
-        let path = '';
-
-        for (let i = 0; i < starPoints * 2; i++) {
-            const radius = i % 2 === 0 ? outerRadius : innerRadius;
-            const angle = (Math.PI / starPoints) * i;
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            path += (i === 0 ? 'M' : 'L') + `${x},${y} `;
-        }
-        path += 'Z';
-
-        return path;
-    }
-
-    private addDataPoints(dataPoints: RadarChartDataPoint[], angleStep: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
-        this.createGoldStarGradients();
-
-        dataPoints.forEach((point, index) => {
-            const angle = index * angleStep;
-            const [x, y] = d3.pointRadial(angle, featureScales[point.key](point.value));
-
-            const starPath = this.create3DGoldStar();
-
-            const starGroup = this.chartGroup.append('g')
-                .attr('transform', `translate(${x}, ${y})`);
-
-            // Shadow for 3D effect
-            starGroup.append('path')
-                .attr('d', starPath)
-                .attr('fill', 'rgba(0, 0, 0, 0.3)')
-                .attr('transform', 'translate(2, 2)');
-
-            // Main star
-            starGroup.append('path')
-                .attr('d', starPath)
-                .attr('fill', 'url(#goldGradient)')
-                .attr('stroke', '#B8860B') // Dark golden rod for outline
-                .attr('stroke-width', 0.5);
-
-            // Shine effect
-            starGroup.append('path')
-                .attr('d', starPath)
-                .attr('fill', 'url(#shineGradient)')
-                .attr('opacity', 0.7);
-        });
-    }
-
-    private addTitleAndInfo(): void {
-        this.titleGroup.append('text')
-            .attr('x', this.width / 2 + 275)
-            .attr('y', 35)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '18px')
-            .attr('class', 'bb-text-league-spartan bb-text-bold')
-            .attr('fill', 'black')
-            .text(`${this.data.player} - ${this.data.season}`);
-
-        const infoText = `${this.data.position} | ${this.data.team} | ${this.data.league}`;
-        this.titleGroup.append('text')
-            .attr('x', this.width / 2 + 275)
-            .attr('y', 55)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '14px')
-            .attr('class', 'bb-text-courier-prime')
-            .attr('fill', 'black')
-            .text(infoText);
-    }
-
-    private createRadarAreaMasks(): void {
-        if (!this.featureScales || !this.angleStep || !this.data) {
-            console.error('Required properties are not set');
-            return;
-        }
-
-        const radarArea = d3.areaRadial<RadarChartDataPoint>()
-            .angle((d, i) => i * this.angleStep!)
-            .innerRadius(0)
-            .outerRadius(d => this.featureScales![d.key](d.value));
-
-        const path = radarArea(this.data.dataPoints);
-        this.radarAreaPath = path ? path : '';
-
-        // Create a mask for the radar area
-        const radarMask = this.svg.append('mask')
-            .attr('id', 'radar-area-mask');
-
-        radarMask.append('rect')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .attr('fill', 'black');
-
-        radarMask.append('path')
-            .attr('d', this.radarAreaPath)
-            .attr('fill', 'white');
-    }
-
-    private wobbleLine(x1: number, y1: number, x2: number, y2: number): string {
-        const wobbleAmount = 2;
-        let d = `M${x1},${y1}`;
-        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        const steps = Math.floor(length / 10);
-        for (let i = 1; i <= steps; i++) {
-            const x = x1 + (x2 - x1) * (i / steps);
-            const y = y1 + (y2 - y1) * (i / steps);
-            const wobbleX = (Math.random() - 0.5) * wobbleAmount;
-            const wobbleY = (Math.random() - 0.5) * wobbleAmount;
-            d += ` L${x + wobbleX},${y + wobbleY}`;
-        }
-        return d;
-    }
-
-    private wobbleArc(centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number): string {
-        const wobbleAmount = 2;
-        let d = '';
-        const steps = 20;
-        for (let i = 0; i <= steps; i++) {
-            const angle = startAngle + (endAngle - startAngle) * (i / steps);
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            const wobbleX = (Math.random() - 0.5) * wobbleAmount;
-            const wobbleY = (Math.random() - 0.5) * wobbleAmount;
-            d += (i === 0 ? 'M' : 'L') + `${x + wobbleX},${y + wobbleY}`;
-        }
-        return d;
-    }
-
-    private drawAbstractSoccerPitch(): void {
-        const offWhiteColor = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-off-white-color');
-        const blackColor = '#000000';
-        const lineOpacity = 0.6;
-        const lineWidth = 2;
-        const boxSpacing = .888;
-        const boxScale = 1;
-
-        const penaltyAreaWidth = this.radius * 0.4 * boxScale;
-        const penaltyAreaHeight = this.radius * 0.8 * boxScale;
-        const sixYardBoxWidth = penaltyAreaWidth * 0.4;
-        const sixYardBoxHeight = penaltyAreaHeight * 0.4;
-        const arcRadius = penaltyAreaHeight * 0.2;
-
-        const yOffset = 16; // Adjust this value to move the pitch up or down
-
-        const bgGroup = this.svg.append('g')
-            .attr('class', 'soccer-pitch-background')
-            .attr('transform', `translate(${this.width / 2}, ${this.height / 2 + yOffset})`);
-
-        // Draw penalty areas
-        [-1, 1].forEach(direction => {
-            const boxX = direction * this.radius * boxSpacing;
-
-            // Penalty box
-            this.drawWobblePath(bgGroup, [
-                [boxX, -penaltyAreaHeight / 2],
-                [boxX, penaltyAreaHeight / 2],
-                [boxX - direction * penaltyAreaWidth, penaltyAreaHeight / 2],
-                [boxX - direction * penaltyAreaWidth, -penaltyAreaHeight / 2],
-                [boxX, -penaltyAreaHeight / 2]
-            ], blackColor, lineWidth, lineOpacity);
-
-            // 6-yard box
-            this.drawWobblePath(bgGroup, [
-                [boxX, -sixYardBoxHeight / 2],
-                [boxX, sixYardBoxHeight / 2],
-                [boxX - direction * sixYardBoxWidth, sixYardBoxHeight / 2],
-                [boxX - direction * sixYardBoxWidth, -sixYardBoxHeight / 2],
-                [boxX, -sixYardBoxHeight / 2]
-            ], blackColor, lineWidth, lineOpacity);
-
-            // Half circle (outside the penalty box, facing outward for both sides)
-            this.drawWobbleArc(bgGroup,
-                boxX - direction * penaltyAreaWidth,
-                0,
-                arcRadius,
-                direction === -1 ? -Math.PI / 2 : Math.PI / 2,
-                direction === -1 ? Math.PI / 2 : 3 * Math.PI / 2,
-                blackColor,
-                lineWidth,
-                lineOpacity
-            );
-        });
-
-        // Create a copy of the paths with black stroke for the radar area
-        bgGroup.selectAll('path').clone()
-            .attr('stroke', blackColor)
-            .attr('stroke-opacity', 1)
-            .attr('mask', 'url(#radar-area-mask)');
-
-        // Apply the pitch mask to the original paths
-        bgGroup.attr('mask', 'url(#pitch-mask)');
-    }
-
-    private drawWobblePath(group: d3.Selection<SVGGElement, unknown, null, undefined>, points: [number, number][], color: string, width: number, opacity: number): void {
-        const d = points.reduce((acc, point, i, arr) => {
-            if (i === 0) return `M${point[0]},${point[1]}`;
-            return acc + this.wobbleLine(arr[i - 1][0], arr[i - 1][1], point[0], point[1]);
-        }, '');
-
-        group.append('path')
-            .attr('d', d)
-            .attr('fill', 'none')
-            .attr('stroke', color)
-            .attr('stroke-width', width)
-            .attr('stroke-opacity', opacity);
-    }
-
-    private drawWobbleArc(group: d3.Selection<SVGGElement, unknown, null, undefined>, centerX: number, centerY: number, radius: number, startAngle: number, endAngle: number, color: string, width: number, opacity: number): void {
-        group.append('path')
-            .attr('d', this.wobbleArc(centerX, centerY, radius, startAngle, endAngle))
-            .attr('fill', 'none')
-            .attr('stroke', color)
-            .attr('stroke-width', width)
-            .attr('stroke-opacity', opacity);
-    }
 }

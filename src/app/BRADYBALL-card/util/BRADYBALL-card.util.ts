@@ -11,7 +11,7 @@ export class BRADYBALLCardUtil {
         return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
     }
 
-    embedFontsInSVG(svgString: string, fonts: { [key: string]: string }): string {
+    public embedFontsInSVG(svgString: string, fonts: { [key: string]: string }): string {
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgString, 'image/svg+xml');
         const svgElement = doc.documentElement;
@@ -106,7 +106,7 @@ export class BRADYBALLCardUtil {
         return filename.includes('italic') ? 'italic' : 'normal';
     }
 
-    saveCombinedSVG(svgElements: SVGElement[], filename: string, fonts: { [key: string]: string }): void {
+    public saveCombinedSVG(svgElements: SVGElement[], filename: string, fonts: { [key: string]: string }): void {
         const combinedSVG = this.combineSVGElements(svgElements);
         const embeddedSVG = this.embedFontsInSVG(combinedSVG, fonts);
         this.saveSVGToFile(embeddedSVG, filename);
@@ -152,7 +152,7 @@ export class BRADYBALLCardUtil {
         return 'getBBox' in element;
     }
 
-    private saveSVGToFile(svgString: string, filename: string): void {
+    public saveSVGToFile(svgString: string, filename: string): void {
         const blob = new Blob([svgString], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');

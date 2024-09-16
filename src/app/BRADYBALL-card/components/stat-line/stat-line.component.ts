@@ -13,24 +13,61 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     @Input() data!: StatLineData;
 
     private svg: any;
-    private margin = { top: 90, right: 35, bottom: 75, left: 35 };
-    private cellPadding = 15;
-    private rowHeight = 40;
-    private fontSize = 14;
-    private headerFontSize = 15;
+    private readonly MARGIN = { top: 100, right: 4, bottom: 25, left: 4 };
+    private readonly CELL_PADDING = 15;
+    private readonly ROW_HEIGHT = 40;
+    private readonly FONT_SIZE = 17;
+    private readonly HEADER_FONT_SIZE = 18;
+    private readonly BORDER_RADIUS = 20;
+    private readonly BORDER_WIDTH = 18;
+    private readonly TITLE_BACKGROUND_HEIGHT = 90;
+    private readonly TITLE_LEFT_MARGIN = 20;
+    private readonly CREAM_COLOR;
+    private readonly BACKGROUND_COLOR;
+    private readonly TABLE_PADDING = 20;
+
     private width: number = 0;
     private height: number = 0;
-    private bloodRedColor = '#BB0000';
-    private stripeOpacity = 0.15;
 
     tableReady: boolean = false;
+    fontsLoaded: boolean = false;
 
     private fonts: { [key: string]: string } = {};
 
-    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
+    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) {
+        this.CREAM_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-off-white-color');
+        this.BACKGROUND_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-red-color');
+    }
 
     ngOnInit(): void {
         this.loadFonts();
+    }
+
+    private async loadFonts(): Promise<void> {
+        const fontFiles = [
+            'courier-prime-regular.woff2',
+            'courier-prime-bold.woff2',
+            'eb-garamond-regular.woff2',
+            'eb-garamond-bold.woff2',
+            'merriweather-regular.woff2',
+            'merriweather-bold.woff2'
+        ];
+
+        this.fontService.loadFonts(fontFiles).subscribe(
+            (fonts) => {
+                this.fonts = fonts;
+                this.fontsLoaded = true;
+                if (this.data) {
+                    this.drawTable();
+                }
+            },
+            (error) => {
+                console.error('Error loading fonts:', error);
+                if (this.data) {
+                    this.drawTable();
+                }
+            }
+        );
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -54,22 +91,21 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         d3.select(this.elementRef.nativeElement).select('svg').remove();
 
         const layout = this.calculateLayout();
-        this.width = layout.totalWidth + this.margin.left + this.margin.right;
-        this.height = (this.data.rows.length + 1) * this.rowHeight + this.margin.top + this.margin.bottom;
+        this.width = layout.totalWidth + this.MARGIN.left + this.MARGIN.right;
+        this.height = (this.data.rows.length + 1) * this.ROW_HEIGHT + this.MARGIN.top + this.MARGIN.bottom + this.TABLE_PADDING;
 
         this.svg = d3.select(this.elementRef.nativeElement)
             .append('svg')
             .attr('width', this.width)
             .attr('height', this.height)
             .append('g')
-            .attr('transform', `translate(${this.margin.left},${this.margin.top})`);
+            .attr('transform', `translate(${this.MARGIN.left},${this.MARGIN.top})`);
 
+        this.createClipPath();
         this.drawBackground(layout);
         this.drawBorder();
         this.drawTitle();
-        this.drawGridLines(layout);
         this.drawTableContent(layout);
-        this.drawBottomInformation();
 
         this.tableReady = true;
     }
@@ -77,15 +113,15 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     private calculateLayout() {
         const headers = ['Season', ...this.data.rows[0].dataPoints.map(dp => dp.label)];
         const columnWidths = headers.map((header, index) => {
-            let maxWidth = this.getTextWidth(header, `${this.headerFontSize}px Courier Prime`);
+            let maxWidth = this.getTextWidth(header, `${this.HEADER_FONT_SIZE}px Courier Prime`);
 
             this.data.rows.forEach(row => {
                 let cellText = index === 0 ? row.season : row.dataPoints[index - 1].value.toString();
-                const cellWidth = this.getTextWidth(cellText, `${this.fontSize}px Courier Prime`);
+                const cellWidth = this.getTextWidth(cellText, `${this.FONT_SIZE}px Courier Prime`);
                 maxWidth = Math.max(maxWidth, cellWidth);
             });
 
-            return maxWidth + this.cellPadding * 2;
+            return maxWidth + this.CELL_PADDING * 2.5;
         });
 
         const totalWidth = columnWidths.reduce((sum, width) => sum + width, 0);
@@ -102,61 +138,62 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         return 0;
     }
 
+    private createClipPath(): void {
+        const clipPath = this.svg.append("defs")
+            .append("clipPath")
+            .attr("id", "rounded-corners");
+
+        const path = this.createRoundedRectPath(
+            -this.MARGIN.left,
+            -this.MARGIN.top,
+            this.width,
+            this.height,
+            this.BORDER_RADIUS
+        );
+
+        clipPath.append("path")
+            .attr("d", path);
+    }
+
     private drawBackground(layout: any): void {
-        const stripeHeight = this.rowHeight * (this.data.rows.length + 1);
-        const totalWidth = layout.totalWidth;
+        const totalWidth = this.width;
+        const totalHeight = this.height;
 
-        // Create a gradient for the faded paint effect
-        const gradient = this.svg.append('defs')
-            .append('linearGradient')
-            .attr('id', 'fade-gradient')
-            .attr('x1', '0%')
-            .attr('y1', '0%')
-            .attr('x2', '100%')
-            .attr('y2', '100%');
+        // Create a group for the background elements
+        const backgroundGroup = this.svg.append('g')
+            .attr('clip-path', 'url(#rounded-corners)');
 
-        gradient.append('stop')
-            .attr('offset', '0%')
-            .attr('style', 'stop-color:#BB0000;stop-opacity:0.35');
-
-        gradient.append('stop')
-            .attr('offset', '100%')
-            .attr('style', 'stop-color:#BB0000;stop-opacity:0.05');
-
-        // Apply the gradient as the background
-        this.svg.append('rect')
-            .attr('x', 0)
-            .attr('y', 0)
+        // Full background
+        backgroundGroup.append('rect')
+            .attr('x', -this.MARGIN.left)
+            .attr('y', -this.MARGIN.top)
             .attr('width', totalWidth)
-            .attr('height', stripeHeight)
-            .attr('fill', 'url(#fade-gradient)');
-
-        // Add vertical stripes for the worn paint effect
-        const stripeWidth = 20;
-        for (let x = 0; x < totalWidth; x += stripeWidth) {
-            this.svg.append('line')
-                .attr('x1', x)
-                .attr('y1', 0)
-                .attr('x2', x)
-                .attr('y2', stripeHeight)
-                .attr('stroke', this.bloodRedColor)
-                .attr('stroke-width', 0)
-                .attr('opacity', 0.05);
-        }
+            .attr('height', totalHeight)
+            .attr('fill', this.BACKGROUND_COLOR);
     }
 
     private drawBorder(): void {
-        const borderRadius = 10;
-        this.svg.append('rect')
-            .attr('x', -this.margin.left)
-            .attr('y', -this.margin.top)
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .attr('rx', borderRadius)
-            .attr('ry', borderRadius)
+        // Draw the border path
+        const path = `
+            M ${-this.MARGIN.left + this.BORDER_RADIUS},${-this.MARGIN.top}
+            h ${this.width - 2 * this.BORDER_RADIUS}
+            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${this.BORDER_RADIUS},${this.BORDER_RADIUS}
+            v ${this.height - 2 * this.BORDER_RADIUS}
+            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${-this.BORDER_RADIUS},${this.BORDER_RADIUS}
+            h ${-(this.width - 2 * this.BORDER_RADIUS)}
+            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${-this.BORDER_RADIUS},${-this.BORDER_RADIUS}
+            v ${-(this.height - 2 * this.BORDER_RADIUS)}
+            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${this.BORDER_RADIUS},${-this.BORDER_RADIUS}
+            z
+        `;
+
+        this.svg.append('path')
+            .attr('d', path)
             .attr('fill', 'none')
-            .attr('stroke', this.BRADYBALLUtil.getCssVariableValue('--bb-black-color'))
-            .attr('stroke-width', 5);
+            .attr('stroke', this.CREAM_COLOR)
+            .attr('stroke-width', this.BORDER_WIDTH)
+            .attr('stroke-linecap', 'round')
+            .attr('stroke-linejoin', 'round');
     }
 
     private drawTitle(): void {
@@ -165,10 +202,28 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             const firstLetter = titleText.charAt(0);
             const restOfTitle = titleText.slice(1);
 
-            const fontSize = 48;
+            const fontSize = 52;
             const smallerFontSize = fontSize * 0.45;
-            const titleYOffset = -this.margin.top / 2 + 15;
-            const letterSpacing = 1; // Adjust this value to increase or decrease spacing
+            const titleYOffset = -this.MARGIN.top / 2 + 25;
+            const letterSpacing = 1;
+            const radius = this.BORDER_RADIUS - this.BORDER_WIDTH / 2;
+            const bottomLeftRadius = radius * 1.8;
+
+            const backgroundPath = `
+                    M ${-this.MARGIN.left + this.BORDER_WIDTH / 2},${-this.MARGIN.top + this.BORDER_WIDTH / 2 + radius}
+                    q 0,${-radius} ${radius},${-radius}
+                    h ${this.width - 2 * radius - this.BORDER_WIDTH}
+                    q ${radius},0 ${radius},${radius}
+                    v ${this.TITLE_BACKGROUND_HEIGHT - radius + this.BORDER_WIDTH / 2}
+                    h ${-(this.width - bottomLeftRadius - this.BORDER_WIDTH)}
+                    q ${-bottomLeftRadius},0 ${-bottomLeftRadius},${bottomLeftRadius}
+                    z
+                `;
+
+            this.svg.append('path')
+                .attr('d', backgroundPath)
+                .attr('class', 'bb-black-color')
+                .attr('fill', 'black');
 
             const tempText = this.svg.append('text')
                 .attr('font-family', 'Times New Roman, serif')
@@ -181,74 +236,99 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             const underlineWidth = restOfTitleWidth + fontSize * 0.8;
 
             this.svg.append('text')
-                .attr('x', this.margin.left)
+                .attr('x', this.TITLE_LEFT_MARGIN)
                 .attr('y', titleYOffset)
                 .attr('text-anchor', 'start')
-                .attr('class', 'bb-text-eb-garamond bb-text-bold')
+                .attr('class', 'bb-text-eb-garamond bb-text-bold bb-cream-off-white-color')
+                .attr('font-family', 'EB Garamond, serif')
+                .attr('font-weight', 'bold')
                 .attr('font-size', `${fontSize}px`)
-                .attr('fill', 'black')
+                .attr('fill', this.CREAM_COLOR)
+                .style('fill', this.CREAM_COLOR)
                 .text(firstLetter);
 
             this.svg.append('line')
-                .attr('x1', this.margin.left + fontSize * 0.85)
+                .attr('x1', this.TITLE_LEFT_MARGIN + fontSize * 0.85)
                 .attr('y1', titleYOffset - 1.5)
-                .attr('x2', this.margin.left + underlineWidth + 7)
+                .attr('x2', this.TITLE_LEFT_MARGIN + underlineWidth + 7)
                 .attr('y2', titleYOffset - 1.5)
-                .attr('stroke', 'black')
+                .attr('class', 'bb-cream-off-white-color')
+                .attr('stroke', this.CREAM_COLOR)
                 .attr('stroke-width', 3.5);
 
             this.svg.append('text')
-                .attr('x', this.margin.left + fontSize * 0.70)
+                .attr('x', this.TITLE_LEFT_MARGIN + fontSize * 0.70)
                 .attr('y', titleYOffset - fontSize * 0.25)
                 .attr('text-anchor', 'start')
-                .attr('class', 'bb-text-merriweather bb-text-bold')
+                .attr('class', 'bb-text-merriweather bb-text-bold bb-cream-off-white-color')
                 .attr('font-size', `${smallerFontSize}px`)
-                .attr('fill', 'black')
                 .attr('letter-spacing', `${letterSpacing}px`)
+                .attr('fill', this.CREAM_COLOR)
+                .style('fill', this.CREAM_COLOR)
                 .text(restOfTitle);
 
             const diamondSize = 8;
             const xOffset = 13;
             const yOffset = 2;
             this.svg.append('path')
-                .attr('d', `M${this.margin.left + underlineWidth + xOffset},${titleYOffset - diamondSize / 2 - yOffset} 
-                            L${this.margin.left + underlineWidth + xOffset + diamondSize / 2},${titleYOffset - yOffset} 
-                            L${this.margin.left + underlineWidth + xOffset},${titleYOffset + diamondSize / 2 - yOffset} 
-                            L${this.margin.left + underlineWidth + xOffset - diamondSize / 2},${titleYOffset - yOffset} Z`)
-                .attr('fill', 'black');
+                .attr('d', `M${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset},${titleYOffset - diamondSize / 2 - yOffset} 
+                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset + diamondSize / 2},${titleYOffset - yOffset} 
+                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset},${titleYOffset + diamondSize / 2 - yOffset} 
+                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset - diamondSize / 2},${titleYOffset - yOffset} Z`)
+                .attr('class', 'bb-cream-off-white-color')
+                .attr('fill', this.CREAM_COLOR)
+                .style('fill', this.CREAM_COLOR);
         }
     }
 
-    private drawGridLines(layout: any): void {
-        for (let i = 0; i <= this.data.rows.length; i++) {
+    private drawGridLines(layout: any, extraTopSpace: number): void {
+        for (let i = 1; i <= this.data.rows.length; i++) {
             this.svg.append('line')
-                .attr('x1', 0)
-                .attr('y1', i * this.rowHeight)
-                .attr('x2', layout.totalWidth)
-                .attr('y2', i * this.rowHeight)
+                .attr('x1', this.BORDER_WIDTH)
+                .attr('y1', i * this.ROW_HEIGHT + extraTopSpace)
+                .attr('x2', layout.totalWidth - this.BORDER_WIDTH)
+                .attr('y2', i * this.ROW_HEIGHT + extraTopSpace)
                 .attr('stroke', 'black')
-                .attr('stroke-width', i <= 1 || i === this.data.rows.length ? 2 : 1);
+                .attr('stroke-width', i === this.data.rows.length || i === 1 ? 2 : 1);
         }
+    }
+
+    private createRoundedRectPath(x: number, y: number, width: number, height: number, radius: number): string {
+        return `
+            M ${x + radius} ${y}
+            h ${width - 2 * radius}
+            a ${radius} ${radius} 0 0 1 ${radius} ${radius}
+            v ${height - 2 * radius}
+            a ${radius} ${radius} 0 0 1 ${-radius} ${radius}
+            h ${-width + 2 * radius}
+            a ${radius} ${radius} 0 0 1 ${-radius} ${-radius}
+            v ${-height + 2 * radius}
+            a ${radius} ${radius} 0 0 1 ${radius} ${-radius}
+            z
+        `;
     }
 
     private drawTableContent(layout: any): void {
         const headers = ['Season', ...this.data.rows[0].dataPoints.map(dp => dp.label)];
 
-        this.drawRow(headers, 0, layout.columnWidths, true);
+        // Draw headers
+        this.drawRow(headers, 0, layout.columnWidths, true, this.TABLE_PADDING);
 
+        // Draw data rows
         this.data.rows.forEach((row, index) => {
             const rowData = [row.season, ...row.dataPoints.map(dp => dp.value.toString())];
-            this.drawRow(rowData, index + 1, layout.columnWidths, false, row.season.toLowerCase() === 'career');
+            this.drawRow(rowData, index + 1, layout.columnWidths, false, this.TABLE_PADDING, row.season.toLowerCase() === 'career');
         });
+
+        // Adjust grid lines
+        this.drawGridLines(layout, this.TABLE_PADDING);
     }
 
-    private drawRow(rowData: string[], rowIndex: number, columnWidths: number[], isHeader: boolean, isCareer: boolean = false): void {
+    private drawRow(rowData: string[], rowIndex: number, columnWidths: number[], isHeader: boolean, extraTopSpace: number, isCareer: boolean = false): void {
         let xPosition = 0;
         rowData.forEach((cellValue, columnIndex) => {
-            const yPosition = (rowIndex + 0.5) * this.rowHeight;
-            if (!isCareer || (isCareer && columnIndex !== 1 && columnIndex !== 2)) {
-                this.drawCell(cellValue, xPosition, columnWidths[columnIndex], yPosition, isHeader, isCareer);
-            }
+            const yPosition = (rowIndex + 0.5) * this.ROW_HEIGHT + extraTopSpace;
+            this.drawCell(cellValue, xPosition, columnWidths[columnIndex], yPosition, isHeader, isCareer);
             xPosition += columnWidths[columnIndex];
         });
     }
@@ -259,138 +339,70 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('y', y)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'middle')
-            .attr('class', 'bb-text-courier-prime')
-            .attr('font-size', isHeader || isCareer ? `${this.headerFontSize}px` : `${this.fontSize}px`)
-            .attr('fill', 'black')
+            .attr('class', `bb-text-courier-prime ${isHeader || isCareer ? 'bb-text-bold' : ''}`)
+            .attr('font-size', isHeader || isCareer ? `${this.HEADER_FONT_SIZE}px` : `${this.FONT_SIZE}px`)
+            .attr('fill', this.CREAM_COLOR)
+            .style('fill', this.CREAM_COLOR)
             .text(value);
-
-        if (isHeader || isCareer) {
-            text.classed('bb-text-bold', true);
-        }
     }
 
-    private drawBottomInformation(): void {
-        const bottomY = this.height - this.margin.top - this.margin.bottom + 38;
-        const centerX = this.width / 2 - this.margin.left;
-        const maxWidth = (this.width - this.margin.left - this.margin.right) / 2 - 20;
-
-        if (this.data.information1) {
-            this.wrapText(this.data.information1, centerX / 2, bottomY, maxWidth, 'middle');
-        }
-
-        if (this.data.information2) {
-            this.wrapText(this.data.information2, centerX * 1.5, bottomY, maxWidth, 'middle');
-        }
-    }
-
-    private wrapText(text: string, x: number, y: number, maxWidth: number, anchor: string): void {
-        const words = text.split(/\s+/).reverse();
+    private wrapText(text: string, x: number, y: number, maxWidth: number, color: string, anchor: string): void {
+        const words = text.split(/\s+/);
         let line: string[] = [];
         let lineNumber = 0;
         const lineHeight = 1.1;
-        const dy = 0;
-        let tspan = this.svg.append("text")
+
+        const textElement = this.svg.append("text")
             .attr("x", x)
             .attr("y", y)
             .attr("text-anchor", anchor)
-            .attr("class", "bb-text-courier-prime")
+            .attr("class", "bb-text-courier-prime bb-text-bold")
             .attr("font-size", "14px")
-            .attr("fill", "black")
-            .attr("dominant-baseline", "middle")
-            .append("tspan")
+            .attr("fill", color)
+            .attr("dominant-baseline", "middle");
+
+        let tspan = textElement.append("tspan")
             .attr("x", x)
-            .attr("dy", dy + "em");
+            .attr("dy", "0em");
 
-
-        let word: string | undefined;
-        while (word = words.pop()) {
+        for (let word of words) {
             line.push(word);
             tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > maxWidth) {
+            if (tspan.node().getComputedTextLength() > maxWidth && line.length > 1) {
                 line.pop();
                 tspan.text(line.join(" "));
                 line = [word];
-                tspan = this.svg.append("text")
+                tspan = textElement.append("tspan")
                     .attr("x", x)
-                    .attr("y", y)
-                    .attr("text-anchor", anchor)
-                    .attr("class", "bb-text-courier-prime")
-                    .attr("font-size", "14px")
-                    .attr("fill", "black")
-                    .attr("dominant-baseline", "middle")
-                    .append("tspan")
-                    .attr("x", x)
-                    .attr("dy", ++lineNumber * lineHeight + dy + "em")
+                    .attr("dy", `${lineHeight}em`)
                     .text(word);
-
+                lineNumber++;
             }
         }
-    }
 
-    private loadFonts(): void {
-        const fontFiles = [
-            'courier-prime-regular.woff2',
-            'courier-prime-bold.woff2',
-            'eb-garamond-regular.woff2',
-            'eb-garamond-bold.woff2',
-            'merriweather-regular.woff2',
-            'merriweather-bold.woff2'
-        ];
-
-        this.fontService.getFonts(fontFiles).subscribe(fonts => {
-            this.fonts = fonts;
-        });
+        // Center the text block vertically
+        const totalHeight = (lineNumber + 1) * lineHeight;
+        textElement.attr("transform", `translate(0, ${-totalHeight / 2}em)`);
     }
 
     saveSVG(): void {
         const svgElement = this.elementRef.nativeElement.querySelector('svg');
+        if (!svgElement) {
+            console.error('SVG element not found');
+            return;
+        }
 
-        // Add a style element to the SVG
-        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-        styleElement.textContent = `
-            @font-face {
-                font-family: 'Courier Prime';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-regular.woff2']}) format('woff2');
-                font-weight: normal;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Courier Prime';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-bold.woff2']}) format('woff2');
-                font-weight: bold;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'EB Garamond';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['eb-garamond-regular.woff2']}) format('woff2');
-                font-weight: normal;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'EB Garamond';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['eb-garamond-bold.woff2']}) format('woff2');
-                font-weight: bold;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Merriweather';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['merriweather-regular.woff2']}) format('woff2');
-                font-weight: normal;
-                font-style: normal;
-            }
-            @font-face {
-                font-family: 'Merriweather';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['merriweather-bold.woff2']}) format('woff2');
-                font-weight: bold;
-                font-style: normal;
-            }
-            .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
-            .bb-text-eb-garamond { font-family: 'EB Garamond', serif; }
-            .bb-text-merriweather { font-family: 'Merriweather', serif; }
-            .bb-text-bold { font-weight: bold; }
-        `;
-        svgElement.insertBefore(styleElement, svgElement.firstChild);
+        // Clone the SVG to avoid modifying the original
+        const clonedSvg = svgElement.cloneNode(true) as SVGElement;
 
-        this.BRADYBALLUtil.saveCombinedSVG([svgElement], 'stat_line.svg', this.fonts);
+        // Serialize the SVG
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(clonedSvg);
+
+        // Embed fonts
+        svgString = this.fontService.embedFontsInSVG(svgString, this.fonts);
+
+        // Save the SVG
+        this.BRADYBALLUtil.saveSVGToFile(svgString, 'stat_line.svg');
     }
 }
