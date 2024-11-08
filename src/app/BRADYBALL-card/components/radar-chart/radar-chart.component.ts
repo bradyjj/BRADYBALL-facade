@@ -20,13 +20,18 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     private radius = Math.min(this.width, this.height) / 2 - this.margin;
 
     chartReady: boolean = false;
+    fontsLoaded: boolean = false;
 
     private featureScales: { [key: string]: d3.ScaleLinear<number, number>; } = {};
     private angleStep: number = 0;
 
     private fonts: { [key: string]: string } = {};
 
-    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) { }
+    private readonly CREAM_COLOR;
+
+    constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) {
+        this.CREAM_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-color');
+    }
 
     ngOnInit(): void {
         this.loadFonts();
@@ -59,9 +64,23 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             'league-spartan-bold.woff2'
         ];
 
-        this.fontService.loadFonts(fontFiles).subscribe(fonts => {
-            this.fonts = fonts;
-        });
+        this.fontService.loadFonts(fontFiles).subscribe(
+            fonts => {
+                this.fonts = fonts;
+                this.fontsLoaded = true;
+                if (this.data) {
+                    this.createSvg();
+                    this.drawChart();
+                }
+            },
+            error => {
+                console.error('Error loading fonts:', error);
+                if (this.data) {
+                    this.createSvg();
+                    this.drawChart();
+                }
+            }
+        );
     }
 
     private createSvg(): void {
@@ -77,29 +96,131 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
     saveSVG(): void {
         const svgElement = this.elementRef.nativeElement.querySelector('svg');
+        if (!svgElement) {
+            console.error('SVG element not found');
+            return;
+        }
 
-        // Add a style element to the SVG
-        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-        styleElement.textContent = `
-            @font-face {
-                font-family: 'Pinegrove';
-                src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['pinegrove.woff2']}) format('woff2');
-                font-weight: 400 700;
-                font-style: normal;
-            }
-            .bb-text-pinegrove { font-family: 'Pinegrove', sans-serif; }
-            .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
-            .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; }
-            .bb-text-bold { font-weight: bold; }
+        // Clone the SVG to avoid modifying the original
+        const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+
+        // Add font definitions and styles
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = this.getFontDefinitions();
+        clonedSvg.insertBefore(defs, clonedSvg.firstChild);
+
+        // Apply inline styles to text elements
+        clonedSvg.querySelectorAll('text').forEach((textElement: SVGTextElement) => {
+            this.applyInlineStyles(textElement);
+        });
+
+        // Serialize the SVG
+        const serializer = new XMLSerializer();
+        let svgString = serializer.serializeToString(clonedSvg);
+
+        // Create a Blob with the SVG content
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+
+        // Create a download link and trigger the download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'radar_chart.svg';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    private getFontDefinitions(): string {
+        return `
+            <style>
+                @font-face {
+                    font-family: 'Pinegrove';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['pinegrove.woff2']}) format('woff2');
+                    font-weight: 400 700;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: 'Courier Prime';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-regular.woff2']}) format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: 'Courier Prime';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['courier-prime-bold.woff2']}) format('woff2');
+                    font-weight: bold;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: 'League Spartan';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['league-spartan-regular.woff2']}) format('woff2');
+                    font-weight: normal;
+                    font-style: normal;
+                }
+                @font-face {
+                    font-family: 'League Spartan';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['league-spartan-bold.woff2']}) format('woff2');
+                    font-weight: bold;
+                    font-style: normal;
+                }
+                :root {
+                    --bb-black-color: #000000;
+                    --bb-white-color: #ffffff;
+                    --bb-brown-gold-color: #b07c29;
+                    --bb-red-color: #972828;
+                    --bb-red-card-color: #ad563b;
+                    --bb-dark-red-burgundy-color: #681e1e;
+                    --bb-orange-color: #ff5b00;
+                    --bb-blue-color: #405e9b;
+                    --bb-blue-card-color: #3a85c7;
+                    --bb-cream-off-white-color: #f8f5e3;
+                    --bb-cream-color: #ded2a2;
+                    --bb-green-color: #59c135;
+                }
+                .bb-text-bold { font-weight: bold; }
+                .bb-text-semibold { font-weight: 600; }
+                .bb-text-medium { font-weight: 500; }
+                .bb-text-extra-bold { font-weight: 800; }
+                .bb-text-black { font-weight: 900; }
+                .bb-text-pinegrove { font-family: 'Pinegrove', sans-serif; color: var(--bb-black-color); }
+                .bb-text-courier-prime { font-family: 'Courier Prime', monospace; color: var(--bb-black-color); }
+                .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; color: var(--bb-black-color); }
+            </style>
         `;
-        svgElement.insertBefore(styleElement, svgElement.firstChild);
+    }
 
-        this.BRADYBALLUtil.saveCombinedSVG([svgElement], 'radar_chart.svg', this.fonts);
+    private applyInlineStyles(textElement: SVGTextElement): void {
+        const classList = Array.from(textElement.classList);
+        let fontFamily = 'sans-serif';
+        let fontWeight = 'normal';
+
+        if (classList.includes('bb-text-pinegrove')) {
+            fontFamily = 'Pinegrove, sans-serif';
+        } else if (classList.includes('bb-text-courier-prime')) {
+            fontFamily = 'Courier Prime, monospace';
+        } else if (classList.includes('bb-text-league-spartan')) {
+            fontFamily = 'League Spartan, sans-serif';
+        }
+
+        if (classList.includes('bb-text-bold')) {
+            fontWeight = 'bold';
+        } else if (classList.includes('bb-text-semibold')) {
+            fontWeight = '600';
+        } else if (classList.includes('bb-text-medium')) {
+            fontWeight = '500';
+        } else if (classList.includes('bb-text-extra-bold')) {
+            fontWeight = '800';
+        } else if (classList.includes('bb-text-black')) {
+            fontWeight = '900';
+        }
+
+        textElement.style.fontFamily = fontFamily;
+        textElement.style.fontWeight = fontWeight;
+        textElement.style.color = '#000000'; // var(--bb-black-color)
     }
 
     private drawChart(): void {
         if (!this.data || !this.data.dataPoints || this.data.dataPoints.length === 0) {
-            console.error('No data available for radar chart');
             this.chartReady = false;
             return;
         }
@@ -111,9 +232,9 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.setBackground();
         this.recreateGroups();
         this.createBlurFilters();
-        this.drawCircularGrid();
-        this.createBaseGradient();
+        this.createGradient();
         this.drawDataArea(this.data.dataPoints);
+        this.drawCircularGrid();
         this.drawAxesAndLabels(this.data.dataPoints);
 
         this.chartReady = true;
@@ -186,15 +307,15 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         const circles = [0.2, 0.4, 0.6, 0.8, 1];
         circles.forEach((r, i) => {
             if (i === circles.length - 1) {
-                this.drawSquiggle(r);
+                this.drawSquiggle();
             } else {
                 this.drawCircle(r);
             }
         });
     }
 
-    private drawSquiggle(r: number): void {
-        const squiggleRadius = this.radius * 1.05;
+    private drawSquiggle(): void {
+        const squiggleRadius = this.radius * 1.06 + 5;
         const squigglePoints = 200;
         const squiggleData = Array.from({ length: squigglePoints }, (_, i) => {
             const angle = (i / squigglePoints) * Math.PI * 2;
@@ -209,7 +330,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.chartGroup.append('path')
             .attr('d', lineFunction(squiggleData as [number, number][]))
             .attr('stroke', 'black')
-            .attr('stroke-width', 3)
+            .attr('stroke-width', 4)
             .attr('fill', 'none');
     }
 
@@ -219,7 +340,9 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('cy', 0)
             .attr('r', this.radius * r)
             .attr('stroke', 'black')
-            .attr('fill', 'none');
+            .attr('stroke-width', 1.5)
+            .attr('fill', 'none')
+            .style('pointer-events', 'none');
     }
 
     private drawAxesAndLabels(dataPoints: RadarChartDataPoint[]): void {
@@ -248,57 +371,59 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         this.chartGroup.append('path')
             .attr('d', lineFunction(squiggleData as [number, number][]))
             .attr('stroke', 'black')
-            .attr('stroke-width', () => Math.random() * .75 + 0.5) // Varying thickness for hand-drawn effect
+            .attr('stroke-width', () => Math.random() * .8 + 0.5) // Varying thickness for hand-drawn effect
             .attr('fill', 'none');
     }
 
     private drawScaleLabels(point: RadarChartDataPoint, angle: number, featureScales: { [key: string]: d3.ScaleLinear<number, number> }): void {
         const circles = [0.2, 0.4, 0.6, 0.8, 1];
         circles.forEach((r, circleIndex) => {
-            // Randomly decide whether to draw this label if its not the first or last
-            if (circleIndex !== circles.length - 1 && circleIndex !== 0) {
-                const chanceToIncludeLabel = .8;
-                if (Math.random() > chanceToIncludeLabel) {
-                    return;
-                }
-            }
-
             const [x, y] = d3.pointRadial(angle, this.radius * r);
             let randomSize = this.getRandomSize(circleIndex);
             let baseOpacity = 0.8;
             const randomOpacity = Math.random() * 0.5 + baseOpacity;
 
+            // Define stroke size range
+            const minStrokeWidth = 0.5;
+            const maxStrokeWidth = 2;
+            const randomStrokeWidth = Math.random() * (maxStrokeWidth - minStrokeWidth) + minStrokeWidth;
+
+            // Add a small vertical offset
+            const verticalOffset = randomSize * 0.3; // Adjust this value as needed
+
             const text = this.chartGroup.append('text')
                 .attr('x', x)
-                .attr('y', y)
+                .attr('y', y + verticalOffset) // Add the vertical offset here
                 .text((point.scale * r).toFixed(1))
                 .attr('font-size', `${randomSize}px`)
                 .attr('class', 'bb-text-pinegrove')
                 .attr('fill', 'black')
+                .attr('stroke', 'black')
+                .attr('stroke-width', randomStrokeWidth)
                 .attr('text-anchor', 'middle')
-                .attr('dominant-baseline', 'middle')
-                .style('opacity', randomOpacity)
-                .style('filter', 'url(#number-blur-filter)');
+                .style('opacity', randomOpacity);
 
-            // Randomly apply bold weight to some labels
-            if (Math.random() > 0.5) {
-                text.classed('bb-text-bold', true);
-            }
+            // Fine-tune vertical alignment if needed
+            text.each(function (this: SVGTextElement) {
+                const bbox = this.getBBox();
+                const dy = (bbox.height / 2) * 0.20; // Adjust this multiplier as needed
+                d3.select(this).attr('dy', dy);
+            });
         });
     }
 
     private getRandomSize(circleIndex: number, numberOfCircles: number = 5): number {
         const outerCircleIndex = numberOfCircles - 1;
-        const outerCircleSize = 18;
+        const outerCircleSize = 30;
 
-        const firstCircleLargerSizeProbability = 0.085;
+        const firstCircleLargerSizeProbability = 0.1;
         const regularLargerSizeProbability = 0.2;
 
-        const smallerSizeMin = 15.5;
-        const smallerSizeMax = 24;
+        const smallerSizeMin = 22;
+        const smallerSizeMax = 27;
 
-        const largeSizes = [28, 30, 32];
-        const firstCircleLargeSizes = [28, 29];
+        const largeSizes = [30, 31, 32, 33];
+        const firstCircleLargeSizes = [28, 29, 30];
 
         if (circleIndex === outerCircleIndex) {
             return outerCircleSize;
@@ -322,51 +447,64 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     private drawLabel(point: RadarChartDataPoint, angle: number): void {
-        const labelRadius = this.radius + 40;
+        const labelRadius = this.radius + 60;
         const labelAngle = angle - Math.PI / 2;
         const labelX = labelRadius * Math.cos(labelAngle);
         const labelY = labelRadius * Math.sin(labelAngle);
 
-        this.chartGroup.append('text')
-            .attr('x', labelX)
-            .attr('y', labelY)
+        const fontSize = 24;
+
+        // Draw the chalk box first
+        this.drawChalkBox(labelX, labelY, point.label, fontSize, angle);
+
+        // Create a group for the text and apply rotation
+        const textGroup = this.chartGroup.append('g')
+            .attr('transform', `translate(${labelX}, ${labelY}) rotate(${(angle * 180 / Math.PI)})`);
+
+        // Now draw the text
+        const textElement = textGroup.append('text')
+            .attr('x', 0)
+            .attr('y', 0)
             .text(point.label)
+            .attr('font-size', `${fontSize}px`)
+            .attr('class', 'bb-text-courier-prime bb-text-bold')
+            .attr('font-weight', 'bold')
+            .attr('fill', this.CREAM_COLOR)
             .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'central')
-            .attr('font-size', '20px')
-            .attr('class', 'bb-text-courier-prime bb-text-extra-bold')
-            .classed('bb-text-extra-bold', true)
-            .attr('fill', 'black')
-            .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${labelX}, ${labelY})`)
-            .style('filter', 'url(#label-blur-filter)');
+            .attr('text-rendering', 'geometricPrecision');
+
+        const bbox = textElement.node().getBBox();
+        textElement.attr('y', -bbox.height + 45 / 2 + fontSize / 2);
     }
 
-    private createBaseGradient(): void {
+    private createGradient(): void {
         const gradient = this.svg.append('defs')
             .append('radialGradient')
             .attr('id', 'vintageGradient')
             .attr('cx', '50%')
             .attr('cy', '50%')
-            .attr('r', '50%');
+            .attr('fx', '50%')
+            .attr('fy', '50%')
+            .attr('r', '50%')
+            .attr('spreadMethod', 'pad');
 
         const colors = [
-            { offset: '0%', color: '#FFFFFF' },     // Bright white center
-            { offset: '10%', color: '#FFF5E6' },    // Warm off-white
-            { offset: '20%', color: '#FFD700' },    // Yellow
-            { offset: '30%', color: '#FF4500' },    // Orange-red
-            { offset: '48%', color: '#8B0000' },    // Dark red
-            { offset: '50%', color: '#660000' },    // Very dark red
-            { offset: '52%', color: '#000000' },    // Black circle
-            { offset: '54%', color: '#660000' },    // Very dark red
-            { offset: '56%', color: '#8B0000' },    // Dark red
-            { offset: '65%', color: '#FF4500' },    // Orange-red
-            { offset: '73%', color: '#FFD700' },    // Back to yellow (vibrant but worn)
-            { offset: '79%', color: '#FF4500' },    // Orange-red
-            { offset: '85%', color: '#8B0000' },    // Dark red again
-            { offset: '90%', color: '#000000' },    // Thin black ring
-            { offset: '92%', color: '#4AC6FF' },    // Vivid sky blue (from image)
-            { offset: '96%', color: '#1E5AA8' },    // Medium blue (from image)
-            { offset: '100%', color: '#0080FF' },   // Bright blue (from image)
+            { offset: '0%', color: '#FFFFFF' },     // Pure white
+            { offset: '10%', color: '#FFF5E6' },    // Very light peachy white
+            { offset: '20%', color: '#FFD700' },    // Golden yellow
+            { offset: '30%', color: '#FF4500' },    // Vermillion/Orange-red
+            { offset: '49%', color: '#8B0000' },    // Dark crimson red
+            { offset: '50%', color: '#000000' },    // Pure black
+            { offset: '55%', color: '#8B0000' },    // Dark crimson red
+            { offset: '62%', color: '#FF4500' },    // Vermillion/Orange-red
+            { offset: '69%', color: '#FFD700' },    // Golden yellow
+            { offset: '70%', color: '#000000' },    // Pure black
+            { offset: '71%', color: '#000080' },    // Navy blue
+            { offset: '73%', color: '#0F6DD4' },    // Medium cerulean blue
+            { offset: '80%', color: '#0080FF' },    // Bright azure blue
+            { offset: '90%', color: '#4AC6FF' },    // Light sky blue
+            { offset: '95%', color: '#7AD7FF' },    // Pale sky blue
+            { offset: '100%', color: '#4AC6FF' },   // Light sky blue
         ];
 
         colors.forEach(stop => {
@@ -408,43 +546,6 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('opacity', '0.3');
     }
 
-    private createRandomGradient(type: 'defense' | 'attack' | 'mixed' = 'mixed'): void {
-        const gradient = this.svg.append('defs')
-            .append('radialGradient')
-            .attr('id', 'vintageGradient')
-            .attr('cx', '50%')
-            .attr('cy', '50%')
-            .attr('r', '50%');
-
-        let baseColors;
-        switch (type) {
-            case 'defense':
-                baseColors = ['#405e9b', '#681e1e', '#8B0000', '#972828'];
-                break;
-            case 'attack':
-                baseColors = ['#ff5b00', '#FF8C00', '#bf5700', '#59c135'];
-                break;
-            default:
-                baseColors = ['#f8f5e3', '#bf5700', '#972828', '#681e1e', '#8B0000', '#FF8C00', '#8B4513', '#405e9b'];
-        }
-
-        const colors = baseColors.map(color => ({
-            offset: Math.random() * 100 + '%',
-            color: color,
-            opacity: Math.random() * 0.5 + 0.5
-        })).sort((a, b) => parseFloat(a.offset) - parseFloat(b.offset));
-
-        colors.forEach(stop => {
-            gradient.append('stop')
-                .attr('offset', stop.offset)
-                .attr('stop-color', stop.color)
-                .attr('stop-opacity', .8);
-        });
-
-        // Add noise
-        this.addNoiseFilter();
-    }
-
     private addNoiseFilter(): void {
         const filter = this.svg.append('defs')
             .append('filter')
@@ -473,12 +574,60 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .outerRadius(d => this.featureScales[d.key](d.value))
             .curve(d3.curveLinearClosed);
 
-        this.chartGroup.append('path')
+        // Create a group for the data area
+        const dataAreaGroup = this.chartGroup.append('g')
+            .attr('class', 'data-area');
+
+        // Create a clip path for the data area
+        const clipPathId = 'dataAreaClip';
+        const clipPath = this.svg.select('defs').append('clipPath')
+            .attr('id', clipPathId);
+
+        clipPath.append('path')
+            .datum(dataPoints)
+            .attr('d', area);
+
+        // Create a full circle background with the gradient
+        dataAreaGroup.append('circle')
+            .attr('r', this.radius)
+            .attr('fill', 'url(#vintageGradient)')
+            .attr('clip-path', `url(#${clipPathId})`);
+
+        // Draw the actual data area outline on top
+        dataAreaGroup.append('path')
             .datum(dataPoints)
             .attr('d', area)
-            .attr('fill', 'url(#vintageGradient)')
+            .attr('fill', 'none')
             .attr('stroke', 'black')
-            .attr('stroke-width', 2);
+            .attr('stroke-width', 3);
+    }
+
+    private drawChalkBox(x: number, y: number, text: string, fontSize: number, angle: number): void {
+        const tempText = this.chartGroup.append('text')
+            .attr('x', x)
+            .attr('y', y)
+            .text(text)
+            .attr('font-size', `${fontSize}px`)
+            .attr('text-anchor', 'middle')
+
+        const bbox = tempText.node().getBBox();
+        tempText.remove();
+
+        const boxWidth = bbox.width + 15 * 2;
+        const boxHeight = bbox.height + 5 * 2;
+
+        const strokeGroup = this.chartGroup.append('g')
+            .attr('transform', `rotate(${(angle * 180 / Math.PI)}, ${x}, ${y})`);
+
+        // Create a simple rectangle with a rough edge effect
+        strokeGroup.append('rect')
+            .attr('x', x - boxWidth / 2)
+            .attr('y', y - boxHeight / 2)
+            .attr('width', boxWidth)
+            .attr('height', boxHeight)
+            .attr('fill', 'black')
+            .attr('stroke', 'none')
+            .attr('shape-rendering', 'geometricPrecision');
     }
 
 }

@@ -106,23 +106,6 @@ export class PlayerSearchComponent implements OnInit {
             title: "RECENT CAREER PERFORMANCE",
             rows: [
                 {
-                    season: "2023-24",
-                    dataPoints: [
-                        { key: "Team", label: "Team", value: "Paris S-G" },
-                        { key: "League", label: "League", value: "FRA-Ligue 1" },
-                        { key: "Age", label: "Age", value: 25 },
-                        { key: "MatchesPlayed", label: "Matches", value: 29 },
-                        { key: "90sPlayed", label: "90s", value: 24 },
-                        { key: "Goals", label: "Goals", value: 27 },
-                        { key: "Assists", label: "Assists", value: 7 },
-                        { key: "GoalsAndAssits", label: "G+A", value: 34 },
-                        { key: "NonPenGoals", label: "nP-Goals", value: 21 },
-                        { key: "NonPenExpectedGoals", label: "npxG", value: 14.5 },
-                        { key: "ExpectedAssists", label: "xA", value: 5.7 },
-                        { key: "GoalsOverExpected", label: "G-xG", value: 6.5 }
-                    ]
-                },
-                {
                     season: "2022-23",
                     dataPoints: [
                         { key: "Team", label: "Team", value: "Paris S-G" },
@@ -137,6 +120,23 @@ export class PlayerSearchComponent implements OnInit {
                         { key: "NonPenExpectedGoals", label: "npxG", value: 22.2 },
                         { key: "ExpectedAssists", label: "xA", value: 7.4 },
                         { key: "GoalsOverExpected", label: "G-xG", value: 3.8 }
+                    ]
+                },
+                {
+                    season: "2023-24",
+                    dataPoints: [
+                        { key: "Team", label: "Team", value: "Paris S-G" },
+                        { key: "League", label: "League", value: "FRA-Ligue 1" },
+                        { key: "Age", label: "Age", value: 25 },
+                        { key: "MatchesPlayed", label: "Matches", value: 29 },
+                        { key: "90sPlayed", label: "90s", value: 24 },
+                        { key: "Goals", label: "Goals", value: 27 },
+                        { key: "Assists", label: "Assists", value: 7 },
+                        { key: "GoalsAndAssits", label: "G+A", value: 34 },
+                        { key: "NonPenGoals", label: "nP-Goals", value: 21 },
+                        { key: "NonPenExpectedGoals", label: "npxG", value: 14.5 },
+                        { key: "ExpectedAssists", label: "xA", value: 5.7 },
+                        { key: "GoalsOverExpected", label: "G-xG", value: 6.5 }
                     ]
                 },
                 {
@@ -174,70 +174,49 @@ export class PlayerSearchComponent implements OnInit {
                 value: 0.5,
                 scale: .5,
                 color: 'var(--bb-red-purple-color)',
-                label: 'Expected Assists'
+                label: 'EXPECTED ASSISTS'
             },
             {
                 key: 'NonPenExpectedGoalsP90',
                 value: 1,
                 scale: 1,
                 color: 'var(--bb-violet-color)',
-                label: 'Non-Pen xG'
+                label: 'NON-PEN xG'
             },
             {
                 key: 'NonPenGoalsP90',
                 value: 1,
                 scale: 1,
                 color: 'var(--bb-green-color)',
-                label: 'Non-Pen Goals'
+                label: 'NON-PEN GOALS'
             },
             {
                 key: 'ShotsOnTargetP90',
                 value: 2.5,
                 scale: 2.5,
                 color: 'var(--bb-turquoise-color)',
-                label: 'Shots on Target'
-            },
-            {
-                key: 'ShotsP90',
-                value: 5,
-                scale: 5,
-                color: 'var(--bb-green-2-color)',
-                label: 'Shots'
+                label: 'SHOTS ON TARGET'
             },
             {
                 key: 'AerialPct',
                 value: 100,
                 scale: 100,
                 color: 'var(--bb-red-purple-color)',
-                label: 'Aerial %'
+                label: 'AERIAL %'
             },
             {
                 key: 'ShotCreatingActionsP90',
                 value: 8,
                 scale: 8,
                 color: 'var(--bb-violet-color)',
-                label: 'Shot Creations'
-            },
-            {
-                key: 'ProgPassesP90',
-                value: 9,
-                scale: 9,
-                color: 'var(--bb-green-color)',
-                label: 'Progressive Passes'
+                label: 'SHOT CREATIONS'
             },
             {
                 key: 'BallWonP90',
                 value: 5,
                 scale: 5,
                 color: 'var(--bb-turquoise-color)',
-                label: 'Possession Won'
-            },
-            {
-                key: 'TakeOnPct',
-                value: 100,
-                scale: 100,
-                color: 'var(--bb-green-2-color)',
-                label: 'Take-On %'
+                label: 'POSSESSION WON'
             }
         ];
 

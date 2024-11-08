@@ -6,12 +6,15 @@
     /* Main colors */
     --bb-brown-gold-color: #b07c29;
     --bb-red-color: #972828;
+    --bb-red-card-color: #ad563b;
     --bb-dark-red-burgundy-color: #681e1e;
     --bb-orange-color: #ff5b00;
     
     /* Accent Colors */
     --bb-blue-color: #405e9b;
+    --bb-blue-card-color: #3a85c7;
     --bb-cream-off-white-color: #f8f5e3;
+    --bb-cream-color: #ded2a2;
     --bb-green-color: #59c135;
     
     --font-pinegrove: 'Pinegrove', sans-serif;
@@ -23,7 +26,7 @@
 }
 
 .bb-text-bold {
-    font-weight: bold;
+    font-weight: 700;
 }
 
 .bb-text-semibold {
@@ -73,11 +76,11 @@
 }
 
 html, body, app-root {
-    background-color: var(--bb-white-color);
+    background-color: var(--bb-cream-off-white-color);
     margin: 0;
     padding: 0;
 }
 
 .container, .row {
-    background-color: var(--bb-white-color);
+    background-color: var(--bb-cream-off-white-color);
 }

@@ -16,15 +16,22 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     private readonly MARGIN = { top: 100, right: 4, bottom: 25, left: 4 };
     private readonly CELL_PADDING = 15;
     private readonly ROW_HEIGHT = 40;
-    private readonly FONT_SIZE = 17;
-    private readonly HEADER_FONT_SIZE = 18;
+    private readonly FONT_SIZE = 21;
+    private readonly HEADER_FONT_SIZE = 22;
     private readonly BORDER_RADIUS = 20;
-    private readonly BORDER_WIDTH = 18;
-    private readonly TITLE_BACKGROUND_HEIGHT = 90;
+    private readonly BORDER_WIDTH = 8;
+    private readonly TITLE_BACKGROUND_HEIGHT = 110;
     private readonly TITLE_LEFT_MARGIN = 20;
     private readonly CREAM_COLOR;
-    private readonly BACKGROUND_COLOR;
-    private readonly TABLE_PADDING = 20;
+    private readonly RED_COLOR;
+    private readonly BLACK_COLOR;
+    private readonly TABLE_PADDING = 10;
+
+    private titleTextColor: string = ``;
+    private chartBackgroundColor: string = ``;
+    private chartTextColor: string = ``;
+    private borderColor: string = ``;
+
 
     private width: number = 0;
     private height: number = 0;
@@ -35,8 +42,14 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     private fonts: { [key: string]: string } = {};
 
     constructor(public elementRef: ElementRef, private fontService: FontService, private BRADYBALLUtil: BRADYBALLCardUtil) {
-        this.CREAM_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-off-white-color');
-        this.BACKGROUND_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-red-color');
+        this.CREAM_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-color');
+        this.RED_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-red-card-color');
+        this.BLACK_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-black-color');
+
+        this.titleTextColor = this.BLACK_COLOR;
+        this.chartBackgroundColor = this.RED_COLOR;
+        this.chartTextColor = this.CREAM_COLOR;
+        this.borderColor = this.BLACK_COLOR;
     }
 
     ngOnInit(): void {
@@ -50,7 +63,9 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             'eb-garamond-regular.woff2',
             'eb-garamond-bold.woff2',
             'merriweather-regular.woff2',
-            'merriweather-bold.woff2'
+            'merriweather-bold.woff2',
+            'league-spartan-regular.woff2',
+            'league-spartan-bold.woff2'
         ];
 
         this.fontService.loadFonts(fontFiles).subscribe(
@@ -101,23 +116,95 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             .append('g')
             .attr('transform', `translate(${this.MARGIN.left},${this.MARGIN.top})`);
 
-        this.createClipPath();
-        this.drawBackground(layout);
-        this.drawBorder();
+        this.drawBackgroundAndBorder();
         this.drawTitle();
         this.drawTableContent(layout);
 
         this.tableReady = true;
     }
 
+    private drawBackgroundAndBorder(): void {
+        const totalWidth = this.width;
+        const totalHeight = this.height;
+        const borderRadius = this.BORDER_RADIUS;
+        const borderWidth = this.BORDER_WIDTH;
+        const x = -this.MARGIN.left;
+        const y = -this.MARGIN.top;
+        const creamHeight = this.TITLE_BACKGROUND_HEIGHT;
+
+        // 1. Draw black background (full rectangle)
+        this.svg.append('rect')
+            .attr('x', x)
+            .attr('y', y)
+            .attr('width', totalWidth)
+            .attr('height', totalHeight)
+            .attr('fill', this.borderColor);
+
+        // 2. Draw cream background (full area with rounded corners)
+        const creamPath = `
+            M ${x + borderWidth / 2},${y + borderRadius}
+            Q ${x + borderWidth / 2},${y + borderWidth / 2} ${x + borderRadius},${y + borderWidth / 2}
+            H ${x + totalWidth - borderRadius}
+            Q ${x + totalWidth - borderWidth / 2},${y + borderWidth / 2} ${x + totalWidth - borderWidth / 2},${y + borderRadius}
+            V ${y + totalHeight - borderRadius}
+            Q ${x + totalWidth - borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + totalWidth - borderRadius},${y + totalHeight - borderWidth / 2}
+            H ${x + borderRadius}
+            Q ${x + borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + borderWidth / 2},${y + totalHeight - borderRadius}
+            Z
+        `;
+        this.svg.append('path')
+            .attr('d', creamPath)
+            .attr('fill', this.CREAM_COLOR);
+
+        // 3. Draw red background (bottom section with curved top-left corner and straight right edge)
+        const redPath = `
+            M ${x + borderWidth / 2},${y + creamHeight + borderRadius}
+            Q ${x + borderWidth / 2},${y + creamHeight} ${x + borderWidth / 2 + borderRadius},${y + creamHeight}
+            H ${x + totalWidth - borderWidth / 2}
+            V ${y + totalHeight - borderRadius}
+            Q ${x + totalWidth - borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + totalWidth - borderRadius},${y + totalHeight - borderWidth / 2}
+            H ${x + borderRadius}
+            Q ${x + borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + borderWidth / 2},${y + totalHeight - borderRadius}
+            Z
+        `;
+        this.svg.append('path')
+            .attr('d', redPath)
+            .attr('fill', this.RED_COLOR);
+
+        // 4. Add stroke to the red background
+        this.svg.append('path')
+            .attr('d', redPath)
+            .attr('fill', 'none')
+            .attr('stroke', this.borderColor)
+            .attr('stroke-width', 3);
+
+        // 5. Draw outer border (transparent fill, only stroke)
+        const borderPath = `
+            M ${x + borderWidth / 2},${y + borderRadius}
+            Q ${x + borderWidth / 2},${y + borderWidth / 2} ${x + borderRadius},${y + borderWidth / 2}
+            H ${x + totalWidth - borderRadius}
+            Q ${x + totalWidth - borderWidth / 2},${y + borderWidth / 2} ${x + totalWidth - borderWidth / 2},${y + borderRadius}
+            V ${y + totalHeight - borderRadius}
+            Q ${x + totalWidth - borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + totalWidth - borderRadius},${y + totalHeight - borderWidth / 2}
+            H ${x + borderRadius}
+            Q ${x + borderWidth / 2},${y + totalHeight - borderWidth / 2} ${x + borderWidth / 2},${y + totalHeight - borderRadius}
+            Z
+        `;
+        this.svg.append('path')
+            .attr('d', borderPath)
+            .attr('fill', 'none')
+            .attr('stroke', this.borderColor)
+            .attr('stroke-width', borderWidth);
+    }
+
     private calculateLayout() {
         const headers = ['Season', ...this.data.rows[0].dataPoints.map(dp => dp.label)];
         const columnWidths = headers.map((header, index) => {
-            let maxWidth = this.getTextWidth(header, `${this.HEADER_FONT_SIZE}px Courier Prime`);
+            let maxWidth = this.getTextWidth(header, `${this.HEADER_FONT_SIZE}px League Spartan`);
 
             this.data.rows.forEach(row => {
                 let cellText = index === 0 ? row.season : row.dataPoints[index - 1].value.toString();
-                const cellWidth = this.getTextWidth(cellText, `${this.FONT_SIZE}px Courier Prime`);
+                const cellWidth = this.getTextWidth(cellText, `${this.FONT_SIZE}px League Spartan`);
                 maxWidth = Math.max(maxWidth, cellWidth);
             });
 
@@ -138,62 +225,46 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         return 0;
     }
 
-    private createClipPath(): void {
-        const clipPath = this.svg.append("defs")
-            .append("clipPath")
-            .attr("id", "rounded-corners");
-
-        const path = this.createRoundedRectPath(
-            -this.MARGIN.left,
-            -this.MARGIN.top,
-            this.width,
-            this.height,
-            this.BORDER_RADIUS
-        );
-
-        clipPath.append("path")
-            .attr("d", path);
-    }
-
     private drawBackground(layout: any): void {
         const totalWidth = this.width;
         const totalHeight = this.height;
+        const curveRadius = this.BORDER_RADIUS * 2;
 
         // Create a group for the background elements
-        const backgroundGroup = this.svg.append('g')
-            .attr('clip-path', 'url(#rounded-corners)');
+        const backgroundGroup = this.svg.append('g');
 
-        // Full background
+        // Full cream background
         backgroundGroup.append('rect')
             .attr('x', -this.MARGIN.left)
             .attr('y', -this.MARGIN.top)
             .attr('width', totalWidth)
             .attr('height', totalHeight)
-            .attr('fill', this.BACKGROUND_COLOR);
-    }
+            .attr('fill', this.CREAM_COLOR);
 
-    private drawBorder(): void {
-        // Draw the border path
-        const path = `
-            M ${-this.MARGIN.left + this.BORDER_RADIUS},${-this.MARGIN.top}
-            h ${this.width - 2 * this.BORDER_RADIUS}
-            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${this.BORDER_RADIUS},${this.BORDER_RADIUS}
-            v ${this.height - 2 * this.BORDER_RADIUS}
+        // Path for the red background and stroke
+        const redBackgroundPath = `
+            M ${-this.MARGIN.left},${-this.MARGIN.top + this.TITLE_BACKGROUND_HEIGHT + curveRadius}
+            q 0,${-curveRadius} ${curveRadius},${-curveRadius}
+            h ${totalWidth - curveRadius - this.MARGIN.left}
+            v ${totalHeight - this.TITLE_BACKGROUND_HEIGHT - this.BORDER_RADIUS}
             a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${-this.BORDER_RADIUS},${this.BORDER_RADIUS}
-            h ${-(this.width - 2 * this.BORDER_RADIUS)}
+            h ${-(totalWidth - 2 * this.BORDER_RADIUS)}
             a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${-this.BORDER_RADIUS},${-this.BORDER_RADIUS}
-            v ${-(this.height - 2 * this.BORDER_RADIUS)}
-            a ${this.BORDER_RADIUS},${this.BORDER_RADIUS} 0 0 1 ${this.BORDER_RADIUS},${-this.BORDER_RADIUS}
+            v ${-(totalHeight - this.TITLE_BACKGROUND_HEIGHT - curveRadius)}
             z
         `;
 
-        this.svg.append('path')
-            .attr('d', path)
+        // Red background for the chart area (excluding title area)
+        backgroundGroup.append('path')
+            .attr('d', redBackgroundPath)
+            .attr('fill', this.chartBackgroundColor);
+
+        // Stroke around the red section only
+        backgroundGroup.append('path')
+            .attr('d', redBackgroundPath)
             .attr('fill', 'none')
-            .attr('stroke', this.CREAM_COLOR)
-            .attr('stroke-width', this.BORDER_WIDTH)
-            .attr('stroke-linecap', 'round')
-            .attr('stroke-linejoin', 'round');
+            .attr('stroke', this.borderColor)
+            .attr('stroke-width', 3);
     }
 
     private drawTitle(): void {
@@ -202,30 +273,26 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             const firstLetter = titleText.charAt(0);
             const restOfTitle = titleText.slice(1);
 
-            const fontSize = 52;
+            const fontSize = 58;
             const smallerFontSize = fontSize * 0.45;
-            const titleYOffset = -this.MARGIN.top / 2 + 25;
+            const titleYOffset = -this.MARGIN.top + this.BORDER_WIDTH + 70; // Adjusted Y position
             const letterSpacing = 1;
-            const radius = this.BORDER_RADIUS - this.BORDER_WIDTH / 2;
-            const bottomLeftRadius = radius * 1.8;
 
-            const backgroundPath = `
-                    M ${-this.MARGIN.left + this.BORDER_WIDTH / 2},${-this.MARGIN.top + this.BORDER_WIDTH / 2 + radius}
-                    q 0,${-radius} ${radius},${-radius}
-                    h ${this.width - 2 * radius - this.BORDER_WIDTH}
-                    q ${radius},0 ${radius},${radius}
-                    v ${this.TITLE_BACKGROUND_HEIGHT - radius + this.BORDER_WIDTH / 2}
-                    h ${-(this.width - bottomLeftRadius - this.BORDER_WIDTH)}
-                    q ${-bottomLeftRadius},0 ${-bottomLeftRadius},${bottomLeftRadius}
-                    z
-                `;
+            const titleGroup = this.svg.append('g')
+                .attr('transform', `translate(${this.BORDER_WIDTH / 2}, 0)`);
 
-            this.svg.append('path')
-                .attr('d', backgroundPath)
-                .attr('class', 'bb-black-color')
-                .attr('fill', 'black');
+            titleGroup.append('text')
+                .attr('x', this.TITLE_LEFT_MARGIN)
+                .attr('y', titleYOffset)
+                .attr('text-anchor', 'start')
+                .attr('class', 'bb-text-eb-garamond bb-text-bold bb-black-color')
+                .attr('font-family', 'EB Garamond, serif')
+                .attr('font-weight', 'bold')
+                .attr('font-size', `${fontSize}px`)
+                .attr('fill', this.titleTextColor)
+                .text(firstLetter);
 
-            const tempText = this.svg.append('text')
+            const tempText = titleGroup.append('text')
                 .attr('font-family', 'Times New Roman, serif')
                 .attr('font-size', `${smallerFontSize}px`)
                 .attr('letter-spacing', `${letterSpacing}px`)
@@ -235,53 +302,51 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
 
             const underlineWidth = restOfTitleWidth + fontSize * 0.8;
 
-            this.svg.append('text')
-                .attr('x', this.TITLE_LEFT_MARGIN)
-                .attr('y', titleYOffset)
-                .attr('text-anchor', 'start')
-                .attr('class', 'bb-text-eb-garamond bb-text-bold bb-cream-off-white-color')
-                .attr('font-family', 'EB Garamond, serif')
-                .attr('font-weight', 'bold')
-                .attr('font-size', `${fontSize}px`)
-                .attr('fill', this.CREAM_COLOR)
-                .style('fill', this.CREAM_COLOR)
-                .text(firstLetter);
-
-            this.svg.append('line')
+            titleGroup.append('line')
                 .attr('x1', this.TITLE_LEFT_MARGIN + fontSize * 0.85)
                 .attr('y1', titleYOffset - 1.5)
                 .attr('x2', this.TITLE_LEFT_MARGIN + underlineWidth + 7)
                 .attr('y2', titleYOffset - 1.5)
-                .attr('class', 'bb-cream-off-white-color')
-                .attr('stroke', this.CREAM_COLOR)
+                .attr('class', 'bb-black-color')
+                .attr('stroke', this.titleTextColor)
                 .attr('stroke-width', 3.5);
 
-            this.svg.append('text')
+            titleGroup.append('text')
                 .attr('x', this.TITLE_LEFT_MARGIN + fontSize * 0.70)
                 .attr('y', titleYOffset - fontSize * 0.25)
                 .attr('text-anchor', 'start')
-                .attr('class', 'bb-text-merriweather bb-text-bold bb-cream-off-white-color')
+                .attr('class', 'bb-text-merriweather bb-text-bold bb-black-color')
                 .attr('font-size', `${smallerFontSize}px`)
                 .attr('letter-spacing', `${letterSpacing}px`)
-                .attr('fill', this.CREAM_COLOR)
-                .style('fill', this.CREAM_COLOR)
+                .attr('fill', this.titleTextColor)
                 .text(restOfTitle);
 
             const diamondSize = 8;
             const xOffset = 13;
             const yOffset = 2;
-            this.svg.append('path')
+            titleGroup.append('path')
                 .attr('d', `M${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset},${titleYOffset - diamondSize / 2 - yOffset} 
-                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset + diamondSize / 2},${titleYOffset - yOffset} 
-                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset},${titleYOffset + diamondSize / 2 - yOffset} 
-                                L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset - diamondSize / 2},${titleYOffset - yOffset} Z`)
-                .attr('class', 'bb-cream-off-white-color')
-                .attr('fill', this.CREAM_COLOR)
-                .style('fill', this.CREAM_COLOR);
+                            L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset + diamondSize / 2},${titleYOffset - yOffset} 
+                            L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset},${titleYOffset + diamondSize / 2 - yOffset} 
+                            L${this.TITLE_LEFT_MARGIN + underlineWidth + xOffset - diamondSize / 2},${titleYOffset - yOffset} Z`)
+                .attr('class', 'bb-black-color')
+                .attr('fill', this.titleTextColor);
         }
     }
 
     private drawGridLines(layout: any, extraTopSpace: number): void {
+        // Middle rows (lighter)
+        for (let i = 0; i < this.data.rows.length - 1; i++) {
+            this.svg.append('rect')
+                .attr('x', this.BORDER_WIDTH)
+                .attr('y', (i + 1) * this.ROW_HEIGHT + extraTopSpace)
+                .attr('width', layout.totalWidth - 2 * this.BORDER_WIDTH)
+                .attr('height', this.ROW_HEIGHT)
+                .attr('fill', this.BLACK_COLOR)
+                .attr('fill-opacity', '0.05'); 
+        }
+    
+        // Draw horizontal grid lines
         for (let i = 1; i <= this.data.rows.length; i++) {
             this.svg.append('line')
                 .attr('x1', this.BORDER_WIDTH)
@@ -289,100 +354,98 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
                 .attr('x2', layout.totalWidth - this.BORDER_WIDTH)
                 .attr('y2', i * this.ROW_HEIGHT + extraTopSpace)
                 .attr('stroke', 'black')
-                .attr('stroke-width', i === this.data.rows.length || i === 1 ? 2 : 1);
+                .attr('stroke-width', i === this.data.rows.length || i === 1 ? 2 : 1)
+                .attr('stroke-opacity', 1);
         }
-    }
-
-    private createRoundedRectPath(x: number, y: number, width: number, height: number, radius: number): string {
-        return `
-            M ${x + radius} ${y}
-            h ${width - 2 * radius}
-            a ${radius} ${radius} 0 0 1 ${radius} ${radius}
-            v ${height - 2 * radius}
-            a ${radius} ${radius} 0 0 1 ${-radius} ${radius}
-            h ${-width + 2 * radius}
-            a ${radius} ${radius} 0 0 1 ${-radius} ${-radius}
-            v ${-height + 2 * radius}
-            a ${radius} ${radius} 0 0 1 ${radius} ${-radius}
-            z
-        `;
+    
+        // Add vertical grid lines for column separation
+        let xPosition = 0;
+        layout.columnWidths.forEach((width: number) => {
+            xPosition += width;
+            this.svg.append('line')
+                .attr('x1', xPosition)
+                .attr('y1', extraTopSpace)
+                .attr('x2', xPosition)
+                .attr('y2', (this.data.rows.length + 1) * this.ROW_HEIGHT + extraTopSpace)
+                .attr('stroke', 'black')
+                .attr('stroke-width', 1)
+                .attr('stroke-opacity', 0.3);
+        });
     }
 
     private drawTableContent(layout: any): void {
         const headers = ['Season', ...this.data.rows[0].dataPoints.map(dp => dp.label)];
 
         // Draw headers
-        this.drawRow(headers, 0, layout.columnWidths, true, this.TABLE_PADDING);
+        const startY = this.TITLE_BACKGROUND_HEIGHT - this.MARGIN.top + this.TABLE_PADDING;
+        this.drawRow(headers, 0, layout.columnWidths, true, startY);
 
-        // Draw data rows
         this.data.rows.forEach((row, index) => {
             const rowData = [row.season, ...row.dataPoints.map(dp => dp.value.toString())];
-            this.drawRow(rowData, index + 1, layout.columnWidths, false, this.TABLE_PADDING, row.season.toLowerCase() === 'career');
+            this.drawRow(rowData, index + 1, layout.columnWidths, false, startY, row.season.toLowerCase() === 'career');
         });
 
-        // Adjust grid lines
-        this.drawGridLines(layout, this.TABLE_PADDING);
+        this.drawGridLines(layout, startY);
     }
 
     private drawRow(rowData: string[], rowIndex: number, columnWidths: number[], isHeader: boolean, extraTopSpace: number, isCareer: boolean = false): void {
         let xPosition = 0;
         rowData.forEach((cellValue, columnIndex) => {
-            const yPosition = (rowIndex + 0.5) * this.ROW_HEIGHT + extraTopSpace;
+            const yPosition = (rowIndex + 0.65) * this.ROW_HEIGHT + extraTopSpace;
             this.drawCell(cellValue, xPosition, columnWidths[columnIndex], yPosition, isHeader, isCareer);
             xPosition += columnWidths[columnIndex];
         });
     }
 
     private drawCell(value: string, x: number, width: number, y: number, isHeader: boolean = false, isCareer: boolean = false): void {
-        const text = this.svg.append('text')
-            .attr('x', x + width / 2)
-            .attr('y', y)
+        const fontSize = isHeader || isCareer ? this.HEADER_FONT_SIZE : this.FONT_SIZE;
+        const fontWeight = isHeader || isCareer ? '700' : '500';
+
+        // Create a group for the text and its stroke
+        const textGroup = this.svg.append('g')
+            .attr('transform', `translate(${x + width / 2}, ${y})`);
+
+        // Add the stroke (black outline)
+        textGroup.append('text')
             .attr('text-anchor', 'middle')
-            .attr('dominant-baseline', 'middle')
-            .attr('class', `bb-text-courier-prime ${isHeader || isCareer ? 'bb-text-bold' : ''}`)
-            .attr('font-size', isHeader || isCareer ? `${this.HEADER_FONT_SIZE}px` : `${this.FONT_SIZE}px`)
-            .attr('fill', this.CREAM_COLOR)
-            .style('fill', this.CREAM_COLOR)
+            .attr('dominant-baseline', 'auto')
+            .attr('class', `bb-text-league-spartan bb-text-bold`)
+            .attr('font-weight', 'bold')
+            .attr('font-family', 'League Spartan')
+            .attr('font-size', `${fontSize}px`)
+            .attr('font-weight', fontWeight)
+            .attr('stroke', 'black')
+            .attr('stroke-width', '1.25px')
+            .attr('fill', 'none')
+            .attr('text-rendering', 'geometricPrecision')
             .text(value);
-    }
 
-    private wrapText(text: string, x: number, y: number, maxWidth: number, color: string, anchor: string): void {
-        const words = text.split(/\s+/);
-        let line: string[] = [];
-        let lineNumber = 0;
-        const lineHeight = 1.1;
+        // Add subtle drop shadow for depth
+        textGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'auto')
+            .attr('class', `bb-text-league-spartan bb-text-bold`)
+            .attr('font-weight', 'bold')
+            .attr('font-family', 'League Spartan')
+            .attr('font-size', `${fontSize}px`)
+            .attr('font-weight', fontWeight)
+            .attr('fill', 'rgba(0,0,0,0.3)')
+            .attr('transform', 'translate(1,1)')
+            .text(value);
 
-        const textElement = this.svg.append("text")
-            .attr("x", x)
-            .attr("y", y)
-            .attr("text-anchor", anchor)
-            .attr("class", "bb-text-courier-prime bb-text-bold")
-            .attr("font-size", "14px")
-            .attr("fill", color)
-            .attr("dominant-baseline", "middle");
-
-        let tspan = textElement.append("tspan")
-            .attr("x", x)
-            .attr("dy", "0em");
-
-        for (let word of words) {
-            line.push(word);
-            tspan.text(line.join(" "));
-            if (tspan.node().getComputedTextLength() > maxWidth && line.length > 1) {
-                line.pop();
-                tspan.text(line.join(" "));
-                line = [word];
-                tspan = textElement.append("tspan")
-                    .attr("x", x)
-                    .attr("dy", `${lineHeight}em`)
-                    .text(word);
-                lineNumber++;
-            }
-        }
-
-        // Center the text block vertically
-        const totalHeight = (lineNumber + 1) * lineHeight;
-        textElement.attr("transform", `translate(0, ${-totalHeight / 2}em)`);
+        // Add the main text
+        textGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'auto')
+            .attr('class', `bb-text-league-spartan bb-text-bold`)
+            .attr('font-weight', 'bold')
+            .attr('font-family', 'League Spartan')
+            .attr('font-size', `${fontSize}px`)
+            .attr('font-weight', fontWeight)
+            .attr('fill', this.chartTextColor)
+            .style('fill', this.chartTextColor)
+            .attr('text-rendering', 'geometricPrecision')
+            .text(value);
     }
 
     saveSVG(): void {
@@ -391,17 +454,49 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             console.error('SVG element not found');
             return;
         }
-
-        // Clone the SVG to avoid modifying the original
+    
+        // Clone the SVG
         const clonedSvg = svgElement.cloneNode(true) as SVGElement;
-
-        // Serialize the SVG
+        
+        // Set basic SVG attributes
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+        
+        // Set a higher base resolution (4x the display size)
+        const scale = 4;
+        const width = this.width * scale;
+        const height = this.height * scale;
+        
+        clonedSvg.setAttribute('width', `${width}`);
+        clonedSvg.setAttribute('height', `${height}`);
+        clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+    
+        // Remove any existing background rectangles
+        clonedSvg.querySelectorAll('rect').forEach(rect => {
+            if (rect.getAttribute('width') === '100%' || rect.getAttribute('width') === `${width}`) {
+                rect.remove();
+            }
+        });
+    
+        // Add style for text rendering
+        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleElement.textContent = `
+            text {
+                text-rendering: geometricPrecision;
+                shape-rendering: geometricPrecision;
+            }
+        `;
+        clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
+    
+        // Serialize to string
         const serializer = new XMLSerializer();
-        let svgString = serializer.serializeToString(clonedSvg);
-
+        let svgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    ${serializer.serializeToString(clonedSvg)}`;
+    
         // Embed fonts
         svgString = this.fontService.embedFontsInSVG(svgString, this.fonts);
-
+    
         // Save the SVG
         this.BRADYBALLUtil.saveSVGToFile(svgString, 'stat_line.svg');
     }

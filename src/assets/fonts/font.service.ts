@@ -7,7 +7,7 @@ import { map, catchError, tap } from 'rxjs/operators';
     providedIn: 'root'
 })
 export class FontService {
-    private loadedFonts: { [key: string]: string } = {};
+    public loadedFonts: { [key: string]: string } = {};
 
     constructor(private http: HttpClient) { }
 
@@ -56,11 +56,11 @@ export class FontService {
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgString, 'image/svg+xml');
         const svgElement = doc.documentElement;
-
+    
         // Create a style element
         const styleElement = doc.createElementNS('http://www.w3.org/2000/svg', 'style');
         styleElement.setAttribute('type', 'text/css');
-
+    
         // Font face declarations
         let styleContent = Object.entries(fonts).map(([filename, base64]) => {
             const fontFamily = this.getFontFamilyFromFilename(filename);
@@ -75,15 +75,17 @@ export class FontService {
             }
             `;
         }).join('\n');
-
+    
         // Add CSS variables and classes
         styleContent += `
             :root {
                 --bb-black-color: #000000;
                 --bb-white-color: #ffffff;
                 --bb-cream-off-white-color: #f8f5e3;
+                --bb-cream-color: #ded2a2;
+                --bb-red-card-color: #ad563b;
             }
-            .bb-text-bold { font-weight: bold; }
+            .bb-text-bold { font-weight: 700; }
             .bb-text-semibold { font-weight: 600; }
             .bb-text-medium { font-weight: 500; }
             .bb-text-extra-bold { font-weight: 800; }
@@ -95,14 +97,44 @@ export class FontService {
             .bb-text-merriweather { font-family: 'Merriweather', serif; }
             .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
         `;
-
+    
         styleElement.textContent = styleContent;
-
+    
         // Insert the style element as the first child of the SVG
         svgElement.insertBefore(styleElement, svgElement.firstChild);
-
+    
+        // Ensure font properties are set on text elements
+        this.ensureFontPropertiesOnTextElements(doc);
+    
         // Serialize back to string
         return new XMLSerializer().serializeToString(doc);
+    }
+
+    private ensureFontPropertiesOnTextElements(doc: Document): void {
+        doc.querySelectorAll('text, tspan').forEach(element => {
+            const textElement = element as SVGTextElement | SVGTSpanElement;
+            const computedStyle = window.getComputedStyle(textElement);
+    
+            // Set font-family
+            const fontFamily = computedStyle.fontFamily || 'inherit';
+            textElement.setAttribute('font-family', fontFamily);
+    
+            // Set font-weight
+            let fontWeight = computedStyle.fontWeight;
+            if (textElement.classList.contains('bb-text-bold')) fontWeight = '700';
+            else if (textElement.classList.contains('bb-text-semibold')) fontWeight = '600';
+            else if (textElement.classList.contains('bb-text-medium')) fontWeight = '500';
+            else if (textElement.classList.contains('bb-text-extra-bold')) fontWeight = '800';
+            else if (textElement.classList.contains('bb-text-black')) fontWeight = '900';
+            textElement.setAttribute('font-weight', fontWeight);
+    
+            // Set color
+            const color = computedStyle.color || '#000000';
+            textElement.setAttribute('fill', color);
+    
+            // Explicitly set text-rendering for better font display
+            textElement.setAttribute('text-rendering', 'optimizeLegibility');
+        });
     }
 
     private getFontFamilyFromFilename(filename: string): string {
