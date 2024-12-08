@@ -1,8 +1,67 @@
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <radar-chart [data]="radarChartModel"></radar-chart>
-            <stat-line [data]="statLineModel"></stat-line>
+<!-- player-search.component.html -->
+<div class="bradyball-container">
+    <!-- Search Header -->
+    <header class="bb-header">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-8">
+                    <div class="search-container">
+                        <div class="bb-card">
+                            <div class="bb-card-content">
+                                <input type="text" class="form-control bb-text-league-spartan"
+                                    placeholder="Search for a player..." [(ngModel)]="playerName"
+                                    (keyup.enter)="fetchPlayerData(playerName)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- Visualizations Section -->
+    <main class="py-4">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-8">
+                    <!-- Stat Line -->
+                    <div class="bb-card">
+                        <div class="bb-card-content">
+                            <stat-line [data]="statLineModel"></stat-line>
+                        </div>
+                        <div class="bb-card-actions">
+                            <button class="bb-button" [disabled]="!statLine?.tableReady" (click)="saveStatLine()">
+                                Save Stat Line
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Radar Chart -->
+                    <div class="bb-card">
+                        <div class="bb-card-content">
+                            <radar-chart [data]="radarChartModel"></radar-chart>
+                        </div>
+                        <div class="bb-card-actions">
+                            <button class="bb-button" [disabled]="!radarChart?.chartReady" (click)="saveRadarChart()">
+                                Save Radar Chart
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Percentile Rank -->
+                    <div class="bb-card">
+                        <div class="bb-card-content">
+                            <percentile-rank [data]="percentileRankModel"></percentile-rank>
+                        </div>
+                        <div class="bb-card-actions">
+                            <button class="bb-button" [disabled]="!percentileRank?.gaugeReady"
+                                (click)="savePercentileRank()">
+                                Save Percentile Rank
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 </div>

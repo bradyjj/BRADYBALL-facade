@@ -97,24 +97,34 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
         }
     }
 
+    private createSvg(): void {
+        // Clear any existing SVG
+        d3.select(this.elementRef.nativeElement).select('svg').remove();
+
+        // Calculate dimensions from layout
+        const layout = this.calculateLayout();
+        this.width = Math.max(layout.totalWidth + this.MARGIN.left + this.MARGIN.right, 800); // Set minimum width
+        this.height = (this.data.rows.length + 1) * this.ROW_HEIGHT + this.MARGIN.top + this.MARGIN.bottom + this.TABLE_PADDING;
+
+        // Create new SVG
+        this.svg = d3.select(this.elementRef.nativeElement.querySelector('.stat-table'))
+            .append('svg')
+            .attr('width', this.width)
+            .attr('height', this.height)
+            .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+            .attr('preserveAspectRatio', 'xMinYMid meet')
+            .append('g')
+            .attr('transform', `translate(${this.MARGIN.left},${this.MARGIN.top})`);
+    }
+
     private drawTable(): void {
         if (!this.data || !this.data.rows || this.data.rows.length === 0) {
             this.tableReady = false;
             return;
         }
 
-        d3.select(this.elementRef.nativeElement).select('svg').remove();
-
         const layout = this.calculateLayout();
-        this.width = layout.totalWidth + this.MARGIN.left + this.MARGIN.right;
-        this.height = (this.data.rows.length + 1) * this.ROW_HEIGHT + this.MARGIN.top + this.MARGIN.bottom + this.TABLE_PADDING;
-
-        this.svg = d3.select(this.elementRef.nativeElement)
-            .append('svg')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .append('g')
-            .attr('transform', `translate(${this.MARGIN.left},${this.MARGIN.top})`);
+        this.createSvg();  // Call the new createSvg method
 
         this.drawBackgroundAndBorder();
         this.drawTitle();
@@ -358,18 +368,38 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
                 .attr('stroke-opacity', 1);
         }
     
-        // Add vertical grid lines for column separation
+        // Calculate positions
         let xPosition = 0;
-        layout.columnWidths.forEach((width: number) => {
+        const positions = layout.columnWidths.map((width: number) => {
             xPosition += width;
-            this.svg.append('line')
-                .attr('x1', xPosition)
-                .attr('y1', extraTopSpace)
-                .attr('x2', xPosition)
-                .attr('y2', (this.data.rows.length + 1) * this.ROW_HEIGHT + extraTopSpace)
-                .attr('stroke', 'black')
-                .attr('stroke-width', 1)
-                .attr('stroke-opacity', 0.3);
+            return xPosition;
+        });
+    
+        // Draw vertical lines
+        positions.forEach((pos: number, index: number) => {
+            const isLineExemption = index === 1 || index === 0 || index === 2;
+    
+            if (isLineExemption) {
+                // Draw line from top to just before career row
+                this.svg.append('line')
+                    .attr('x1', pos)
+                    .attr('y1', extraTopSpace)
+                    .attr('x2', pos)
+                    .attr('y2', (this.data.rows.length) * this.ROW_HEIGHT + extraTopSpace)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 1)
+                    .attr('stroke-opacity', 0.3);
+            } else {
+                // Draw full lines for all other columns
+                this.svg.append('line')
+                    .attr('x1', pos)
+                    .attr('y1', extraTopSpace)
+                    .attr('x2', pos)
+                    .attr('y2', (this.data.rows.length + 1) * this.ROW_HEIGHT + extraTopSpace)
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', 1)
+                    .attr('stroke-opacity', 0.3);
+            }
         });
     }
 
@@ -454,30 +484,30 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             console.error('SVG element not found');
             return;
         }
-    
+
         // Clone the SVG
         const clonedSvg = svgElement.cloneNode(true) as SVGElement;
-        
+
         // Set basic SVG attributes
         clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
         clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-        
+
         // Set a higher base resolution (4x the display size)
         const scale = 4;
         const width = this.width * scale;
         const height = this.height * scale;
-        
+
         clonedSvg.setAttribute('width', `${width}`);
         clonedSvg.setAttribute('height', `${height}`);
         clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
-    
+
         // Remove any existing background rectangles
         clonedSvg.querySelectorAll('rect').forEach(rect => {
             if (rect.getAttribute('width') === '100%' || rect.getAttribute('width') === `${width}`) {
                 rect.remove();
             }
         });
-    
+
         // Add style for text rendering
         const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
         styleElement.textContent = `
@@ -487,17 +517,18 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
             }
         `;
         clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
-    
+
         // Serialize to string
         const serializer = new XMLSerializer();
         let svgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     ${serializer.serializeToString(clonedSvg)}`;
-    
+
         // Embed fonts
         svgString = this.fontService.embedFontsInSVG(svgString, this.fonts);
-    
+
         // Save the SVG
         this.BRADYBALLUtil.saveSVGToFile(svgString, 'stat_line.svg');
     }
+
 }

@@ -10,12 +10,15 @@ import { CommonModule } from "@angular/common";
 import { HttpClientModule } from "@angular/common/http";
 import { FontService } from "../../assets/fonts/font.service";
 import { BRADYBALLCardUtil } from "./util/BRADYBALL-card.util";
+import { PercentileRankComponent } from './components/percentile-rank/percentile-rank.component';
+import { FormsModule } from "@angular/forms";
 
 @NgModule({
     imports: [
         SharedModule,
         BRADYBALLCardRoutingModule,
         CommonModule,
+        FormsModule,
         HttpClientModule
     ],
     exports: [],
@@ -24,7 +27,8 @@ import { BRADYBALLCardUtil } from "./util/BRADYBALL-card.util";
         BRADYBALLCardPageComponent,
         PlayerSearchComponent,
         RadarChartComponent,
-        StatLineComponent
+        StatLineComponent,
+        PercentileRankComponent
     ],
     providers: [
         FontService,
