@@ -7,6 +7,8 @@ import { APP_ROUTES, AppRoutingModule } from "./app.routing";
 import { BRADYBALLCardRoutingModule } from "./BRADYBALL-card/BRADYBALL-card-routing.module";
 import { HttpClientModule } from "@angular/common/http";
 import { FontService } from "../assets/fonts/font.service";
+import { BRADYBALLAboutRoutingModule } from "./BRADYBALL-about/BRADYBALL-about-routing.module";
+import { BRADYBALLAboutModule } from "./BRADYBALL-about/BRADYBALL-about.module";
 
 @NgModule({
     declarations: [
@@ -18,6 +20,8 @@ import { FontService } from "../assets/fonts/font.service";
         AppRoutingModule,
         BRADYBALLCardRoutingModule,
         BRADYBALLCardModule,
+        BRADYBALLAboutRoutingModule,
+        BRADYBALLAboutModule,
         RouterModule.forRoot(APP_ROUTES, {useHash: true})
     ],
     providers: [FontService],

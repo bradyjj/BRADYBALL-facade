@@ -1,0 +1,92 @@
+<div class="vintage-resume" #resumeContent>
+    <header>
+        <h1>BRADY J. JACOBS</h1>
+        <div class="contact-info">
+            <span>{{contact.email}} | {{contact.phone}} | {{contact.github}} | {{contact.linkedin}}</span>
+        </div>
+    </header>
+
+    <section class="resume-section">
+        <h2>EDUCATION</h2>
+        <div class="content">
+            <div class="flex-header">
+                <div>
+                    <h3>{{education.school}}</h3>
+                    <div class="subtitle">
+                        {{education.degree}}, {{education.minor}}
+                    </div>
+                </div>
+                <div class="date">{{education.date}}</div>
+            </div>
+            <div class="details">
+                <div class="gpa">
+                    <strong>GPA: </strong>
+                    <span> {{education.gpa}} ({{education.honors}})</span>
+                </div>
+                <div class="coursework">
+                    <strong>Advanced Coursework: </strong>
+                    <span *ngFor="let course of education.coursework; let last = last">
+                        {{course}}{{!last ? ', ' : ''}}
+                    </span>                
+                </div>
+            </div>
+            <ul>
+                <li *ngFor="let highlight of education.highlights">{{highlight}}</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>EXPERIENCE</h2>
+        <div class="content" *ngFor="let job of experience">
+            <div class="flex-header">
+                <div>
+                    <h3 class="title">{{job.title}}</h3>
+                    <div class="subtitle">{{job.company}} | {{job.location}}</div>
+                </div>
+                <div class="date">{{job.date}}</div>
+            </div>
+            <div *ngIf="job.previousRole" class="previous-role">
+                Software Engineering Intern | May 2022 - August 2022
+            </div>
+            <ul>
+                <li *ngFor="let point of job.points">{{point}}</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>TECHNICAL PROJECTS</h2>
+        <div class="content">
+            <div class="flex-header">
+                <div>
+                    <h3>{{projects.title}}</h3>
+                    <div class="subtitle">{{projects.type}}</div>
+                </div>
+                <div class="date">{{projects.date}}</div>
+            </div>
+            <ul>
+                <li *ngFor="let point of projects.points">{{point}}</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="resume-section">
+        <h2>TECHNICAL COMPETENCIES</h2>
+        <div class="skills-grid">
+            <div class="skill-card" *ngFor="let section of skills | keyvalue">
+                <div class="skill-header">{{section.key}}</div>
+                <div class="skill-content">
+                    <div class="skill-category" *ngFor="let category of section.value | keyvalue">
+                        <div class="category-name">{{category.key}}</div>
+                        <div class="skills-list">{{category.value.join(' • ')}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="download-section">
+    <button class="bb-button" (click)="downloadPDF()">Save as PDF</button>
+</div>

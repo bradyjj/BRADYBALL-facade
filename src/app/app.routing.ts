@@ -4,6 +4,7 @@ import { NgModule } from "@angular/core";
 
 export const APP_ROUTES: Routes = [
     { path: '', redirectTo: '/BRADYBALL-card', pathMatch: 'full' },
+    { path: 'about', redirectTo: '/BRADYBALL-about', pathMatch: 'full' },
     { path: 'app', component: AppComponent, children: [
         
     ]},
