@@ -1,6 +1,3 @@
-<div class="container">
-  <div class="card-body">
-      <div *ngIf="chartReady" #chartContainer></div>
-      <button [disabled]="!chartReady || !fontsLoaded" (click)="saveSVG()">Save Chart as SVG</button>
-    </div>
+<div class="chart-container">
+  <div #chartContainer class="radar-chart"></div>
 </div>

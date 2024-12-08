@@ -19,7 +19,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
     private height = 800;
     private radius = Math.min(this.width, this.height) / 2 - this.margin;
 
-    chartReady: boolean = false;
+    public chartReady: boolean = false;
     fontsLoaded: boolean = false;
 
     private featureScales: { [key: string]: d3.ScaleLinear<number, number>; } = {};
@@ -85,11 +85,13 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
     private createSvg(): void {
         d3.select(this.elementRef.nativeElement).select('svg').remove();
-        this.svg = d3.select(this.elementRef.nativeElement)
+        this.svg = d3.select(this.elementRef.nativeElement.querySelector('.radar-chart'))
             .append('svg')
             .attr('width', this.width)
-            .attr('height', this.height);
-
+            .attr('height', this.height)
+            .attr('viewBox', `0 0 ${this.width} ${this.height}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet');
+    
         this.chartGroup = this.svg.append('g')
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
     }
@@ -100,27 +102,46 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             console.error('SVG element not found');
             return;
         }
-
+    
         // Clone the SVG to avoid modifying the original
         const clonedSvg = svgElement.cloneNode(true) as SVGElement;
-
+    
+        // Set basic SVG attributes for higher resolution
+        const scale = 4;
+        const width = this.width * scale;
+        const height = this.height * scale;
+        clonedSvg.setAttribute('width', `${width}`);
+        clonedSvg.setAttribute('height', `${height}`);
+        clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+        clonedSvg.style.backgroundColor = 'transparent'; // Add transparency
+        clonedSvg.setAttribute('background-color', 'transparent'); // Ensure transparency
+    
+        // Remove the background rectangle
+        clonedSvg.querySelectorAll('rect').forEach(rect => {
+            if (rect.getAttribute('width') === `${this.width}` && 
+                rect.getAttribute('height') === `${this.height}` && 
+                rect.getAttribute('fill') === 'none') {
+                rect.remove();
+            }
+        });
+    
         // Add font definitions and styles
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         defs.innerHTML = this.getFontDefinitions();
         clonedSvg.insertBefore(defs, clonedSvg.firstChild);
-
+    
         // Apply inline styles to text elements
         clonedSvg.querySelectorAll('text').forEach((textElement: SVGTextElement) => {
             this.applyInlineStyles(textElement);
         });
-
+    
         // Serialize the SVG
         const serializer = new XMLSerializer();
         let svgString = serializer.serializeToString(clonedSvg);
-
+    
         // Create a Blob with the SVG content
         const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-
+    
         // Create a download link and trigger the download
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
@@ -216,7 +237,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
 
         textElement.style.fontFamily = fontFamily;
         textElement.style.fontWeight = fontWeight;
-        textElement.style.color = '#000000'; // var(--bb-black-color)
+        textElement.style.color = '#000000';
     }
 
     private drawChart(): void {

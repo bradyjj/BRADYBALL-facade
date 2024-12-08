@@ -7,6 +7,8 @@ import { StatLineData } from '../../models/stat-line-player.model';
 import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
 import { StatLineComponent } from '../stat-line/stat-line.component';
 import { RadarChartComponent } from '../radar-chart/radar-chart.component';
+import { PercentileRankComponent } from '../percentile-rank/percentile-rank.component';
+import { PercentileRankData } from '../../models/percentile-rank.model';
 
 @Component({
     selector: 'player-search',
@@ -15,8 +17,9 @@ import { RadarChartComponent } from '../radar-chart/radar-chart.component';
 })
 export class PlayerSearchComponent implements OnInit {
 
-    @ViewChild(StatLineComponent) statLine!: StatLineComponent;
-    @ViewChild(RadarChartComponent) radarChart!: RadarChartComponent;
+    @ViewChild(StatLineComponent) statLine?: StatLineComponent;
+    @ViewChild(RadarChartComponent) radarChart?: RadarChartComponent;
+    @ViewChild(PercentileRankComponent) percentileRank?: PercentileRankComponent;
 
     playerName: string = "Kylian Mbappé";
     player = new Player();
@@ -34,8 +37,8 @@ export class PlayerSearchComponent implements OnInit {
     playerMiscData: any;
     combinedPlayerData: { [season: string]: PlayerStat } = {};
     radarChartModel: RadarChartPlayerData = RadarChartPlayerData.createDefault();
-
     statLineModel: StatLineData = StatLineData.createDefault();
+    percentileRankModel: PercentileRankData = PercentileRankData.createDefault();
 
     constructor(private supabaseService: SupabaseService, public BRADYBALLUtil: BRADYBALLCardUtil) { }
 
@@ -43,9 +46,10 @@ export class PlayerSearchComponent implements OnInit {
         await this.fetchPlayerData(this.playerName);
         this.createRadarChartModel();
         this.createStatLineDataModel();
+        this.createPercentileRankModel();
     }
 
-    private fetchPlayerData(player: string): Promise<void> {
+    public fetchPlayerData(player: string): Promise<void> {
         return Promise.all([
             this.supabaseService.getPlayerStandardData(player),
             this.supabaseService.getPlayerShootingData(player),
@@ -234,8 +238,31 @@ export class PlayerSearchComponent implements OnInit {
         };
     }
 
-    saveCombinedSVG() {
-        const statLineSVG = this.statLine.elementRef.nativeElement.querySelector('svg');
-        const radarChartSVG = this.radarChart.elementRef.nativeElement.querySelector('svg');
+    private createPercentileRankModel(): void {
+        const percentileRank = 22;
+        const description = "Out of 25 competitors, Mbappe ranked 4th overall in the 2023-24 season, placing him in the 88th percentile based on the seven key attributes evaulated in the attribute overview.";
+
+        this.percentileRankModel = {
+            percentile: percentileRank,
+            description: description
+        }
+    }
+
+    saveRadarChart(): void {
+        if (this.radarChart) {
+            this.radarChart.saveSVG();
+        }
+    }
+    
+    saveStatLine(): void {
+        if (this.statLine) {
+            this.statLine.saveSVG();
+        }
+    }
+    
+    savePercentileRank(): void {
+        if (this.percentileRank) {
+            this.percentileRank.saveSVG();
+        }
     }
 }
