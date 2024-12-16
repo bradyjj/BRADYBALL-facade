@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { BRADYBALLCardScreenComponent } from './components/BRADYBALL-card-screen/BRADYBALL-card-screen.component';
 
 
-export const BRADYBALLcardRoutes: Routes = [
+export const BRADYBALLCardRoutes: Routes = [
     {
         path: 'BRADYBALL-card', children: [
             { path: '', component: BRADYBALLCardScreenComponent }
@@ -12,7 +12,7 @@ export const BRADYBALLcardRoutes: Routes = [
 ];
 
 @NgModule({
-    imports: [RouterModule.forChild(BRADYBALLcardRoutes)],
+    imports: [RouterModule.forChild(BRADYBALLCardRoutes)],
     exports: [RouterModule]
 })
 export class BRADYBALLCardRoutingModule { }
