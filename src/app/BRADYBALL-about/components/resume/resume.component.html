@@ -6,7 +6,7 @@
         </div>
     </header>
 
-    <section class="resume-section">
+    <section class="resume-section pt-1">
         <h2>EDUCATION</h2>
         <div class="content">
             <div class="flex-header">
@@ -43,11 +43,11 @@
                 <div>
                     <h3 class="title">{{job.title}}</h3>
                     <div class="subtitle">{{job.company}} | {{job.location}}</div>
+                    <div *ngIf="job.previousRole" class="previous-position">
+                        Previously: Software Engineering Intern (May 2022 - August 2022)
+                    </div>
                 </div>
                 <div class="date">{{job.date}}</div>
-            </div>
-            <div *ngIf="job.previousRole" class="previous-role">
-                Software Engineering Intern | May 2022 - August 2022
             </div>
             <ul>
                 <li *ngFor="let point of job.points">{{point}}</li>

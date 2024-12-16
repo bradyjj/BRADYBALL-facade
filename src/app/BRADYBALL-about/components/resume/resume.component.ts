@@ -1,6 +1,4 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 @Component({
     selector: 'resume',
@@ -25,9 +23,8 @@ export class ResumeComponent {
         gpa: '3.92',
         honors: 'Magna Cum Laude',
         highlights: [
-            'Lead Teaching Assistant: CPSC 1060 - Introduction to Programming in Java',
-            'Teaching Assistant: CPSC 1010 - Introduction to Computer Science',
-            'Senior Capstone Project Lead: Led 4-person team for American Tire Distributors (ATD) market analysis'
+            'Lead Teaching Assistant for CPSC 1060 (Introduction to Java) and CPSC 1010 (Introduction to Computer Science)',
+            'Led 4-person capstone team conducting ATD market analysis by integrating web-scraped external data with customer datasets in a Snowflake data warehouse, identifying market opportunities through Tableau and PowerBI visualizations'
         ],
         coursework: [
             'Advanced Machine Learning',
@@ -45,10 +42,10 @@ export class ResumeComponent {
             date: 'June 2023 - Present',
             previousRole: 'Software Engineering Intern (May 2022 - August 2022)',
             points: [
-                'Earned "Rookie Rockstar" award for exceptional technical performance and rapid integration',
-                'Led development of "Available to Commerce" UI system, becoming subject matter expert',
-                'Engineered full-stack applications using Java and AngularJS maintaining >90% test coverage',
-                'Implemented comprehensive monitoring solutions for cache health and system reliability'
+                'Recognized with "Rookie Rockstar" award in Q1 2024 for exceptional technical performance and rapid integration into the team',
+                'Developed and maintained full-stack applications using Java and AngularJS, ensuring >90% test coverage for high-quality code',
+                'Resolved over 20 Jira tickets and CIIs from multiple Fortune 500 clients, demonstrating strong problem-solving skills across various functional areas in Order Management',
+                'Implemented comprehensive monitoring solutions using Prometheus and Kibana for Hazelcast cache health and system reliability, enhancing overall system performance and stability'
             ]
         },
         {
@@ -68,7 +65,7 @@ export class ResumeComponent {
         type: 'Independent Research & Development Project',
         date: 'March 2024 - Present',
         points: [
-            'Architected a comprehensive sports analytics platform, integrating data science, machine learning techniques, and custom data visualization using D3.js',
+            'Developed a comprehensive sports analytics platform, integrating data science, machine learning techniques, and custom data visualization using D3.js',
             'Designed and implemented a scalable microservices architecture with Python, FastAPI, and Redis to support advanced sports performance analysis and visualizations.',
         ]
     };
@@ -76,12 +73,12 @@ export class ResumeComponent {
     skills = {
         'Technical Development': {
             'Programming Languages': ['Java', 'Python', 'C/C++', 'JavaScript'],
-            'Web Technologies': ['AngularJS', 'D3.js', 'HTML/CSS', 'REST APIs', 'FastAPI'],
-            'Database & Storage': ['MySQL', 'PostgreSQL', 'Redis', 'Snowflake']
+            'Web Technologies': ['AngularJS', 'HTML/CSS', 'REST APIs'],
+            'Database & Storage': ['MySQL', 'PostgreSQL', 'Redis', 'Snowflake', 'Prometheus']
         },
-        'Data Science & Research': {
+        'Data Science & Analytics': {
             'Machine Learning': ['Statistical Modeling', 'NLP', 'Algorithm Development'],
-            'Data Analysis': ['Data Engineering', 'ETL Pipelines', 'Statistical Analysis'],
+            'Data Analysis': ['Data Engineering', 'ETL Pipelines'],
             'Visualization': ['D3.js', 'PowerBI', 'Tableau']
         },
         'Tools & Infrastructure': {
@@ -91,37 +88,29 @@ export class ResumeComponent {
     };
 
     async downloadPDF() {
-        const content = this.resumeContent.nativeElement;
-        
-        const options = {
-            scale: 1,
-            useCORS: true,
-            backgroundColor: '#f8f5e3',
-            width: content.offsetWidth,
-            height: content.offsetHeight
-        };
+        // Store original styles
+        const originalOverflow = document.body.style.overflow;
+        const originalBodyHeight = document.body.style.height;
+        const originalContentHeight = this.resumeContent.nativeElement.style.height;
         
         try {
-            const canvas = await html2canvas(content, options);
+            // Set fixed dimensions to force single page
+            document.body.style.overflow = 'hidden';
+            document.body.style.height = '11in';
+            this.resumeContent.nativeElement.style.height = '11in';
             
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'in',
-                format: 'letter'
-            });
-    
-            pdf.addImage(
-                canvas.toDataURL('image/png', 1.0),
-                'PNG',
-                0,
-                0,
-                8.5,
-                11
-            );
-    
-            pdf.save('Brady_Jacobs_Resume.pdf');
-        } catch (error) {
-            console.error('Error generating PDF:', error);
+            // Add print-specific class
+            this.resumeContent.nativeElement.classList.add('printing');
+            
+            // Print
+            window.print();
+            
+        } finally {
+            // Restore all original styles
+            document.body.style.overflow = originalOverflow;
+            document.body.style.height = originalBodyHeight;
+            this.resumeContent.nativeElement.style.height = originalContentHeight;
+            this.resumeContent.nativeElement.classList.remove('printing');
         }
     }
 }
