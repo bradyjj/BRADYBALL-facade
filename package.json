@@ -21,6 +21,7 @@
         "@angular/platform-server": "^16.2.0",
         "@angular/router": "^16.2.0",
         "@nguniversal/express-engine": "^16.2.0",
+        "@popperjs/core": "^2.11.8",
         "@supabase/supabase-js": "^2.44.4",
         "bootstrap": "^5.3.3",
         "d3": "^7.9.0",

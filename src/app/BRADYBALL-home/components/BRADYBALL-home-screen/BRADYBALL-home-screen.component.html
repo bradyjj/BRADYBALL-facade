@@ -1,0 +1,26 @@
+<div class="bb-home-container" (mousemove)="onMouseMove($event)">
+  <!-- Interactive cursor follower -->
+  <div class="cursor-follower" [style.transform]="getCursorPosition()"></div>
+
+  <!-- Main hero section -->
+  <section class="hero-section">
+    <div class="interactive-text" [style.transform]="getParallaxTransform(0.5)" (mouseenter)="expandCursor()"
+      (mouseleave)="shrinkCursor()">
+      <h1 class="main-title">BRADYBALL</h1>
+      <p class="subtitle">Football Analytics Reimagined</p>
+    </div>
+  </section>
+
+  <!-- Interactive cards grid -->
+  <section class="cards-grid">
+    <div class="card-wrapper" *ngFor="let card of cards; let i = index"
+      [style.transform]="getParallaxTransform(0.2 * (i + 1))" (mouseenter)="onCardHover(i)"
+      (mouseleave)="onCardLeave(i)">
+      <div class="interactive-card" [class.hovered]="hoveredCard === i">
+        <h3>{{card.title}}</h3>
+        <p>{{card.description}}</p>
+        <div class="card-overlay"></div>
+      </div>
+    </div>
+  </section>
+</div>
