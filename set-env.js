@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-// Ensure environment variables are loaded
-require('dotenv').config();
-
 // Create the environments directory if it doesn't exist
 const envDir = path.join(__dirname, 'src', 'environments');
 if (!fs.existsSync(envDir)) {
