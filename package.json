@@ -4,7 +4,8 @@
     "scripts": {
         "start": "ng serve",
         "devstart": "dotenv -e .env ng serve",
-        "build": "ng build --configuration production",
+        "build": "node set-env.js && ng build --configuration production",
+        "prestart": "node set-env.js",
         "build:ssr": "ng run BRADYBALL-facade:server:production"
     },
     "private": true,
