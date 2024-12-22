@@ -2,12 +2,10 @@
     "name": "BRADYBALL-facade",
     "version": "0.0.0",
     "scripts": {
-        "ng": "ng",
         "start": "ng serve",
-        "build": "ng build",
-        "watch": "ng build --watch --configuration development",
-        "test": "ng test",
-        "serve:ssr:BRADYBALL-facade": "node dist/BRADYBALL-facade/server/server.mjs"
+        "devstart": "dotenv -e .env ng serve",
+        "build": "ng build --configuration production",
+        "build:ssr": "ng run BRADYBALL-facade:server:production"
     },
     "private": true,
     "dependencies": {
@@ -36,6 +34,7 @@
         "zone.js": "~0.13.0"
     },
     "devDependencies": {
+        "@angular-builders/custom-webpack": "^16.0.1",
         "@angular-devkit/build-angular": "^16.2.0",
         "@angular/cli": "^16.2.0",
         "@angular/compiler-cli": "^16.2.0",
@@ -45,13 +44,17 @@
         "@types/jasmine": "~5.1.0",
         "@types/node": "^18.19.41",
         "base64-inline-loader": "^2.0.1",
+        "cross-env": "^7.0.3",
+        "dotenv-cli": "^8.0.0",
+        "dotenv-webpack": "^8.1.0",
         "jasmine-core": "~5.1.0",
         "karma": "~6.4.0",
         "karma-chrome-launcher": "~3.2.0",
         "karma-coverage": "~2.2.0",
         "karma-jasmine": "~5.1.0",
         "karma-jasmine-html-reporter": "~2.1.0",
-        "typescript": "~4.9.5"
+        "typescript": "~4.9.5",
+        "webpack": "^5.97.1"
     },
     "overrides": {
         "@supabase/supabase-js": {

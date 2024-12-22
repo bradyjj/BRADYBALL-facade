@@ -9,7 +9,8 @@
   ],
   "include": [
     "src/**/*.d.ts",
-    "src/app/**/!(*.spec|*.test).ts"
+    "src/app/**/!(*.spec|*.test).ts",
+    "src/env-loader.ts"
   ],
   "exclude": [
     "src/app/**/*.server.ts",

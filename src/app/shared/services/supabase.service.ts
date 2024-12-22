@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { BRADYBALLCardConstants } from '../../BRADYBALL-card/util/BRADYBALL-card.constant';
+import { environment } from '../../../environments/environment';
 
-const SUPABASE_KEY = process.env['SUPABASE_KEY'] as string;
-const SUPABASE_URL = process.env['SUPABASE_URL'] as string;
+const SUPABASE_KEY = environment.SUPABASE_KEY;
+const SUPABASE_URL = environment.SUPABASE_URL;
 
 @Injectable({
     providedIn: 'root'
