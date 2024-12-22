@@ -1,11 +1,16 @@
+<!-- BRADYBALL-home-screen.component.html -->
 <div class="container-fluid p-0">
     <div class="row g-0">
         <div class="col-auto">
             <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
         </div>
         <div class="col main-content" [ngClass]="{'expanded': isCollapsed}">
-            <div class="col px-0">
-                <player-search></player-search>
+            <div class="gradient-container">
+                <svg #gradientSvg class="gradient-svg"></svg>
+                <div class="text-overlay">
+                    <h1>BRADYBALL</h1>
+                    <p>Football Analytics Reimagined</p>
+                </div>
             </div>
             <BRADYBALL-footer></BRADYBALL-footer>
         </div>

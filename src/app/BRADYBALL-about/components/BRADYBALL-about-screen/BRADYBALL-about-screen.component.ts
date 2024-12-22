@@ -6,9 +6,15 @@ import { Component } from '@angular/core';
     styleUrls: ['./BRADYBALL-about-screen.component.scss'],
 })
 export class BRADYBALLAboutScreenComponent {
+    isCollapsed = false;
+
     constructor() { }
 
     refreshPage(): void {
         window.location.reload();
+    }
+
+    onHeaderCollapseChanged(collapsed: boolean): void {
+        this.isCollapsed = collapsed;
     }
 }

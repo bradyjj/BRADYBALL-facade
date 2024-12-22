@@ -1,17 +1,21 @@
-import { RouterModule, Routes } from "@angular/router";
-import { AppComponent } from "./app.component";
 import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+
+import { AppComponent } from "./app.component";
+import { BRADYBALLHomeScreenComponent } from "./BRADYBALL-home/components/BRADYBALL-home-screen/BRADYBALL-home-screen.component";
+import { BRADYBALLCardScreenComponent } from "./BRADYBALL-card/components/BRADYBALL-card-screen/BRADYBALL-card-screen.component";
+import { BRADYBALLAboutScreenComponent } from "./BRADYBALL-about/components/BRADYBALL-about-screen/BRADYBALL-about-screen.component";
 
 export const APP_ROUTES: Routes = [
-    { path: '', redirectTo: '/BRADYBALL-card', pathMatch: 'full' },
-    { path: 'about', redirectTo: '/BRADYBALL-about', pathMatch: 'full' },
-    { path: 'app', component: AppComponent, children: [
-        
-    ]},
+    { path: '', component: BRADYBALLHomeScreenComponent }, // Default home screen
+    { path: 'BRADYBALL-home', component: BRADYBALLHomeScreenComponent },
+    { path: 'BRADYBALL-player-analysis', component: BRADYBALLCardScreenComponent },
+    { path: 'BRADYBALL-about', component: BRADYBALLAboutScreenComponent },
+    { path: '**', redirectTo: '/BRADYBALL-home' }, // Catch-all redirect
 ];
 
 @NgModule({
     imports: [RouterModule.forRoot(APP_ROUTES)],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
 export class AppRoutingModule { }

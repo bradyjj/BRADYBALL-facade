@@ -4,16 +4,15 @@ import { CommonModule } from "@angular/common";
 import { HttpClientModule } from "@angular/common/http";
 import { FontService } from "../../assets/fonts/font.service";
 import { FormsModule } from "@angular/forms";
-import { BRADYBALLAboutRoutingModule } from "./BRADYBALL-about-routing.module";
-import { BRADYBALLAboutScreenComponent } from "./components/BRADYBALL-about-screen/BRADYBALL-about-screen.component";
-import { BRADYBALLAboutPageComponent } from "./components/BRADYBALL-about-page/BRADYBALL-about-page.compoonent";
-import { ResumeComponent } from "./components/resume/resume.component";
+import { BRADYBALLHomePageComponent } from "./components/BRADYBALL-home-page/ BRADYBALL-home-page.component";
+import { BRADYBALLHomeScreenComponent } from "./components/BRADYBALL-home-screen/BRADYBALL-home-screen.component";
+import { BRADYBALLHomeRoutingModule } from "./BRADYBALL-home-routing.module";
 import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
 
 @NgModule({
     imports: [
         SharedModule,
-        BRADYBALLAboutRoutingModule,
+        BRADYBALLHomeRoutingModule,
         CommonModule,
         FormsModule,
         HttpClientModule,
@@ -21,12 +20,11 @@ import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
     ],
     exports: [],
     declarations: [
-        BRADYBALLAboutScreenComponent,
-        BRADYBALLAboutPageComponent,
-        ResumeComponent
+        BRADYBALLHomeScreenComponent,
+        BRADYBALLHomePageComponent,
     ],
     providers: [
         FontService,
     ],
 })
-export class BRADYBALLAboutModule { }
+export class BRADYBALLHomeModule { }

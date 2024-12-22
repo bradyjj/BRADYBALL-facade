@@ -2,13 +2,6 @@ $letter-width-px: 812; // 8.5in * 96dpi
 $letter-height-px: 1072; // 11in * 96dpi
 $page-margin: 38px; // 0.5in * 96dpi
 
-:host {
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: #f8f5e3;
-}
-
 .vintage-resume {
     width: #{$letter-width-px}px;
     height: #{$letter-height-px}px;
