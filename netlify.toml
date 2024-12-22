@@ -1,3 +1,3 @@
 [build]
-  command = "echo $SUPABASE_KEY && echo $SUPABASE_URL && ng build --configuration production"
+  command = "ng build --configuration production"
   publish = "dist/BRADYBALL-facade"
