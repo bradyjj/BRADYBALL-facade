@@ -4,7 +4,8 @@ module.exports = {
     plugins: [
         new Dotenv({
             path: '.env',
-            safe: true
+            safe: true,
+            systemvars: true
         })
     ],
     resolve: {
