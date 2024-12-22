@@ -7,9 +7,9 @@ import { BRADYBALLAboutScreenComponent } from "./BRADYBALL-about/components/BRAD
 
 export const APP_ROUTES: Routes = [
     { path: '', component: BRADYBALLHomeScreenComponent }, // Default home screen
-    { path: 'BRADYBALL-home', component: BRADYBALLHomeScreenComponent },
-    { path: 'BRADYBALL-player-analysis', component: BRADYBALLCardScreenComponent },
-    { path: 'BRADYBALL-about', component: BRADYBALLAboutScreenComponent },
+    { path: 'home', component: BRADYBALLHomeScreenComponent },
+    { path: 'player-analysis', component: BRADYBALLCardScreenComponent },
+    { path: 'about', component: BRADYBALLAboutScreenComponent },
     { path: '**', redirectTo: '/BRADYBALL-home' }, // Catch-all redirect
 ];
 

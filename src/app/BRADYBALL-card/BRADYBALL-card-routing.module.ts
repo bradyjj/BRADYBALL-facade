@@ -5,7 +5,7 @@ import { BRADYBALLCardScreenComponent } from './components/BRADYBALL-card-screen
 
 export const BRADYBALLCardRoutes: Routes = [
     {
-        path: 'BRADYBALL-card', children: [
+        path: 'player-analysis', children: [
             { path: '', component: BRADYBALLCardScreenComponent }
         ]
     },
