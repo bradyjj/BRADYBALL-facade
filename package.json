@@ -4,8 +4,7 @@
     "scripts": {
         "start": "ng serve",
         "devstart": "dotenv -e .env ng serve",
-        "build": "node set-env.js && ng build --configuration production",
-        "prestart": "node set-env.js",
+        "build": "ng build --configuration production",
         "build:ssr": "ng run BRADYBALL-facade:server:production"
     },
     "private": true,
@@ -37,7 +36,7 @@
     "devDependencies": {
         "@angular-builders/custom-webpack": "^16.0.1",
         "@angular-devkit/build-angular": "^16.2.0",
-        "@angular/cli": "^16.2.0",
+        "@angular/cli": "^16.2.16",
         "@angular/compiler-cli": "^16.2.0",
         "@types/d3": "^7.4.3",
         "@types/express": "^4.17.17",

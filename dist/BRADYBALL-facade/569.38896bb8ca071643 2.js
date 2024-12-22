@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkBRADYBALL_facade=self.webpackChunkBRADYBALL_facade||[]).push([[569],{569:e=>{e.exports=function(){throw new Error("ws does not work in the browser. Browser clients must use the native WebSocket object")}}}]);
