@@ -4,7 +4,7 @@
     "scripts": {
         "start": "ng serve",
         "devstart": "dotenv -e .env ng serve",
-        "build": "ng build --configuration production",
+        "build": "env NG_APP_IGNORE_ENV=true ng build --configuration production",
         "build:ssr": "ng run BRADYBALL-facade:server:production"
     },
     "private": true,
