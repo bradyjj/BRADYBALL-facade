@@ -7,6 +7,7 @@ import { FormsModule } from "@angular/forms";
 import { BRADYBALLHomePageComponent } from "./components/BRADYBALL-home-page/ BRADYBALL-home-page.component";
 import { BRADYBALLHomeScreenComponent } from "./components/BRADYBALL-home-screen/BRADYBALL-home-screen.component";
 import { BRADYBALLHomeRoutingModule } from "./BRADYBALL-home-routing.module";
+import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
 
 @NgModule({
     imports: [
@@ -14,12 +15,13 @@ import { BRADYBALLHomeRoutingModule } from "./BRADYBALL-home-routing.module";
         BRADYBALLHomeRoutingModule,
         CommonModule,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        BRADYBALLCommonModule
     ],
     exports: [],
     declarations: [
         BRADYBALLHomeScreenComponent,
-        BRADYBALLHomePageComponent
+        BRADYBALLHomePageComponent,
     ],
     providers: [
         FontService,

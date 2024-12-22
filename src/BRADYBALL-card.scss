@@ -63,19 +63,6 @@
     color: var(--bb-black-color);
 }
 
-/* Base Styles */
-html, body, app-root {
-    background-color: var(--bb-cream-off-white-color);
-    margin: 0;
-    padding: 0;
-}
-
-/* Layout Components */
-.bradyball-container {
-    min-height: 100vh;
-    background-color: var(--bb-cream-off-white-color);
-}
-
 /* Button Styles */
 .bb-button {
     background-color: var(--bb-red-card-color);

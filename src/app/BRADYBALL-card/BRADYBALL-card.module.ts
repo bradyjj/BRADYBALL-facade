@@ -12,6 +12,7 @@ import { FontService } from "../../assets/fonts/font.service";
 import { BRADYBALLCardUtil } from "./util/BRADYBALL-card.util";
 import { PercentileRankComponent } from './components/percentile-rank/percentile-rank.component';
 import { FormsModule } from "@angular/forms";
+import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
 
 @NgModule({
     imports: [
@@ -19,7 +20,8 @@ import { FormsModule } from "@angular/forms";
         BRADYBALLCardRoutingModule,
         CommonModule,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        BRADYBALLCommonModule
     ],
     exports: [],
     declarations: [
