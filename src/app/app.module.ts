@@ -5,7 +5,7 @@ import { RouterModule } from "@angular/router";
 
 import { AppComponent } from "./app.component";
 import { APP_ROUTES, AppRoutingModule } from "./app.routing";
-import { BRADYBALLCardModule } from "./BRADYBALL-card/BRADYBALL-card.module";
+import { BRADYBALLPlayerAnalysisModule } from "./BRADYBALL-player-analysis/BRADYBALL-player-analysis.module";
 import { BRADYBALLAboutModule } from "./BRADYBALL-about/BRADYBALL-about.module";
 import { BRADYBALLHomeModule } from "./BRADYBALL-home/BRADYBALL-home.module";
 import { BRADYBALLCommonModule } from "./common/BRADYBALL-common.module";
@@ -19,7 +19,7 @@ import { FontService } from "../assets/fonts/font.service";
         BrowserModule,
         HttpClientModule,
         AppRoutingModule,
-        BRADYBALLCardModule,
+        BRADYBALLPlayerAnalysisModule,
         BRADYBALLAboutModule,
         BRADYBALLHomeModule,
         BRADYBALLCommonModule,

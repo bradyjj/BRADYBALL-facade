@@ -5,8 +5,8 @@ import { HttpClientModule } from "@angular/common/http";
 import { FontService } from "../../assets/fonts/font.service";
 import { FormsModule } from "@angular/forms";
 import { BRADYBALLAboutRoutingModule } from "./BRADYBALL-about-routing.module";
-import { BRADYBALLAboutScreenComponent } from "./components/BRADYBALL-about-screen/BRADYBALL-about-screen.component";
-import { BRADYBALLAboutPageComponent } from "./components/BRADYBALL-about-page/BRADYBALL-about-page.compoonent";
+import { AboutScreenComponent } from "./components/about-screen/about-screen.component";
+import { AboutPageComponent } from "./components/about-page/about-page.compoonent";
 import { ResumeComponent } from "./components/resume/resume.component";
 import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
 
@@ -21,8 +21,8 @@ import { BRADYBALLCommonModule } from "../common/BRADYBALL-common.module";
     ],
     exports: [],
     declarations: [
-        BRADYBALLAboutScreenComponent,
-        BRADYBALLAboutPageComponent,
+        AboutScreenComponent,
+        AboutPageComponent,
         ResumeComponent
     ],
     providers: [

@@ -6,15 +6,17 @@ import 'd3-transition';
 import { Goal } from '../../../common/models/goal.model';
 
 @Component({
-    selector: 'BRADYBALL-home-screen',
-    templateUrl: './BRADYBALL-home-screen.component.html',
-    styleUrls: ['./BRADYBALL-home-screen.component.scss']
+    selector: 'home-screen',
+    templateUrl: './home-screen.component.html',
+    styleUrls: ['./home-screen.component.scss']
 })
-export class BRADYBALLHomeScreenComponent implements AfterViewInit, OnDestroy {
+export class HomeScreenComponent implements AfterViewInit, OnDestroy {
     @ViewChild('pitchSvg') svgElement!: ElementRef;
     isCollapsed = false;
+    
     private svg!: Selection<SVGElement, unknown, null, undefined>;
     private animationFrameId: number | null = null;
+
     exampleGoal: Goal =
         {
             "id": 2259,

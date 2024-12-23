@@ -1,7 +1,7 @@
 import { Component, Input, ElementRef, OnInit, OnChanges, AfterViewInit, SimpleChanges } from '@angular/core';
 import * as d3 from 'd3';
 import { FontService } from '../../../../assets/fonts/font.service';
-import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
+import { BRADYBALLCardUtil } from '../../util/player-analysis.util';
 import { PercentileRankData } from '../../models/percentile-rank.model';
 
 @Component({

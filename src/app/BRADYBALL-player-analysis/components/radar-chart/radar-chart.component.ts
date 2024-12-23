@@ -2,7 +2,7 @@ import { Component, Input, ElementRef, SimpleChanges, OnChanges, AfterViewInit, 
 import * as d3 from 'd3';
 import { RadarChartPlayerData, RadarChartDataPoint } from '../../models/radar-chart-player.model';
 import { FontService } from '../../../../assets/fonts/font.service';
-import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
+import { BRADYBALLCardUtil } from '../../util/player-analysis.util';
 
 @Component({
     selector: 'radar-chart',

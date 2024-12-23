@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-    selector: 'BRADYBALL-card-screen',
-    templateUrl: './BRADYBALL-card-screen.component.html',
-    styleUrls: ['./BRADYBALL-card-screen.component.scss'],
+    selector: 'player-analysis-screen',
+    templateUrl: './player-analysis-screen.component.html',
+    styleUrls: ['./player-analysis-screen.component.scss'],
 })
-export class BRADYBALLCardScreenComponent {
+export class PlayerAnalysisScreenComponent {
 
     isCollapsed = false;
     

@@ -4,7 +4,7 @@ import { Player } from '../../models/player.model';
 import { PlayerStat } from '../../models/player-stat.model';
 import { RadarChartDataPoint, RadarChartPlayerData } from '../../models/radar-chart-player.model';
 import { StatLineData } from '../../models/stat-line-player.model';
-import { BRADYBALLCardUtil } from '../../util/BRADYBALL-card.util';
+import { BRADYBALLCardUtil } from '../../util/player-analysis.util';
 import { StatLineComponent } from '../stat-line/stat-line.component';
 import { RadarChartComponent } from '../radar-chart/radar-chart.component';
 import { PercentileRankComponent } from '../percentile-rank/percentile-rank.component';

@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { BRADYBALLHomeScreenComponent } from './components/BRADYBALL-home-screen/BRADYBALL-home-screen.component';
+import { HomeScreenComponent } from './components/home-screen/home-screen.component';
 
 export const BRADYBALLHomeRoutes: Routes = [
     {
         path: 'home', children: [
-            { path: '', component: BRADYBALLHomeScreenComponent }
+            { path: '', component: HomeScreenComponent }
         ]
     },
 ];
@@ -15,4 +15,4 @@ export const BRADYBALLHomeRoutes: Routes = [
     exports: [RouterModule]
 })
 export class BRADYBALLHomeRoutingModule { }
-export const routedComponents = [BRADYBALLHomeScreenComponent];
+export const routedComponents = [HomeScreenComponent];
