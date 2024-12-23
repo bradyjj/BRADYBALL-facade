@@ -1,4 +1,4 @@
-# BRADYBALL-Facade
+# BRADYBALL-Facade | [BRADYBALL.net](https://BRADYBALL.net)
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.0.
 
@@ -16,7 +16,8 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Run
 
-Run 'ng serve' to run the project at http://localhost:4200/
+1. Run 'npm i' to install packages
+2. Run 'npm run devstart' to run the project at http://localhost:4200/
 
 ## Running unit tests
 
@@ -32,5 +33,5 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## Setup Configuration
 
-1. Copy `src/config.sample.ts` to `src/config.ts`.
-2. Replace `'YOUR_SUPABASE_URL'` and `'YOUR_SUPABASE_ANON_KEY'` with your actual Supabase credentials.
+1. Copy `.env.example` to `.env`.
+2. Replace `SUPABASE_URL'` and `'SUPABASE_KEY'` with your actual Supabase credentials.
