@@ -5,13 +5,15 @@ import { HttpClientModule } from "@angular/common/http";
 import { FormsModule } from "@angular/forms";
 import { BRADYBALLHeaderComponent } from "./BRADYBALL-header/BRADYBALL-header.component";
 import { BRADYBALLFooterComponent } from "./BRADYBALL-footer/BRADYBALL-footer.component";
+import { AppRoutingModule } from "../app.routing";
 
 @NgModule({
     imports: [
         SharedModule,
         CommonModule,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        AppRoutingModule
     ],
     exports: [
         BRADYBALLFooterComponent,

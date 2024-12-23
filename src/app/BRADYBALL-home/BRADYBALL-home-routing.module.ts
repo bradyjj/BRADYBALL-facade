@@ -4,7 +4,7 @@ import { BRADYBALLHomeScreenComponent } from './components/BRADYBALL-home-screen
 
 export const BRADYBALLHomeRoutes: Routes = [
     {
-        path: 'BRADYBALL-home', children: [
+        path: 'home', children: [
             { path: '', component: BRADYBALLHomeScreenComponent }
         ]
     },

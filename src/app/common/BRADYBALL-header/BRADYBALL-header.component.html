@@ -2,12 +2,13 @@
     <div class="bg-warning p-3 d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0">
-                <a class="text-dark text-decoration-none" routerLink="/BRADYBALL-home" href="/#/BRADYBALL-home">
+                <a class="btn text-dark text-decoration-none" (click)="navigateHome()">
                     <span *ngIf="!isCollapsed">BRADYBALL LOGO</span>
                     <span *ngIf="isCollapsed">B</span>
                 </a>
             </h4>
         </div>
+
         <button class="btn collapse-button" (click)="toggleCollapse()">
             <i class="bi" [ngClass]="{'bi-chevron-left': !isCollapsed, 'bi-chevron-right': isCollapsed}"></i>
         </button>
@@ -16,16 +17,16 @@
     <nav class="p-3" [ngClass]="{'d-none': isCollapsed}">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/about" href="/#/about">About BRADYBALL</a>
+                <a class="nav-link text-dark" routerLink="/about">About BRADYBALL</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/player-analysis" href="/#/player-analysis">Player Analysis</a>
+                <a class="nav-link text-dark" routerLink="/player-analysis">Player Analysis</a>
             </li>
             <li class="nav-itemI">
-                <a class="nav-link text-dark" routerLink="/team-insights" href="/#/team-insights">Team Insights</a>
+                <a class="nav-link text-dark" routerLink="/team-insights">Team Insights</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/season-trends" href="/#/season-trends">Season Trends</a>
+                <a class="nav-link text-dark" routerLink="/season-trends">Season Trends</a>
             </li>
         </ul>
     </nav>

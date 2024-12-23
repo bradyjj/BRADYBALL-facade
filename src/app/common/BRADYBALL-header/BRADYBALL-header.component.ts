@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'BRADYBALL-header',
@@ -9,8 +10,11 @@ export class BRADYBALLHeaderComponent {
     isCollapsed = false;
     @Output() collapseChanged = new EventEmitter<boolean>();
 
-    refreshPage(): void {
-        window.location.reload();
+    constructor(private router: Router) {}
+
+    // Method to navigate to /home
+    navigateHome(): void {
+        this.router.navigateByUrl('/home');
     }
 
     toggleCollapse(): void {

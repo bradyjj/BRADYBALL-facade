@@ -23,7 +23,7 @@ import { FontService } from "../assets/fonts/font.service";
         BRADYBALLAboutModule,
         BRADYBALLHomeModule,
         BRADYBALLCommonModule,
-        RouterModule.forRoot(APP_ROUTES, { useHash: true })
+        RouterModule.forRoot(APP_ROUTES, { useHash: false })
     ],
     providers: [FontService],
     bootstrap: [AppComponent]
