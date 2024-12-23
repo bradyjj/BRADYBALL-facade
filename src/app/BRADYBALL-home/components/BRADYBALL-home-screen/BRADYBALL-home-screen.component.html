@@ -5,13 +5,7 @@
             <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
         </div>
         <div class="col main-content" [ngClass]="{'expanded': isCollapsed}">
-            <div class="gradient-container">
-                <svg #gradientSvg class="gradient-svg"></svg>
-                <div class="text-overlay">
-                    <h1>BRADYBALL</h1>
-                    <p>Football Analytics Reimagined</p>
-                </div>
-            </div>
+            <BRADYBALL-pitch [goal]="exampleGoal"></BRADYBALL-pitch>
             <BRADYBALL-footer></BRADYBALL-footer>
         </div>
     </div>
