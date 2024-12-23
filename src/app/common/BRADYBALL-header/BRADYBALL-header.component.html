@@ -1,6 +1,7 @@
-<div class="header-container" [ngClass]="{'collapsed': isCollapsed}">
+<div class="header-container d-flex flex-column" [ngClass]="{'collapsed': isCollapsed}">
     <div class="bg-warning p-3 d-flex justify-content-between align-items-center">
-        <div>
+        <div class="d-flex align-items-center">
+            <!-- Logo section (B or full logo) -->
             <h4 class="mb-0">
                 <a class="btn text-dark text-decoration-none" (click)="navigateHome()">
                     <span *ngIf="!isCollapsed">BRADYBALL LOGO</span>
@@ -9,11 +10,13 @@
             </h4>
         </div>
 
-        <button class="btn collapse-button" (click)="toggleCollapse()">
+        <!-- Chevron button -->
+        <button class="btn p-0" (click)="toggleCollapse()">
             <i class="bi" [ngClass]="{'bi-chevron-left': !isCollapsed, 'bi-chevron-right': isCollapsed}"></i>
         </button>
     </div>
 
+    <!-- Navigation list that collapses when `isCollapsed` is true -->
     <nav class="p-3" [ngClass]="{'d-none': isCollapsed}">
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -22,7 +25,7 @@
             <li class="nav-item">
                 <a class="nav-link text-dark" routerLink="/player-analysis">Player Analysis</a>
             </li>
-            <li class="nav-itemI">
+            <li class="nav-item">
                 <a class="nav-link text-dark" routerLink="/team-insights">Team Insights</a>
             </li>
             <li class="nav-item">
