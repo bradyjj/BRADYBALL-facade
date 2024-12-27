@@ -1,10 +1,103 @@
+<!-- about-screen.component.html -->
 <div class="container-fluid p-0">
     <div class="row g-0">
         <div class="col-auto">
             <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
         </div>
         <div class="col main-content" [ngClass]="{'expanded': isCollapsed}">
-            <resume></resume>
+            <!-- Page Title Header -->
+            <div class="bb-page-header">
+                <h1>About BRADYBALL</h1>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="container-fluid py-3">
+                <div class="row">
+                    <!-- Left Side - Tables -->
+                    <div class="col-md-5">
+                        <div class="px-3">
+                            <h2 class="bb-text-berkeley-mono fs-5 mb-2">Personal Information</h2>
+                            <table class="bb-table">
+                                <tbody>
+                                    <tr>
+                                        <td>Name</td>
+                                        <td>Brady Jacobs</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Occupation</td>
+                                        <td>Full-stack Software Engineer</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Employer</td>
+                                        <td>
+                                            <span class="text-decoration-none">Manhattan Associates</span>                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Previous Occupations</td>
+                                        <td>Machine Learning Research Assistant<br>Senior Teaching Assistant</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Previous Employers</td>
+                                        <td>
+                                            <span class="text-decoration-none">Clemson University</span>                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Education</td>
+                                        <td>
+                                            <div class="text-decoration-none">BS Computer Science</div>
+                                            <a href="https://www.clemson.edu/" class="text-decoration-none">Clemson University</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h2 class="bb-text-berkeley-mono fs-5 mb-2 mt-3">Contact</h2>
+                            <table class="bb-table">
+                                <tbody>
+                                    <tr>
+                                        <td>Email</td>
+                                        <td><a href="mailto:bradyjacobs@gmail.com"
+                                                class="text-decoration-none">bradyjjacobs@gmail.com</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Phone</td>
+                                        <td>+1 (864)-499-6768</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Github</td>
+                                        <td><a href="#" class="text-decoration-none">github.com/bradyjj</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td>LinkedIn</td>
+                                        <td><a href="#" class="text-decoration-none">linkedin.com/in/bradyjacobs</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h2 class="bb-text-berkeley-mono fs-5 mb-2 mt-3">Notes</h2>
+                            <table class="bb-table">
+                                <tbody>
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>Player Performance Analysis</td>
+                                        <td><a routerLink="/player-analysis" class="text-decoration-none">Read →</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Side - Resume -->
+                    <div class="col-md-7">
+                        <h2 class="bb-text-berkeley-mono fs-5 mb-2">Resume</h2>
+                        <div>
+                            <resume></resume>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <BRADYBALL-footer></BRADYBALL-footer>
         </div>
     </div>

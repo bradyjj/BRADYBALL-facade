@@ -1,3 +1,37 @@
-<div class="pitch-container">
-    <svg #pitch></svg>
+<div class="vh-100">
+    <div class="bb-card d-flex m-0">
+        <div class="row g-0 flex-grow-1">
+            <!-- Main Content Column -->
+            <div class="col-12 d-flex flex-column">
+                <!-- Header Section -->
+                <div class="pitch-header p-3">
+                    <h3 class="bb-text-league-spartan mb-0">{{goal?.fixture_name}}</h3>
+                    <div class="d-flex justify-content-between align-items-baseline">
+                        <div>
+                            <div class="bb-text-courier-prime text-muted small">
+                                {{goal?.competition_name}} | {{goal?.season}}
+                            </div>
+                            <div class="bb-text-courier-prime mt-1">
+                                {{goal?.team}} - <span class="bb-text-bold">{{goal?.goal_scorer}}</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="bb-text-league-spartan bb-text-bold small">xG</div>
+                            <div class="bb-text-pinegrove bb-text-bold" 
+                                 style="color: var(--bb-brown-gold-color)">
+                                {{goal?.shot_xg | number:'1.2-2'}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pitch Container -->
+                <div class="pitch-container flex-grow-1">
+                    <div class="sandlot-frame h-100">
+                        <svg #pitch class="w-100 h-100"></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

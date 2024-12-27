@@ -1,10 +1,43 @@
-@import "./BRADYBALL-card.scss";
+@import "./BRADYBALL.scss";
+
+:host {
+    display: block;
+    min-height: 100vh;
+    background-color: var(--bb-cream-off-white-color);
+}
 
 .main-content {
     width: 75%;
     transition: width 0.3s;
-    
+    background-color: var(--bb-cream-off-white-color);
+
     &.expanded {
         width: calc(100% - 3.75rem);
+    }
+}
+
+// Add the new page header style
+.bb-page-header {
+    padding: 1.5rem 2rem;
+    position: relative;
+    
+    h1 {
+        font-family: 'TX-02';
+        font-weight: 500;
+        font-size: 1.75rem;
+        color: var(--bb-black-color);
+        margin: 0;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 2rem;
+        right: 2rem;
+        bottom: .5rem;
+        height: 2px;
+        background-color: var(--bb-black-color);
     }
 }

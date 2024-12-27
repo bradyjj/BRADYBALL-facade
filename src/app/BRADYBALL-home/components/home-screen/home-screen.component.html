@@ -3,9 +3,16 @@
         <div class="col-auto">
             <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
         </div>
-        <div class="col main-content" [ngClass]="{'expanded': isCollapsed}">
-            <pitch [goal]="exampleGoal"></pitch>
-            <footer></footer>
+
+        <div class=" col main-content" [ngClass]="{'expanded': isCollapsed}">
+            <div class="bb-page-header">
+                <h1>BRADYBALL Home</h1>
+            </div>
+
+            <div class="container-fluid py-3">
+                <pitch [goal]="exampleGoal"></pitch>
+            </div>
+            <BRADYBALL-footer></BRADYBALL-footer>
         </div>
     </div>
 </div>

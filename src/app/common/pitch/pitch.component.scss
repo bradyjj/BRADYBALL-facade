@@ -1,11 +1,95 @@
-.pitch-container {
-    width: 100%;
-    height: 100%;
-    background-color: #1a1a1a;
-    padding: 20px;
+.pitch-header {
+    background-color: var(--bb-cream-off-white-color);
+    border-bottom: 3px solid var(--bb-black-color);
+    min-height: 90px;
+}
 
-    svg {
-        width: 100%;
-        height: 100%;
+.pitch-container {
+    background-color: var(--bb-black-color);
+    padding: 1rem;
+}
+
+.sandlot-frame {
+    background: #2b2b2b;
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    border: 3px solid var(--bb-black-color);
+    padding: 1rem;
+    position: relative;
+}
+
+.event-stream-col {
+    border-left: 3px solid var(--bb-black-color);
+    background-color: var(--bb-cream-off-white-color);
+}
+
+.event-list {
+    position: relative;
+}
+
+.event-scroll {
+    height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding-right: 0.5rem;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--bb-brown-gold-color);
+        border-radius: 3px;
+    }
+}
+
+.event-card {
+    background: var(--bb-white-color);
+    border: 2px solid var(--bb-brown-gold-color);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &.active {
+        transform: translateX(5px);
+        border-color: var(--bb-red-card-color);
+    }
+
+    .event-time {
+        color: var(--bb-brown-gold-color);
+        font-size: 0.9rem;
+    }
+
+    .player-name {
+        color: var(--bb-black-color);
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .event-type {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: var(--bb-white-color);
+    }
+
+    .pass-badge {
+        background-color: var(--bb-blue-card-color);
+    }
+
+    .shot-badge {
+        background-color: var(--bb-red-card-color);
+    }
+
+    .carry-badge {
+        background-color: #4CAF50
+    }
+
+    .key-pass-badge {
+        background-color: #000000;
+        color: #ffeb3b;
     }
 }
