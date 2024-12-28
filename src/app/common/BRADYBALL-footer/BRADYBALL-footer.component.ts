@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'BRADYBALL-footer',
@@ -6,5 +7,5 @@ import { Component } from '@angular/core';
     styleUrls: ['./BRADYBALL-footer.component.scss']
 })
 export class BRADYBALLFooterComponent {
-    constructor() { }
+    constructor(private router: Router) { }
 }

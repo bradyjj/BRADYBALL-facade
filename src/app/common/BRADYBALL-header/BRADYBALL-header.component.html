@@ -1,39 +1,42 @@
-<div class="header-container d-flex flex-column" [ngClass]="{'collapsed': isCollapsed}">
-    <div class="p-3 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center">
-            <!-- Logo section (B or full logo) -->
-            <h4 class="mb-0">
-                <a class="btn fs-4" (click)="navigateHome()">
-                    <span class="bb-text-courier-prime" *ngIf="!isCollapsed">BRADYBALL</span>
-                    <span class="bb-text-courier-prime" *ngIf="isCollapsed">B</span>
-                </a>
-            </h4>
+<!-- Header Template -->
+<div class="h-100 bg-white">
+    <div class="header-container d-flex flex-column" [ngClass]="{'collapsed': isCollapsed}">
+        <div class="p-3 d-flex justify-content-between align-items-center">
+            <!-- Logo section -->
+            <div class="d-flex align-items-center">
+                <h4 class="mb-0">
+                    <a class="btn fs-4" (click)="navigateHome()">
+                        <span class="bb-text-courier-prime" *ngIf="!isCollapsed">BRADYBALL</span>
+                        <span class="bb-text-courier-prime" *ngIf="isCollapsed">B</span>
+                    </a>
+                </h4>
+            </div>
+
+            <!-- Chevron toggle -->
+            <button class="btn p-0" (click)="toggleCollapse()">
+                <i class="bi" [ngClass]="{'bi-chevron-left': !isCollapsed, 'bi-chevron-right': isCollapsed}"></i>
+            </button>
         </div>
 
-        <!-- Chevron button -->
-        <button class="btn p-0" (click)="toggleCollapse()">
-            <i class="bi" [ngClass]="{'bi-chevron-left': !isCollapsed, 'bi-chevron-right': isCollapsed}"></i>
-        </button>
+        <!-- Navigation -->
+        <nav class="p-3" [ngClass]="{'d-none': isCollapsed}">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/home" routerLinkActive="active">
+                        BRADYBALL Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/about" routerLinkActive="active">
+                        About
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" routerLink="/player-analysis" routerLinkActive="active">
+                        Player Analysis
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
-
-    <!-- Navigation list that collapses when `isCollapsed` is true -->
-    <nav class="p-3 bb-text-berkeley-mono" [ngClass]="{'d-none': isCollapsed}">
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/home" routerLinkActive="active">
-                    Home
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/about" routerLinkActive="active">
-                    About BRADYBALL
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" routerLink="/player-analysis" routerLinkActive="active">
-                    Player Analysis
-                </a>
-            </li>
-        </ul>
-    </nav>
 </div>

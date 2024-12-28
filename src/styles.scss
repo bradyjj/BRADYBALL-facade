@@ -1,43 +1,41 @@
 @import "./BRADYBALL.scss";
 
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--bb-cream-off-white-color);
+}
+
 :host {
     display: block;
     min-height: 100vh;
     background-color: var(--bb-cream-off-white-color);
 }
 
+.header-container {
+    background-color: #fff;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: sticky;
+    top: 0;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+    background-color: var(--bb-cream-off-white-color);
+}
+
 .main-content {
     width: 75%;
+    margin: auto;
     transition: width 0.3s;
     background-color: var(--bb-cream-off-white-color);
 
     &.expanded {
         width: calc(100% - 3.75rem);
-    }
-}
-
-// Add the new page header style
-.bb-page-header {
-    padding: 1.5rem 2rem;
-    position: relative;
-    
-    h1 {
-        font-family: 'TX-02';
-        font-weight: 500;
-        font-size: 1.75rem;
-        color: var(--bb-black-color);
-        margin: 0;
-        padding-bottom: 0.5rem;
-        display: inline-block;
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        left: 2rem;
-        right: 2rem;
-        bottom: .5rem;
-        height: 2px;
-        background-color: var(--bb-black-color);
     }
 }
