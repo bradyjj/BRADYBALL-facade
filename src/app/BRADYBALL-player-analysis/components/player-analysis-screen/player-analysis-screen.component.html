@@ -1,0 +1,17 @@
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <div class="col-auto">
+            <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
+        </div>
+        <div class="col main-content" [ngClass]="{'expanded': isCollapsed}">
+            <div class="bb-page-header">
+                <h1>Player Analysis</h1>
+            </div>
+
+            <div class="col px-0">
+                <player-search></player-search>
+            </div>
+            <BRADYBALL-footer></BRADYBALL-footer>
+        </div>
+    </div>
+</div>

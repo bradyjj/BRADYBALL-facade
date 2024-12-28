@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { BRADYBALLCardConstants } from '../../BRADYBALL-card/util/BRADYBALL-card.constant';
+import { BRADYBALLCardConstants } from '../../BRADYBALL-player-analysis/util/player-analysis.constant';
 import { environment } from '../../../environments/environment';
 
 const SUPABASE_KEY = environment.SUPABASE_KEY;

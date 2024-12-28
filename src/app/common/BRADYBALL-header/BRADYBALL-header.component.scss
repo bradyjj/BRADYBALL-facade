@@ -1,9 +1,95 @@
+/* Header Styles */
 .header-container {
-    height: 100vh;
-    background-color: #fff;
-    width: 100%;
-
+    min-height: 100vh;
+    font-family: var(--font-berkeley-mono);
+    
     &.collapsed {
-        width: 5rem;
+        .nav {
+            display: none;
+        }
+    }
+}
+
+/* Navigation Items */
+.nav-item {
+    margin-bottom: 1rem;
+
+    .nav-link {
+        font-family: var(--font-berkeley-mono);
+        position: relative;
+        height: 2rem;
+        padding: 0.25rem 1rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0;
+        box-shadow: 3px 2px 0 #dee2e6;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        width: 16rem; /* Increased from 12rem */
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.active {
+            padding-left: 1.5rem;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 8px;
+                height: 8px;
+                background-color: var(--bb-red-color);
+                border-radius: 50%;
+            }
+        }
+
+        &:hover {
+            background-color: #000;
+            border-color: #000;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        &:active {
+            transform: translateY(1px) translateX(1px);
+            box-shadow: 2px 1px 0 #dee2e6;
+        }
+    }
+}
+
+/* Logo Styles */
+.btn.bb-text-courier-prime {
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+/* Chevron Button Styles */
+.bi {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+
+    &.bi-chevron-left {
+        transform: rotate(0deg);
+    }
+
+    &.bi-chevron-right {
+        transform: rotate(180deg);
+    }
+}
+
+/* Collapse Animation */
+.nav {
+    transition: opacity 0.3s ease;
+
+    &.d-none {
+        opacity: 0;
     }
 }

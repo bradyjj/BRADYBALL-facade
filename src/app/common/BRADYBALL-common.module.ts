@@ -6,6 +6,7 @@ import { FormsModule } from "@angular/forms";
 import { BRADYBALLHeaderComponent } from "./BRADYBALL-header/BRADYBALL-header.component";
 import { BRADYBALLFooterComponent } from "./BRADYBALL-footer/BRADYBALL-footer.component";
 import { AppRoutingModule } from "../app.routing";
+import { PitchComponent } from "./pitch/pitch.component";
 
 @NgModule({
     imports: [
@@ -18,10 +19,12 @@ import { AppRoutingModule } from "../app.routing";
     exports: [
         BRADYBALLFooterComponent,
         BRADYBALLHeaderComponent,
+        PitchComponent,
     ],
     declarations: [
         BRADYBALLFooterComponent,
         BRADYBALLHeaderComponent,
+        PitchComponent,
     ]
 })
 export class BRADYBALLCommonModule { }

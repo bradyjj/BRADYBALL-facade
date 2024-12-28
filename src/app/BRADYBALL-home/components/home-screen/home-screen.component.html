@@ -1,0 +1,81 @@
+<!-- home.component.html -->
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <div class="col-auto">
+            <BRADYBALL-header (collapseChanged)="onHeaderCollapseChanged($event)"></BRADYBALL-header>
+        </div>
+
+        <div class="col main-content d-flex flex-column" [ngClass]="{'expanded': isCollapsed}">
+            <!-- Header -->
+            <div class="bb-page-header">
+                <h1>BRADYBALL Home</h1>
+            </div>
+
+            <!-- Welcome Section -->
+            <div class="bb-content-wrapper flex-grow-1 d-flex flex-column">
+                <!-- Subheader -->
+                <div class="bb-page-subheader">
+                    <h2>Welcome to BRADYBALL</h2>
+                </div>
+
+                <div class="row mt-4">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <div class="bb-text-berkeley-mono">
+                            An engineer's precision, an artist's creativity, and an athlete's intuition-
+                        </div>
+                        <div class="definition-block mt-3">
+                            <div class="definition-content">
+                                <span class="bb-text-berkeley-mono bb-text-bold text-italic">BRADYBALL</span><span
+                                    class="bb-text-berkeley-mono"> — An innovative approach to understanding soccer that
+                                    combines cutting-edge machine learning, intricate tactical analysis, and a deep
+                                    appreciation for the sport's artistic flair, yielding unparalleled insights into
+                                    player performance, match dynamics, and team strategies</span>
+                            </div>
+                        </div>
+                        <div class="bb-text-berkeley-mono mt-3">
+                            Simply put, we harnass the mathematical precision and tactical artistry to decode the game's beautiful
+                            complexities.
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <div class="bb-text-berkeley-mono bb-text-bold">Our Philosophy</div>
+                        <ul class="bb-list bb-text-berkeley-mono mt-3">
+                            <li>Analyze data within the context of game dynamics.</li>
+                            <li>Include multiple viewpoints in decision-making to challenge initial assumptions.</li>
+                            <li>Question opinions, but appreciate feedback from others.</li>
+                            <li>Performance is quantifiable.</li>
+                            <li>Every detail matters.</li>
+                            <li>Evaluate decisions based on the process and logic, not just the result.</li>
+                            <li>Accept responsibility for failures and learn from them.</li>
+                            <li>Self-belief is immensely powerful.</li>
+                            <li>Momentum compounds; compounding momentum.</li>
+                            <li>Enable the dreams of others.</li>
+                            <li>Search for and find the <span class="text-italic">"Headfake."</span></li>
+                            <li>Extreme people get extreme results.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Subheader -->
+                <div class="mt-4">
+                    <div class="bb-page-subheader">
+                        <h2>Goal Simulator</h2>
+                    </div>
+
+                    <!-- Pitch Section -->
+                    <div class="container-fluid py-3 pitch-container-wrapper">
+                        <pitch [goal]="exampleGoal"></pitch>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-auto">
+                <BRADYBALL-footer></BRADYBALL-footer>
+            </div>
+        </div>
+    </div>
+</div>

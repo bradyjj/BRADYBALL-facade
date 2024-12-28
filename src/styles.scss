@@ -1,9 +1,40 @@
-@import "./BRADYBALL-card.scss";
+@import "./BRADYBALL.scss";
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: var(--bb-cream-off-white-color);
+}
+
+:host {
+    display: block;
+    min-height: 100vh;
+    background-color: var(--bb-cream-off-white-color);
+}
+
+.header-container {
+    background-color: #fff;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: sticky;
+    top: 0;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+    background-color: var(--bb-cream-off-white-color);
+}
 
 .main-content {
     width: 75%;
+    margin: auto;
     transition: width 0.3s;
-    
+    background-color: var(--bb-cream-off-white-color);
+
     &.expanded {
         width: calc(100% - 3.75rem);
     }
