@@ -1,95 +1,122 @@
-/* Header Styles */
+@import "src/styles/mixins.scss";
+
 .header-container {
     min-height: 100vh;
     font-family: var(--font-berkeley-mono);
-    
-    &.collapsed {
+
+    @include mobile {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1030;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        min-height: auto;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+
         .nav {
-            display: none;
+            max-width: 100vw;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
     }
 }
 
-/* Navigation Items */
+.mobile-header {
+    @include mobile {
+        height: 48px;
+        padding: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+}
+
+.nav-link {
+    position: relative;
+    height: 2rem;
+    padding: 0.25rem 1rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    box-shadow: 3px 2px 0 #dee2e6;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    width: 16rem;
+    color: #000 !important;
+
+    @include mobile {
+        width: auto;
+        min-width: 70px;
+        height: 28px;
+        font-size: 0.7rem;
+        line-height: 1;
+        padding: 0 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 2px 1px 0 #dee2e6;
+        margin-left: 0.5rem;
+    }
+
+    &.active {
+        padding-left: 1.5rem;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--bb-red-color);
+            border-radius: 50%;
+        }
+
+        @include mobile {            
+            &::before {
+                left: .75rem;
+                width: 4px;
+                height: 4px;
+            }
+        }
+    }
+
+    &:hover {
+        background-color: #000;
+        border-color: #000;
+        color: #fff !important;
+        text-decoration: none;
+    }
+
+    &:active {
+        transform: translateY(1px) translateX(1px);
+        box-shadow: 2px 1px 0 #dee2e6;
+    }
+}
+
 .nav-item {
     margin-bottom: 1rem;
 
-    .nav-link {
-        font-family: var(--font-berkeley-mono);
-        position: relative;
-        height: 2rem;
-        padding: 0.25rem 1rem;
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        border-radius: 0;
-        box-shadow: 3px 2px 0 #dee2e6;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        width: 16rem; /* Increased from 12rem */
-        color: #000;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        &.active {
-            padding-left: 1.5rem;
-
-            &::before {
-                content: '';
-                position: absolute;
-                left: 0.5rem;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 8px;
-                height: 8px;
-                background-color: var(--bb-red-color);
-                border-radius: 50%;
-            }
-        }
-
-        &:hover {
-            background-color: #000;
-            border-color: #000;
-            color: #fff;
-            text-decoration: none;
-        }
-
-        &:active {
-            transform: translateY(1px) translateX(1px);
-            box-shadow: 2px 1px 0 #dee2e6;
-        }
+    @include mobile {
+        margin: 0;
     }
 }
 
-/* Logo Styles */
-.btn.bb-text-courier-prime {
-    &:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-}
-
-/* Chevron Button Styles */
 .bi {
     font-size: 1.25rem;
     transition: transform 0.3s ease;
 
-    &.bi-chevron-left {
-        transform: rotate(0deg);
-    }
-
-    &.bi-chevron-right {
-        transform: rotate(180deg);
-    }
+    &.bi-chevron-left { transform: rotate(0deg); }
+    &.bi-chevron-right { transform: rotate(180deg); }
+    
+    @include mobile { display: none; }
 }
 
-/* Collapse Animation */
-.nav {
-    transition: opacity 0.3s ease;
-
-    &.d-none {
-        opacity: 0;
+:host {
+    @include mobile {
+        & + * {
+            margin-top: 48px;
+        }
     }
 }

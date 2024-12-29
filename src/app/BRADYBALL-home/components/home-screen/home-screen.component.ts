@@ -4,6 +4,8 @@ import { select, Selection } from 'd3-selection';
 import * as d3 from 'd3';
 import 'd3-transition';
 import { Goal } from '../../../common/models/goal.model';
+import { Subject, takeUntil } from 'rxjs';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
     selector: 'home-screen',
@@ -12,10 +14,13 @@ import { Goal } from '../../../common/models/goal.model';
 })
 export class HomeScreenComponent implements AfterViewInit, OnDestroy {
     @ViewChild('pitchSvg') svgElement!: ElementRef;
+    
     isCollapsed = false;
-
+    isMobile = false;
+    private destroy$ = new Subject<void>();
     private svg!: Selection<SVGElement, unknown, null, undefined>;
     private animationFrameId: number | null = null;
+
 
     exampleGoal: Goal =
         {
@@ -242,30 +247,77 @@ export class HomeScreenComponent implements AfterViewInit, OnDestroy {
             "shot_technique": "Right Foot Volley"
         }
 
+    constructor(private breakpointObserver: BreakpointObserver) {
+        // Initialize mobile detection
+        this.breakpointObserver
+            .observe([Breakpoints.Handset])
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(result => {
+                this.isMobile = result.matches;
+                if (this.svg) {
+                    this.updateViewportForDevice();
+                }
+            });
+    }
+
     ngAfterViewInit(): void {
         this.initializePitch();
+        this.updateViewportForDevice();
     }
 
     ngOnDestroy(): void {
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
         }
+        this.destroy$.next();
+        this.destroy$.complete();
     }
 
     onHeaderCollapseChanged(collapsed: boolean): void {
         this.isCollapsed = collapsed;
+        // Add small delay to allow DOM to update before resizing
+        setTimeout(() => {
+            if (this.svg) {
+                this.updateViewportForDevice();
+            }
+        }, 100);
     }
 
     private initializePitch(): void {
         const element = this.svgElement.nativeElement;
+        // Clear existing content
         while (element.firstChild) {
             element.removeChild(element.firstChild);
         }
 
         this.svg = select(element as SVGElement)
             .attr('width', '100%')
-            .attr('height', '100%')
-            .attr('viewBox', '0 0 1000 700')
-            .attr('preserveAspectRatio', 'xMidYMid slice');
+            .attr('height', '100%');
+
+        this.updateViewportForDevice();
+    }
+
+    private updateViewportForDevice(): void {
+        if (!this.svg) return;
+
+        if (this.isMobile) {
+            // Mobile viewport settings
+            this.svg
+                .attr('viewBox', '0 0 1000 700')
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            // Additional mobile-specific SVG adjustments if needed
+            this.svg.selectAll('text')
+                .style('font-size', '14px'); // Adjust text size for mobile
+        } else {
+            // Desktop viewport settings
+            this.svg
+                .attr('viewBox', '0 0 1000 700')
+                .attr('preserveAspectRatio', 'xMidYMid slice');
+
+            // Reset any mobile-specific adjustments
+            this.svg.selectAll('text')
+                .style('font-size', '16px');
+        }
     }
 }

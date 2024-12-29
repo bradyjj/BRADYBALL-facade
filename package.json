@@ -5,11 +5,15 @@
         "start": "ng serve",
         "devstart": "dotenv -e .env ng serve",
         "build": "ng build --configuration production",
-        "build:ssr": "ng run BRADYBALL-facade:server:production"
+        "build:ssr": "ng run BRADYBALL-facade:server:production",
+        "start:mobile": "ng serve --host 0.0.0.0 --disable-host-check",
+        "ip": "ipconfig getifaddr en0",
+        "dev:mobile": "dotenv -e .env ng serve --host 0.0.0.0 --disable-host-check"
     },
     "private": true,
     "dependencies": {
         "@angular/animations": "^16.2.0",
+        "@angular/cdk": "^16.2.12",
         "@angular/common": "^16.2.0",
         "@angular/compiler": "^16.2.0",
         "@angular/core": "^16.2.0",
