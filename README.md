@@ -1,5 +1,8 @@
 # BRADYBALL-Facade | [BRADYBALL.net](https://BRADYBALL.net)
 
+<img width="441" alt="Screenshot 2025-02-28 at 10 10 35 PM" src="https://github.com/user-attachments/assets/08daab74-f958-432a-ab7e-883b20d1d3f0" />
+<img width="441" alt="Second image" src="https://github.com/user-attachments/assets/9f0c817e-411f-467b-b1fb-34c735053d49" />
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.0.
 
 ## Development server
