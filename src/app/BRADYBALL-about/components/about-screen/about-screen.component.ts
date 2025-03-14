@@ -9,19 +9,13 @@ import { ResumeComponent } from '../resume/resume.component';
 export class AboutScreenComponent {
     isCollapsed = false;
 
-    constructor() { }
-
     @ViewChild(ResumeComponent) resumeComponent!: ResumeComponent;
-
-    refreshPage(): void {
-        window.location.reload();
-    }
 
     onHeaderCollapseChanged(collapsed: boolean): void {
         this.isCollapsed = collapsed;
     }
 
-    downloadResumePdf() {
+    downloadResumePdf(): void {
         if (this.resumeComponent) {
             this.resumeComponent.downloadPDF();
         } else {
