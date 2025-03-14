@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { ResumeComponent } from '../resume/resume.component';
 
 @Component({
     selector: 'about-screen',
@@ -8,13 +9,17 @@ import { Component } from '@angular/core';
 export class AboutScreenComponent {
     isCollapsed = false;
 
-    constructor() { }
-
-    refreshPage(): void {
-        window.location.reload();
-    }
+    @ViewChild(ResumeComponent) resumeComponent!: ResumeComponent;
 
     onHeaderCollapseChanged(collapsed: boolean): void {
         this.isCollapsed = collapsed;
+    }
+
+    downloadResumePdf(): void {
+        if (this.resumeComponent) {
+            this.resumeComponent.downloadPDF();
+        } else {
+            console.error('Resume component not found');
+        }
     }
 }

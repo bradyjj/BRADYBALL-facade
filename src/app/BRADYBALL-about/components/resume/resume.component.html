@@ -1,88 +1,98 @@
-<div class="vintage-resume" #resumeContent>
-    <header>
+<!-- Resume Actions -->
+<div class="resume-actions">
+    <button class="btn btn-primary btn-sm mb-2" (click)="downloadPDF()">
+      <i class="fas fa-download"></i> Download PDF
+    </button>
+  </div>
+  
+  <!-- Resume Content -->
+  <div class="resume-container">
+    <div class="vintage-resume" #resumeContent>
+      <header>
         <h1>BRADY J. JACOBS</h1>
         <div class="contact-info">
-            <span>{{contact.email}} | {{contact.phone}} | {{contact.github}} | {{contact.linkedin}}</span>
+          <span>{{contact.email}} | {{contact.phone}} | {{contact.github}} | {{contact.linkedin}}</span>
         </div>
-    </header>
-
-    <section class="resume-section pt-1">
+      </header>
+  
+      <section class="resume-section">
         <h2>EDUCATION</h2>
         <div class="content">
-            <div class="flex-header">
-                <div>
-                    <h3>{{education.school}}</h3>
-                    <div class="subtitle">
-                        {{education.degree}}, {{education.minor}}
-                    </div>
-                </div>
-                <div class="date">{{education.date}}</div>
+          <div class="flex-header">
+            <div>
+              <h3>{{education.school}}</h3>
+              <div class="subtitle">
+                {{education.degree}}, {{education.minor}}
+              </div>
             </div>
-            <div class="details">
-                <div class="gpa">
-                    <strong>GPA: </strong>
-                    <span> {{education.gpa}} ({{education.honors}})</span>
-                </div>
-                <div class="coursework">
-                    <strong>Advanced Coursework: </strong>
-                    <span *ngFor="let course of education.coursework; let last = last">
-                        {{course}}{{!last ? ', ' : ''}}
-                    </span>                
-                </div>
+            <div class="date">{{education.date}}</div>
+          </div>
+          <div class="details">
+            <div class="gpa">
+              <strong>GPA: </strong>
+              <span> {{education.gpa}} ({{education.honors}})</span>
             </div>
-            <ul>
-                <li *ngFor="let highlight of education.highlights">{{highlight}}</li>
-            </ul>
+            <div class="coursework">
+              <strong>Advanced Coursework: </strong>
+              <span *ngFor="let course of education.coursework; let last = last">
+                {{course}}{{!last ? ', ' : ''}}
+              </span>
+            </div>
+          </div>
+          <ul>
+            <li *ngFor="let highlight of education.highlights">{{highlight}}</li>
+          </ul>
         </div>
-    </section>
-
-    <section class="resume-section">
+      </section>
+  
+      <section class="resume-section">
         <h2>EXPERIENCE</h2>
-        <div class="content" *ngFor="let job of experience">
-            <div class="flex-header">
-                <div>
-                    <h3 class="title">{{job.title}}</h3>
-                    <div class="subtitle">{{job.company}} | {{job.location}}</div>
-                    <div *ngIf="job.previousRole" class="previous-position">
-                        Previously: Software Engineering Intern (May 2022 - August 2022)
-                    </div>
-                </div>
-                <div class="date">{{job.date}}</div>
+        <div class="content" *ngFor="let job of experience; let i = index">
+          <div class="flex-header" [ngClass]="{'experience-section-break': i > 0}">
+            <div>
+              <h3 class="title">{{job.title}}</h3>
+              <div class="subtitle">{{job.company}} | {{job.location}}</div>
+              <div *ngIf="job.previousRole" class="previous-position">
+                Previously: {{job.previousRole}}
+              </div>
             </div>
-            <ul>
-                <li *ngFor="let point of job.points">{{point}}</li>
-            </ul>
+            <div class="date">{{job.date}}</div>
+          </div>
+          <ul>
+            <li *ngFor="let point of job.points">{{point}}</li>
+          </ul>
         </div>
-    </section>
-
-    <section class="resume-section">
+      </section>
+  
+      <section class="resume-section">
         <h2>TECHNICAL PROJECTS</h2>
         <div class="content">
-            <div class="flex-header">
-                <div>
-                    <h3>{{projects.title}}</h3>
-                    <div class="subtitle">{{projects.type}}</div>
-                </div>
-                <div class="date">{{projects.date}}</div>
+          <div class="flex-header">
+            <div>
+              <h3>{{projects.title}}</h3>
+              <div class="subtitle">{{projects.type}}</div>
             </div>
-            <ul>
-                <li *ngFor="let point of projects.points">{{point}}</li>
-            </ul>
+            <div class="date">{{projects.date}}</div>
+          </div>
+          <ul>
+            <li *ngFor="let point of projects.points">{{point}}</li>
+          </ul>
         </div>
-    </section>
-
-    <section class="resume-section">
+      </section>
+  
+      <section class="resume-section">
         <h2>TECHNICAL COMPETENCIES</h2>
         <div class="skills-grid">
-            <div class="skill-card" *ngFor="let section of skills | keyvalue">
-                <div class="skill-header">{{section.key}}</div>
-                <div class="skill-content">
-                    <div class="skill-category" *ngFor="let category of section.value | keyvalue">
-                        <div class="category-name">{{category.key}}</div>
-                        <div class="skills-list">{{category.value.join(' • ')}}</div>
-                    </div>
-                </div>
+          <div class="skill-card" *ngFor="let section of skills | keyvalue">
+            <div class="skill-header">{{section.key}}</div>
+            <div class="skill-content">
+              <div class="skill-category" *ngFor="let category of section.value | keyvalue">
+                <div class="category-name">{{category.key}}</div>
+                <div class="skills-list">{{category.value.join(' • ')}}</div>
+              </div>
             </div>
+          </div>
         </div>
-    </section>
-</div>
+      </section>
+    </div>
+  </div>
