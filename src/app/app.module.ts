@@ -10,6 +10,7 @@ import { BRADYBALLAboutModule } from "./BRADYBALL-about/BRADYBALL-about.module";
 import { BRADYBALLHomeModule } from "./BRADYBALL-home/BRADYBALL-home.module";
 import { BRADYBALLCommonModule } from "./common/BRADYBALL-common.module";
 import { FontService } from "../assets/fonts/font.service";
+import { BRADYBALLNewModule } from "./BRADYBALL.new/BRADYBALL-new.module";
 
 @NgModule({
     declarations: [
@@ -23,6 +24,7 @@ import { FontService } from "../assets/fonts/font.service";
         BRADYBALLAboutModule,
         BRADYBALLHomeModule,
         BRADYBALLCommonModule,
+        BRADYBALLNewModule,
         RouterModule.forRoot(APP_ROUTES, { useHash: false })
     ],
     providers: [FontService],

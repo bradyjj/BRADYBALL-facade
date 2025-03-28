@@ -1,0 +1,186 @@
+<!-- app.component.html -->
+<div class="container-fluid p-0 main-container">
+    <app-header></app-header>
+    <div class="content-wrapper">
+        <router-outlet></router-outlet>
+    </div>
+    <app-footer></app-footer>
+</div>
+
+<!-- header.component.html -->
+<header class="fixed-top">
+    <div class="container-fluid px-4">
+        <nav class="navbar navbar-expand-lg">
+            <div class="navbar-brand">
+                <a class="title-link" routerLink="/">Ryoji Ikeda</a>
+            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" routerLink="/" routerLinkActive="active">news</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="javascript:void(0)" (click)="showProjects()">works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/exhibitions" routerLinkActive="active">exhibitions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/concerts" routerLinkActive="active">performances</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/acoustic" routerLinkActive="active">acoustic
+                            concerts</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/recordings" routerLinkActive="active">recordings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/collaborations"
+                            routerLinkActive="active">collaborations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/archive/publications"
+                            routerLinkActive="active">publications</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/biography" routerLinkActive="active">biography</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" routerLink="/contact" routerLinkActive="active">contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="https://www.codexedition.com/" target="_blank">shop</a>
+                    </li>
+                </ul>
+
+                <div class="social-links">
+                    <a href="https://www.instagram.com/_ryoji_ikeda_/" target="_blank" class="social-icon">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://twitter.com/ryojiikeda" target="_blank" class="social-icon">
+                        <i class="bi bi-twitter"></i>
+                    </a>
+                    <a href="https://www.facebook.com/ryojiikedaofficial" target="_blank" class="social-icon">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="https://www.youtube.com/user/ryojiikedastudio" target="_blank" class="social-icon">
+                        <i class="bi bi-youtube"></i>
+                    </a>
+                    <a href="https://vimeo.com/ryojiikeda" target="_blank" class="social-icon">
+                        <i class="bi bi-vimeo"></i>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Projects submenu that slides down when "works" is clicked -->
+        <div class="projects-submenu" [ngClass]="{'show': showProjectsMenu}">
+            <app-projects-menu></app-projects-menu>
+        </div>
+    </div>
+</header>
+
+<!-- news.component.html -->
+<div class="container news-container mt-5 pt-5">
+    <div *ngFor="let newsItem of newsItems; let i = index">
+        <app-news-item [newsItem]="newsItem"></app-news-item>
+        <div class="divider my-5" *ngIf="i < newsItems.length - 1"></div>
+    </div>
+</div>
+
+<!-- news-item.component.html -->
+<div class="row news-item">
+    <div class="col-md-6">
+        <a *ngIf="newsItem.link" [href]="newsItem.link" target="_blank">
+            <img [src]="newsItem.image" class="img-fluid" [alt]="newsItem.title">
+        </a>
+        <img *ngIf="!newsItem.link" [src]="newsItem.image" class="img-fluid" [alt]="newsItem.title">
+    </div>
+    <div class="col-md-6">
+        <div class="news-header">
+            <h2 class="news-title">{{newsItem.title}}</h2>
+            <p class="news-type">{{newsItem.type}}</p>
+        </div>
+
+        <div class="news-dates mt-4">
+            <div *ngFor="let date of newsItem.dates" class="date-item mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="date-range">{{date.dateRange}}</div>
+                    </div>
+                    <div class="col-md-8">
+                        <a [href]="date.link" target="_blank" class="venue">{{date.venue}}</a>
+                        <div *ngIf="date.curator" class="curator">curated by {{date.curator}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="newsItem.description" class="news-description mt-4">
+            <p [innerHTML]="newsItem.description"></p>
+        </div>
+    </div>
+</div>
+
+<!-- projects-menu.component.html -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="projects-grid">
+                <ng-container *ngFor="let project of projects">
+                    <div class="project-item">
+                        <a [routerLink]="['/project', project.id]" class="project-link">
+                            <div class="project-title">{{project.title}}</div>
+                            <div class="project-year">{{project.year}} >></div>
+                        </a>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- footer.component.html -->
+<footer class="container-fluid">
+    <div class="row footer-content">
+        <div class="col-md-2">
+            <div class="footer-brand">
+                <a routerLink="/" class="footer-title">Ryoji Ikeda</a>
+                <div class="footer-links">
+                    <a routerLink="/">news</a>
+                    <a routerLink="/biography">biography</a>
+                    <a routerLink="/contact">contact</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="row projects-footer">
+                <ng-container *ngFor="let project of projects">
+                    <div class="col-md-2 mb-4">
+                        <a [routerLink]="['/project', project.id]" class="footer-project-link">
+                            <div class="project-title">{{project.title}}</div>
+                            <div class="project-types">
+                                <p *ngFor="let type of project.types">{{type}}</p>
+                            </div>
+                        </a>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="back-to-top">
+            <a href="javascript:void(0)" (click)="scrollToTop()">^ top</a>
+        </div>
+        <div class="copyright">
+            &copy; Ryoji Ikeda, {{ currentYear }}
+        </div>
+    </div>
+</footer>
