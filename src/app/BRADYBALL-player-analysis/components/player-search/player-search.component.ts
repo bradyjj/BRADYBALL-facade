@@ -239,7 +239,7 @@ export class PlayerSearchComponent implements OnInit {
     }
 
     private createPercentileRankModel(): void {
-        const percentileRank = 22;
+        const percentileRank = 88;
         const description = "Out of 25 competitors, Mbappe ranked 4th overall in the 2023-24 season, placing him in the 88th percentile based on the seven key attributes evaulated in the attribute overview.";
 
         this.percentileRankModel = {
