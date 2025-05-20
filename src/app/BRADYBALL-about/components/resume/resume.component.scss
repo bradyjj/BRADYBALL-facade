@@ -262,3 +262,18 @@ ul {
         margin: 0;
     }
 }
+
+.buttons-container {
+    width: 100%;
+    max-width: $a4-width;
+    margin-top: 15px;
+}
+
+.page-container {
+    width: 100%;
+    max-width: $a4-width;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

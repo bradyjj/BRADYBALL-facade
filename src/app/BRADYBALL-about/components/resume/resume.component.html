@@ -1,11 +1,4 @@
-<!-- Resume Actions -->
-<div class="resume-actions">
-    <button class="btn btn-primary btn-sm mb-2" (click)="downloadPDF()">
-      <i class="fas fa-download"></i> Download PDF
-    </button>
-  </div>
-  
-  <!-- Resume Content -->
+<div class="page-container">
   <div class="resume-container">
     <div class="vintage-resume" #resumeContent>
       <header>
@@ -14,7 +7,7 @@
           <span>{{contact.email}} | {{contact.phone}} | {{contact.github}} | {{contact.linkedin}}</span>
         </div>
       </header>
-  
+
       <section class="resume-section">
         <h2>EDUCATION</h2>
         <div class="content">
@@ -44,7 +37,7 @@
           </ul>
         </div>
       </section>
-  
+
       <section class="resume-section">
         <h2>EXPERIENCE</h2>
         <div class="content" *ngFor="let job of experience; let i = index">
@@ -63,7 +56,7 @@
           </ul>
         </div>
       </section>
-  
+
       <section class="resume-section">
         <h2>TECHNICAL PROJECTS</h2>
         <div class="content">
@@ -79,7 +72,7 @@
           </ul>
         </div>
       </section>
-  
+
       <section class="resume-section">
         <h2>TECHNICAL COMPETENCIES</h2>
         <div class="skills-grid">
@@ -96,3 +89,12 @@
       </section>
     </div>
   </div>
+
+  <div class="buttons-container">
+    <div class="resume-actions d-flex justify-content-end">
+      <button class="bb-button" (click)="downloadPDF()">
+        <i class="fas fa-download"></i> Download PDF
+      </button>
+    </div>
+  </div>
+</div>

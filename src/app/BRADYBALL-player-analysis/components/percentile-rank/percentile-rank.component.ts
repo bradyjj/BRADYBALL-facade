@@ -16,7 +16,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
     private width = 800;
     private height = 300;
 
-    public gaugeReady: boolean = false;
+    public chartReady: boolean = false;
     fontsLoaded: boolean = false;
 
     private readonly CREAM_COLOR;
@@ -42,19 +42,23 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
     ngOnInit(): void {
         this.loadFonts();
+        if (this.data) {
+            this.createSvg();
+            this.drawChart();
+        }  
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['data'] && this.data) {
             this.createSvg();
-            this.drawGauge();
+            this.drawChart();
         }
     }
 
     ngAfterViewInit(): void {
         if (this.data) {
             this.createSvg();
-            this.drawGauge();
+            this.drawChart();
         }
     }
 
@@ -62,8 +66,8 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         const fontFiles = [
             'league-spartan-regular.woff2',
             'league-spartan-bold.woff2',
-            'tx-02.woff2',
-            'tx-02-bold.woff2',
+            'TX-02-Regular.woff2',
+            'TX-02-Bold.woff2',
         ];
 
         this.fontService.loadFonts(fontFiles).subscribe(
@@ -72,14 +76,14 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                 this.fontsLoaded = true;
                 if (this.data) {
                     this.createSvg();
-                    this.drawGauge();
+                    this.drawChart();
                 }
             },
             error => {
                 console.error('Error loading fonts:', error);
                 if (this.data) {
                     this.createSvg();
-                    this.drawGauge();
+                    this.drawChart();
                 }
             }
         );
@@ -95,7 +99,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('preserveAspectRatio', 'xMidYMid meet');
     }
 
-    saveSVG(): void {
+    public saveSVG(): void {
         const svgElement = this.elementRef.nativeElement.querySelector('svg');
         if (!svgElement) {
             console.error('SVG element not found');
@@ -105,20 +109,124 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         // Clone the SVG
         const clonedSvg = svgElement.cloneNode(true) as SVGElement;
 
-        // Add font definitions
+        // Set basic SVG attributes for higher resolution
+        const scale = 4;
+        clonedSvg.setAttribute('width', `${this.width * scale}`);
+        clonedSvg.setAttribute('height', `${this.height * scale}`);
+        clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+        clonedSvg.style.backgroundColor = 'transparent';
+        clonedSvg.setAttribute('background-color', 'transparent'); // Ensure transparency
+
+        // Create fixed font definitions that handle the Berkeley Mono/TX-02 mapping
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
         defs.innerHTML = this.getFontDefinitions();
         clonedSvg.insertBefore(defs, clonedSvg.firstChild);
 
-        // Serialize to string
+        // Collect all filter ids used in the SVG
+        const usedFilterIds = new Set<string>();
+        const elementsWithFilters = clonedSvg.querySelectorAll('[filter]');
+        elementsWithFilters.forEach((el) => {
+            const filterAttr = el.getAttribute('filter');
+            if (filterAttr && filterAttr.startsWith('url(#')) {
+                // Extract ID from url(#filterId)
+                const filterId = filterAttr.substring(5, filterAttr.length - 1);
+                usedFilterIds.add(filterId);
+            }
+        });
+
+        // Add necessary filter definitions
+        const missingFilters = [
+            'innerShadow', 'distressedEdges', 'outerRimShadow',
+            'blur1px', 'enhancedNeedleGlow', 'displayGlow',
+            'stickyNoteTextShadow' // Add the sticky note text shadow filter
+        ];
+
+        // TypeScript safety: defs is guaranteed to exist at this point
+        const defElement = defs;
+        missingFilters.forEach(filterId => {
+            if (usedFilterIds.has(filterId) && !defElement.querySelector(`#${filterId}`)) {
+                this.createFilterDirectly(defElement, filterId);
+            }
+        });
+
+        this.applyCorrectFontAttributes(clonedSvg);
+
+        this.enhanceStickyNoteForExport(clonedSvg);
+
+        this.postProcessSpecificElements(clonedSvg);
+
+        // Serialize to string with proper XML declaration
         const serializer = new XMLSerializer();
-        let svgString = serializer.serializeToString(clonedSvg);
+        let svgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+    ${serializer.serializeToString(clonedSvg)}`;
 
-        // Embed fonts
-        svgString = this.fontService.embedFontsInSVG(svgString, this.fonts);
-
-        // Save file
+        // Save file with corrected SVG string
         this.BRADYBALLUtil.saveSVGToFile(svgString, 'percentile_rank.svg');
+    }
+
+    private enhanceStickyNoteForExport(svgElement: SVGElement): void {
+        // Find all sticky note text elements
+        const stickyNoteTexts = svgElement.querySelectorAll('.sticky-note-text, .sticky-note-shadow');
+
+        // Enhance each text element with proper styling
+        stickyNoteTexts.forEach((textElement) => {
+            const svgTextElement = textElement as SVGTextElement;
+            const isShadow = svgTextElement.classList.contains('sticky-note-shadow');
+
+            // Set explicit font attributes
+            svgTextElement.style.fontFamily = "'League Spartan', sans-serif";
+            svgTextElement.setAttribute('font-family', "'League Spartan', sans-serif");
+            svgTextElement.style.fontWeight = 'bold';
+            svgTextElement.setAttribute('font-weight', 'bold');
+
+            // Set proper fill color
+            if (isShadow) {
+                svgTextElement.style.fill = "rgba(0,0,0,0.35)";
+                svgTextElement.setAttribute('fill', 'rgba(0,0,0,0.35)');
+                // Apply filter if it exists
+                const filter = svgTextElement.getAttribute('filter');
+                if (filter) {
+                    svgTextElement.style.filter = filter;
+                }
+            } else {
+                svgTextElement.style.fill = this.BLACK_COLOR;
+                svgTextElement.setAttribute('fill', this.BLACK_COLOR);
+            }
+
+            // Explicitly set text rendering for better font display
+            svgTextElement.setAttribute('text-rendering', 'geometricPrecision');
+            textElement.setAttribute('text-rendering', 'geometricPrecision');
+        });
+    }
+
+    // Add this to your createFilterDirectly method to include the sticky note text shadow
+    private createFilterDirectly(defs: Element, filterId: string): void {
+        switch (filterId) {
+            // ... existing cases ...
+
+            case 'stickyNoteTextShadow':
+                // Create text shadow filter specifically for sticky note
+                const textShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+                textShadowFilter.setAttribute('id', 'stickyNoteTextShadow');
+                textShadowFilter.setAttribute('x', '-20%');
+                textShadowFilter.setAttribute('y', '-20%');
+                textShadowFilter.setAttribute('width', '140%');
+                textShadowFilter.setAttribute('height', '140%');
+
+                const feDropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+                feDropShadow.setAttribute('dx', '1');
+                feDropShadow.setAttribute('dy', '1');
+                feDropShadow.setAttribute('stdDeviation', '0.5');
+                feDropShadow.setAttribute('flood-opacity', '0.2');
+                feDropShadow.setAttribute('flood-color', '#000000');
+
+                textShadowFilter.appendChild(feDropShadow);
+                defs.appendChild(textShadowFilter);
+                break;
+
+            // ... other cases ...
+        }
     }
 
     private getFontDefinitions(): string {
@@ -136,17 +244,127 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                     font-weight: bold;
                     font-style: normal;
                 }
+                
+                /* TX-02 fonts with proper naming to match CSS */
                 @font-face {
                     font-family: 'TX-02';
-                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['tx-02.woff2']}) format('woff2');
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['TX-02-Regular.woff2']}) format('woff2');
                     font-weight: normal;
                     font-style: normal;
+                }
+                @font-face {
+                    font-family: 'TX-02';
+                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['TX-02-Bold.woff2']}) format('woff2');
+                    font-weight: bold;
+                    font-style: normal;
+                }
+                
+                /* Color Variables */
+                :root {
+                    --bb-cream-color: ${this.CREAM_COLOR};
+                    --bb-red-card-color: ${this.RED_COLOR};
+                    --bb-black-color: ${this.BLACK_COLOR};
+                    --bb-white-color: ${this.WHITE_COLOR};
+                    --bb-pale-yellow: ${this.YELLOW_COLOR};
+                }
+                
+                .bb-text-bold { font-weight: bold }
+                .bb-text-berkeley-mono { font-family: 'TX-02', 'Berkeley Mono', monospace; color: var(--bb-white-color); }
+                .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; color: var(--bb-black-color); }
+
+                /* Ensure all text has proper rendering */
+                text {
+                    text-rendering: geometricPrecision;
+                    shape-rendering: geometricPrecision;
+                }
+                
+                /* Special selection for tick labels and digital display */
+                .ticks text {
+                    font-family: 'TX-02', 'Berkeley Mono', monospace !important;
+                    fill: #ffffff !important;
+                }
+                .digital-display text {
+                    font-family: 'TX-02', 'Berkeley Mono', monospace !important;
+                    fill: #ffffff !important;
+                }
+                
+                /* Special styling for sticky note text */
+                .sticky-note-text {
+                    font-family: 'League Spartan', sans-serif !important;
+                    font-weight: bold !important;
+                    fill: ${this.BLACK_COLOR} !important;
+                    text-rendering: geometricPrecision;
+                }
+                .sticky-note-shadow {
+                    font-family: 'League Spartan', sans-serif !important;
+                    font-weight: bold !important;
+                    fill: rgba(0,0,0,0.35) !important;
+                    filter: url(#stickyNoteTextShadow);
                 }
             </style>
         `;
     }
 
-    // Modified code to make the sticky note more vibrant yellow and worn edges
+    // Special handling for specific elements like tick labels and digital display
+    private postProcessSpecificElements(svgElement: SVGElement): void {
+        // Process tick labels specifically to use TX-02 font
+        const tickLabels = svgElement.querySelectorAll('.ticks text');
+        tickLabels.forEach(label => {
+            label.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
+
+            if (label.textContent && !isNaN(parseFloat(label.textContent.trim()))) {
+                label.setAttribute('fill', '#ffffff');
+                (label as SVGElement).style.fill = '#ffffff';
+            }
+        });
+
+        // Fix digital display text to use TX-02 font
+        const digitalDisplay = svgElement.querySelectorAll('.digital-display text');
+        digitalDisplay.forEach(text => {
+            text.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
+            text.setAttribute('fill', '#ffffff');
+            (text as SVGElement).style.fill = '#ffffff';
+        });
+    }
+
+    // Apply correct font attributes to all text elements
+    private applyCorrectFontAttributes(svgElement: SVGElement): void {
+        const textElements = svgElement.querySelectorAll('text');
+
+        textElements.forEach((textElement: SVGTextElement) => {
+            const classList = Array.from(textElement.classList || []);
+
+            // Fix Berkeley Mono references to use TX-02
+            if (classList.includes('bb-text-berkeley-mono')) {
+                textElement.style.fontFamily = "'TX-02', 'Berkeley Mono', monospace";
+                textElement.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
+                textElement.style.fill = "#ffffff";
+                textElement.setAttribute('fill', '#ffffff');
+
+                // Add explicit font-weight if it's bold
+                if (classList.includes('bb-text-bold')) {
+                    textElement.style.fontWeight = 'bold';
+                    textElement.setAttribute('font-weight', 'bold');
+                }
+            }
+            // Handle League Spartan text
+            else if (classList.includes('bb-text-league-spartan')) {
+                textElement.style.fontFamily = "'League Spartan', sans-serif";
+                textElement.setAttribute('font-family', "'League Spartan', sans-serif");
+
+                if (classList.includes('bb-text-bold')) {
+                    textElement.style.fontWeight = 'bold';
+                    textElement.setAttribute('font-weight', 'bold');
+                }
+            }
+
+            // Preserve filter effects
+            const filter = textElement.getAttribute('filter');
+            if (filter) {
+                textElement.style.filter = filter;
+            }
+        });
+    }
 
     private drawDescription(): void {
         if (!this.data?.description) return;
@@ -156,7 +374,8 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         const NOTE_HEIGHT = 200;
 
         const descriptionGroup = this.svg.append('g')
-            .attr('transform', `translate(${this.height + 50}, 60)`);
+            .attr('transform', `translate(${this.height + 50}, 60)`)
+            .attr('class', 'sticky-note-container');
 
         const stickyNote = descriptionGroup.append('g')
             .attr('transform', 'rotate(-2)');
@@ -186,7 +405,20 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('yChannelSelector', 'G')
             .attr('result', 'displacedEdges');
 
-        // Draw sticky note background with drop shadow and more vibrant yellow
+        const textShadowFilter = defs.append('filter')
+            .attr('id', 'stickyNoteTextShadow')
+            .attr('x', '-20%')
+            .attr('y', '-20%')
+            .attr('width', '140%')
+            .attr('height', '140%');
+
+        textShadowFilter.append('feDropShadow')
+            .attr('dx', '1')
+            .attr('dy', '1')
+            .attr('stdDeviation', '0.5')
+            .attr('flood-opacity', '0.2')
+            .attr('flood-color', '#000000');
+
         stickyNote.append('rect')
             .attr('width', NOTE_WIDTH)
             .attr('height', NOTE_HEIGHT)
@@ -216,7 +448,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('numOctaves', '5')
             .attr('stitchTiles', 'stitch');
 
-        // Apply enhanced paper texture
         stickyNote.append('rect')
             .attr('width', NOTE_WIDTH)
             .attr('height', NOTE_HEIGHT)
@@ -225,7 +456,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('ry', 2)
             .attr('opacity', 0.25);
 
-        // Tape configuration for each corner with more realistic appearance
         const tapeConfig = [
             { x: 0, y: 0, rotation: -45 },
             { x: NOTE_WIDTH, y: 0, rotation: 45 },
@@ -234,7 +464,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         ];
 
         tapeConfig.forEach(({ x, y, rotation }) => {
-            // Create tape backing shadow
             stickyNote.append('rect')
                 .attr('width', 40)
                 .attr('height', 30)
@@ -293,7 +522,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
         // Binary search for optimal font size
         const findOptimalFontSize = () => {
-            let min = 8;
+            let min = 12; // Increase min size for better visibility
             let max = 24;
 
             while (min <= max) {
@@ -303,7 +532,9 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
                 let tempText = descriptionGroup.append('text')
                     .attr('font-size', `${fontSize}px`)
-                    .attr('class', 'bb-text-league-spartan bb-text-bold');
+                    .attr('class', 'bb-text-league-spartan bb-text-bold')
+                    .attr('font-family', 'League Spartan')
+                    .attr('font-weight', 'bold');
 
                 // Try to fit text with current font size
                 words.forEach(word => {
@@ -332,20 +563,29 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
         fontSize = findOptimalFontSize();
 
-        // Draw the final text with slight shadow for better readability against vibrant yellow
+        // Create a text group for better organization
+        const textGroup = stickyNote.append('g')
+            .attr('class', 'sticky-note-text');
+
+        // Draw the final text with enhanced shadow for better readability
         finalLines.forEach((line, i) => {
-            // Text shadow for contrast
-            descriptionGroup.append('text')
-                .attr('class', 'bb-text-league-spartan bb-text-bold')
+            // Text shadow (darker and more defined for better visibility in export)
+            textGroup.append('text')
+                .attr('class', 'bb-text-league-spartan bb-text-bold sticky-note-shadow')
+                .attr('font-family', 'League Spartan')
+                .attr('font-weight', 'bold')
                 .attr('font-size', `${fontSize}px`)
-                .attr('fill', 'rgba(0,0,0,0.2)')
+                .attr('fill', 'rgba(0,0,0,0.35)') // Darker shadow
                 .attr('x', 41)
                 .attr('y', 36 + (i * lineHeight))
+                .attr('filter', 'url(#stickyNoteTextShadow)')
                 .text(line);
 
-            // Main text
-            descriptionGroup.append('text')
-                .attr('class', 'bb-text-league-spartan bb-text-bold')
+            // Main text with explicitly set attributes to ensure export quality
+            textGroup.append('text')
+                .attr('class', 'bb-text-league-spartan bb-text-bold sticky-note-text')
+                .attr('font-family', 'League Spartan')
+                .attr('font-weight', 'bold')
                 .attr('font-size', `${fontSize}px`)
                 .attr('fill', this.BLACK_COLOR)
                 .attr('x', 40)
@@ -354,9 +594,9 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         });
     }
 
-    private drawGauge(): void {
+    private drawChart(): void {
         if (!this.data || typeof this.data.percentile !== 'number') {
-            this.gaugeReady = false;
+            this.chartReady = false;
             return;
         }
 
@@ -451,7 +691,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         // Draw the digital display at the bottom
         this.drawDigitalDisplay(gaugeGroup, gaugeRadius, this.data.percentile);
 
-        this.gaugeReady = true;
+        this.chartReady = true;
     }
 
     private createRaceTrackGradient(): void {
@@ -625,10 +865,32 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         const mediumTickWidth = 3;
         const smallTickWidth = 1.5;
 
+        // Get the current percentile value to determine where blurring should stop
+        // Make sure this.data exists and use safe access
+        const currentValue = this.data?.percentile ? this.data.percentile / 10 : 8.8; // Default to 8.8 if data not available
+
         // Calculate angles for tick marks (0-10 scale)
         const scale = d3.scaleLinear()
             .domain([0, 10])
             .range([startAngle, endAngle]);
+
+        // Create more subtle motion blur filters with different intensities
+        const defs = this.svg.select('defs');
+
+        // Create different levels of blur for progressive effect, but much more subtle
+        [1, 2, 3].forEach(level => {
+            const motionBlur = defs.append('filter')
+                .attr('id', `subtleMotionBlur${level}`)
+                .attr('x', '-50%')
+                .attr('y', '-50%')
+                .attr('width', '200%')
+                .attr('height', '200%');
+
+            motionBlur.append('feGaussianBlur')
+                .attr('in', 'SourceGraphic')
+                .attr('stdDeviation', `${level * 0.3},0`) // Very subtle horizontal blur, no vertical blur
+                .attr('result', 'blur');
+        });
 
         // Draw all tick marks with full range from 0 to 10
         for (let i = 0; i <= 100; i++) {
@@ -638,8 +900,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
             if (isMajor || isMedium || isSmall) {
                 const value = i / 10;
-
-                const angle = scale(i / 10);
+                const angle = scale(value);
                 const angleRad = (angle * Math.PI) / 180;
 
                 let tickLength = smallTickLength;
@@ -660,7 +921,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                 const outerY = (radius - tickLength) * Math.sin(angleRad);
 
                 // Determine if this is in the red zone (9-10)
-                const isRedZone = i / 10 >= 9;
+                const isRedZone = value >= 9;
 
                 let tickColor = '#ffffff';
 
@@ -680,7 +941,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                     }
                 }
 
-                // Draw tick mark (red for 9-10, white otherwise)
+                // Draw tick mark
                 ticksGroup.append('line')
                     .attr('x1', innerX)
                     .attr('y1', innerY)
@@ -688,7 +949,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                     .attr('y2', outerY)
                     .attr('stroke', tickColor)
                     .attr('stroke-width', tickWidth)
-                    .attr('stroke-linecap', 'square')
+                    .attr('stroke-linecap', 'square');
 
                 // Add label for major ticks
                 if (isMajor) {
@@ -698,21 +959,75 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
                     // Determine text alignment based on position
                     let textAnchor = 'middle';
-                    if (i / 10 === 0) textAnchor = 'end';
-                    else if (i / 10 === 10) textAnchor = 'start';
-                    else if (i / 10 < 5) textAnchor = 'end';
-                    else if (i / 10 > 5) textAnchor = 'start';
+                    if (value === 0) textAnchor = 'end';
+                    else if (value === 10) textAnchor = 'start';
+                    else if (value < 5) textAnchor = 'end';
+                    else if (value > 5) textAnchor = 'start';
 
-                    // Add label with Berkeley Mono font (red for 9-10, white otherwise)
+                    // Calculate blur level based on distance from current value
+                    // Apply motion blur effect that intensifies as we move further from the current value
+                    // but only to numbers that come before the current position
+                    // Using much more subtle blur levels
+                    let filterValue = 'none';
+
+                    // Only apply blur to values before the current value (needle position)
+                    if (value < currentValue) {
+                        // Calculate distance from current value, but limit the blur effect
+                        const distance = currentValue - value;
+                        // Limit blur levels to just 3 levels max
+                        const blurLevel = Math.min(3, Math.ceil(distance));
+                        // Only apply blur if it's at least 1 value away from current
+                        if (distance >= 1) {
+                            filterValue = `url(#subtleMotionBlur${blurLevel})`;
+                        }
+                    }
+
+                    // Create a subtle shadow effect for better readability against black background
+                    const shadowFilter = defs.append('filter')
+                        .attr('id', `textShadow-${i}`)
+                        .attr('x', '-30%')
+                        .attr('y', '-30%')
+                        .attr('width', '160%')
+                        .attr('height', '160%');
+
+                    shadowFilter.append('feDropShadow')
+                        .attr('dx', '0')
+                        .attr('dy', '0')
+                        .attr('stdDeviation', '1')
+                        .attr('flood-opacity', '0.5')
+                        .attr('flood-color', '#000000');
+
+                    // Add label with crisp white text
                     ticksGroup.append('text')
                         .attr('x', labelX)
                         .attr('y', labelY)
                         .attr('class', 'bb-text-berkeley-mono bb-text-bold')
+                        .attr('font-weight', 'bold')
                         .attr('text-anchor', textAnchor)
                         .attr('dominant-baseline', 'middle')
-                        .attr('fill', this.WHITE_COLOR)
+                        .attr('fill', '#ffffff') // Keep text white
                         .attr('font-size', '14px')
-                        .text(i / 10);
+                        .attr('filter', `${filterValue} url(#textShadow-${i})`) // Add subtle shadow for better readability
+                        .text(value);
+
+                    // If we want to simulate the blur from the example clock even more accurately
+                    // We could add a duplicate text slightly offset to create a motion trail effect
+                    if (value < currentValue) {
+                        const distanceFromCurrent = currentValue - value;
+                        if (distanceFromCurrent > 2) {
+                            ticksGroup.append('text')
+                                .attr('x', labelX - 2) // Slight offset to create motion trail
+                                .attr('y', labelY)
+                                .attr('class', 'bb-text-berkeley-mono bb-text-bold')
+                                .attr('text-anchor', textAnchor)
+                                .attr('dominant-baseline', 'middle')
+                                .attr('fill', '#ffffff')
+                                .attr('font-size', '14px')
+                                .attr('opacity', 0.4) // Semi-transparent
+                                .attr('filter', filterValue)
+                                .text(value);
+                        }
+                    }
                 }
             }
         }
@@ -722,16 +1037,16 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         const digitalGroup = group.append('g').attr('class', 'digital-display');
 
         // Position below the gauge as in the reference image
-        const displayWidth = radius * 1.5;
+        const displayWidth = radius * 1.45;
         const displayHeight = radius * 0.5;
         const displayY = radius * .45;
 
         // Create a more subtle curved digital display background
         const displayPath = `
-            M ${-displayWidth / 2},${displayY + displayHeight * 0.4}
-            A ${radius},${radius * 1.01} 0 0 0 ${displayWidth / 2},${displayY + displayHeight * 0.4}
-            L ${displayWidth * 0.28},${displayY - displayHeight * 0.2}
-            L ${-displayWidth * 0.28},${displayY - displayHeight * 0.2}
+            M ${-displayWidth / 2},${displayY + displayHeight * 0.48}
+            A ${radius},${radius} 0 0 0 ${displayWidth / 2},${displayY + displayHeight * 0.48}
+            L ${displayWidth * 0.23},${displayY - displayHeight * 0.2}
+            L ${-displayWidth * 0.23},${displayY - displayHeight * 0.2}
             Z
         `;
 
@@ -779,6 +1094,38 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('fill', 'url(#screenPattern)')
             .attr('opacity', 0.8);
 
+        // Define a silver gradient in your defs section (add this where you define other patterns/gradients)
+        const silverGradient = this.svg.select('defs').append('linearGradient')
+            .attr('id', 'silverGradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '0%')
+            .attr('y2', '100%');
+
+        silverGradient.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#e0e0e0');
+
+        silverGradient.append('stop')
+            .attr('offset', '45%')
+            .attr('stop-color', '#c0c0c0');
+
+        silverGradient.append('stop')
+            .attr('offset', '55%')
+            .attr('stop-color', '#a0a0a0');
+
+        silverGradient.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#b8b8b8');
+
+        // You might also want to add highlights
+        digitalGroup.append('path')
+            .attr('d', displayPath)
+            .attr('fill', 'none')
+            .attr('stroke', 'rgba(255, 255, 255, 0.5)')
+            .attr('stroke-width', 2)
+            .attr('filter', 'url(#blur1px)');
+
         // Display the percentile with enhanced glow - larger like in image 2
         digitalGroup.append('text')
             .attr('x', 0)
@@ -792,17 +1139,17 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .text(`${Math.round(percentile)}%`);
 
         // Add RANK text to the right of the percentage
-        digitalGroup.append('text')
-            .attr('x', displayWidth * 0.25)
-            .attr('y', displayY + displayHeight * 0.42)
-            .attr('text-anchor', 'start')
-            .attr('dominant-baseline', 'middle')
-            .attr('fill', this.DIGITAL_COLOR)
-            .attr('class', 'bb-text-berkeley-mono bb-text-bold')
-            .attr('font-size', '12px')
-            .attr('opacity', 0.9)
-            .attr('filter', 'url(#displayGlow)')
-            .text('RANK');
+        // digitalGroup.append('text')
+        //     .attr('x', 0)
+        //     .attr('y', displayY + displayHeight * 0.8)
+        //     .attr('text-anchor', 'start')
+        //     .attr('dominant-baseline', 'middle')
+        //     .attr('fill', this.DIGITAL_COLOR)
+        //     .attr('class', 'bb-text-berkeley-mono bb-text-bold')
+        //     .attr('font-size', '12px')
+        //     .attr('opacity', 0.9)
+        //     .attr('filter', 'url(#displayGlow)')
+        //     .text('RANK');
     }
 
     private drawDashboardContainer(): void {

@@ -96,7 +96,7 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
             .attr('transform', `translate(${this.width / 2}, ${this.height / 2})`);
     }
 
-    saveSVG(): void {
+    public saveSVG(): void {
         const svgElement = this.elementRef.nativeElement.querySelector('svg');
         if (!svgElement) {
             console.error('SVG element not found');
