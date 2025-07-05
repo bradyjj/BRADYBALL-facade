@@ -84,19 +84,58 @@ export class FontService {
                 --bb-cream-off-white-color: #f8f5e3;
                 --bb-cream-color: #ded2a2;
                 --bb-red-card-color: #ad563b;
+                --bb-brown-gold-color: #b07c29;
+                --bb-red-color: #972828;
+                --bb-dark-red-burgundy-color: #681e1e;
+                --bb-orange-color: #ff5b00;
+                --bb-blue-color: #405e9b;
+                --bb-blue-card-color: #3a85c7;
+                --bb-cream-color: #ded2a2;
+                --bb-green-color: #59c135;
+                --bb-light-orange: #FF8C41;
+                --bb-bright-orange: #ff5b00;
+                --bb-dark-orange: #e65d35;
+                --bb-pale-yellow: #ffe03d;
+                --bb-light-green: #7baf56;
+                --bb-medium-green: #98c475;
+                --bb-dark-green: #2d3b24;
+                --bb-burgundy: #a8021a;
+                --bb-dark-burgundy: #972828;
+                --bb-deeper-burgundy: #681e1e;
+                --bb-steel-blue: #467a80;
+                --bb-light-cream: #f0da9b;
+                --bb-cream: #f8f5e3;
+                --bb-navy: #25416c;
+                --bb-medium-blue: #405e9b;
+                --bb-light-blue: #3a85c7;
+                --bb-forest-green: #01714f;
+                --bb-warm-brown: #b07c29;
             }
+
             .bb-text-bold { font-weight: 700; }
             .bb-text-semibold { font-weight: 600; }
             .bb-text-medium { font-weight: 500; }
             .bb-text-extra-bold { font-weight: 800; }
             .bb-text-black { font-weight: 900; }
+            
             .bb-text-pinegrove { font-family: 'Pinegrove', sans-serif; }
             .bb-text-special-elite { font-family: 'Special Elite', sans-serif; }
             .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; }
             .bb-text-eb-garamond { font-family: 'EB Garamond', serif; }
             .bb-text-merriweather { font-family: 'Merriweather', serif; }
             .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
-            .bb-text-berkeley-mono { font-family: 'TX-02', monospace; }
+            .bb-text-berkeley-mono { font-family: 'Berkeley Mono', monospace; }
+
+            .text-thin { font-weight: 100; }
+            .text-extralight { font-weight: 200; }
+            .text-light { font-weight: 300; }
+            .text-regular { font-weight: 400; }
+            .text-medium { font-weight: 500; }
+            .text-semibold { font-weight: 600; }
+            .text-bold { font-weight: 700; }
+            .text-extrabold { font-weight: 800; }
+            .text-black { font-weight: 900; }
+            .text-italic { font-style: italic; }
         `;
 
         styleElement.textContent = styleContent;
@@ -145,7 +184,7 @@ export class FontService {
         if (filename.includes('pinegrove')) return 'Pinegrove';
         if (filename.includes('special-elite')) return 'Special Elite';
         if (filename.includes('league-spartan')) return 'League Spartan';
-        if (filename.includes('TX-02')) return 'TX-02';
+        if (filename.includes('berkeley-mono')) return 'Berkeley Mono';
         return 'sans-serif';
     }
 

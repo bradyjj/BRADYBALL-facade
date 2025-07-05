@@ -32,12 +32,11 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
     private chartTextColor: string = ``;
     private borderColor: string = ``;
 
-
     private width: number = 0;
     private height: number = 0;
 
-    tableReady: boolean = false;
-    fontsLoaded: boolean = false;
+    public tableReady: boolean = false;
+    public fontsLoaded: boolean = false;
 
     private fonts: { [key: string]: string } = {};
 
@@ -54,6 +53,18 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
 
     ngOnInit(): void {
         this.loadFonts();
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['data'] && this.data) {
+            this.drawTable();
+        }
+    }
+
+    ngAfterViewInit() {
+        if (this.data) {
+            this.drawTable();
+        }
     }
 
     private async loadFonts(): Promise<void> {
@@ -83,18 +94,6 @@ export class StatLineComponent implements OnInit, OnChanges, AfterViewInit {
                 }
             }
         );
-    }
-
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['data'] && this.data) {
-            this.drawTable();
-        }
-    }
-
-    ngAfterViewInit() {
-        if (this.data) {
-            this.drawTable();
-        }
     }
 
     private createSvg(): void {

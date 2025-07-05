@@ -110,11 +110,12 @@ export class RadarChartComponent implements OnInit, OnChanges, AfterViewInit {
         const scale = 4;
         const width = this.width * scale;
         const height = this.height * scale;
+
         clonedSvg.setAttribute('width', `${width}`);
         clonedSvg.setAttribute('height', `${height}`);
         clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
-        clonedSvg.style.backgroundColor = 'transparent'; // Add transparency
-        clonedSvg.setAttribute('background-color', 'transparent'); // Ensure transparency
+        clonedSvg.style.backgroundColor = 'transparent';
+        clonedSvg.setAttribute('background-color', 'transparent');
     
         // Remove the background rectangle
         clonedSvg.querySelectorAll('rect').forEach(rect => {

@@ -103,7 +103,6 @@ export class PlayerSearchComponent implements OnInit {
         this.statLineModel = this.getMockData();
     }
 
-
     private getMockData(): StatLineData {
         return {
             player: "Kylian Mbappé",

@@ -5,16 +5,11 @@
     
     /* Main colors */
     --bb-brown-gold-color: #b07c29;
-    --bb-red-color: #972828;
-    --bb-red-card-color: #ad563b;
-    --bb-dark-red-burgundy-color: #681e1e;
     --bb-orange-color: #ff5b00;
     
     /* Accent Colors */
     --bb-blue-color: #405e9b;
     --bb-blue-card-color: #3a85c7;
-    --bb-cream-off-white-color: #f8f5e3;
-    --bb-cream-color: #ded2a2;
     --bb-green-color: #59c135;
     
     /* New Colors from Image */
@@ -30,26 +25,27 @@
     --bb-light-green: #7baf56;
     --bb-medium-green: #98c475;
     --bb-dark-green: #2d3b24;
+    --bb-forest-green: #01714f;
     
     /* Red/Burgundy Shades */
+    --bb-red-color: #972828;
+    --bb-red-card-color: #ad563b;
     --bb-burgundy: #a8021a;
     --bb-dark-burgundy: #972828;
     --bb-deeper-burgundy: #681e1e;
-    
-    /* Blue/Grey Shades */
-    --bb-steel-blue: #467a80;
+    --bb-dark-red-burgundy-color: #681e1e;
     
     /* Cream/Beige Shades */
+    --bb-cream-off-white-color: #f8f5e3;
     --bb-light-cream: #f0da9b;
     --bb-cream: #f8f5e3;
+    --bb-cream-color: #ded2a2;
     
     /* Blue Shades */
     --bb-navy: #25416c;
     --bb-medium-blue: #405e9b;
     --bb-light-blue: #3a85c7;
-    
-    /* Forest Green */
-    --bb-forest-green: #01714f;
+    --bb-steel-blue: #467a80;
     
     /* Brown */
     --bb-warm-brown: #b07c29;
@@ -61,7 +57,7 @@
     --font-eb-garamond: 'EB Garamond', serif;
     --font-merriweather: 'Merriweather', serif;
     --font-courier-prime: 'Courier Prime', monospace;
-    --font-berkeley-mono: 'TX-02', monospace;
+    --font-berkeley-mono: 'Berkeley Mono', monospace;
 }
 
 /* Typography Classes */
@@ -272,7 +268,7 @@ percentile-rank {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
-    font-family: 'TX-02';
+    font-family: 'Berekeley Mono', monospace;
     
     td {
         padding: 6px 8px;
@@ -307,7 +303,7 @@ percentile-rank {
     position: relative;
     
     h1 {
-        font-family: 'TX-02';
+        font-family: 'Berkeley Mono', monospace;
         font-weight: bold;
         font-size: 1.75rem;
         color: var(--bb-black-color);
@@ -381,7 +377,7 @@ percentile-rank {
 }
 
 .definition-content {
-    font-family: 'TX-02';
+    font-family: 'Berkeley Mono', monospace;
     line-height: 1.5;
 }
 
@@ -396,7 +392,7 @@ percentile-rank {
     margin-bottom: 1.25rem;
     
     h2 {
-        font-family: 'TX-02';
+        font-family: 'Berkeley Mono', monospace;
         font-weight: bold;
         font-size: 1rem;
         color: var(--bb-black-color);

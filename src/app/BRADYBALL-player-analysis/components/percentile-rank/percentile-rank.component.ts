@@ -10,20 +10,17 @@ import { PercentileRankData } from '../../models/percentile-rank.model';
     styleUrls: ['./percentile-rank.component.scss']
 })
 export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit {
-    @Input() data?: PercentileRankData;
+    @Input() data!: PercentileRankData;
 
     private svg: any;
     private width = 800;
     private height = 300;
 
     public chartReady: boolean = false;
-    fontsLoaded: boolean = false;
+    public fontsLoaded: boolean = false;
 
-    private readonly CREAM_COLOR;
-    private readonly RED_COLOR;
     private readonly BLACK_COLOR;
     private readonly WHITE_COLOR;
-    private readonly YELLOW_COLOR;
     private readonly DIGITAL_COLOR = '#ffffff';
 
     private fonts: { [key: string]: string } = {};
@@ -33,41 +30,32 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         private fontService: FontService,
         private BRADYBALLUtil: BRADYBALLCardUtil
     ) {
-        this.CREAM_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-cream-color');
-        this.RED_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-red-card-color');
         this.BLACK_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-black-color');
         this.WHITE_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-white-color');
-        this.YELLOW_COLOR = this.BRADYBALLUtil.getCssVariableValue('--bb-pale-yellow');
     }
 
     ngOnInit(): void {
         this.loadFonts();
-        if (this.data) {
-            this.createSvg();
-            this.drawChart();
-        }  
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['data'] && this.data) {
-            this.createSvg();
             this.drawChart();
         }
     }
 
     ngAfterViewInit(): void {
         if (this.data) {
-            this.createSvg();
             this.drawChart();
         }
     }
 
-    private loadFonts(): void {
+    private async loadFonts(): Promise<void> {
         const fontFiles = [
             'league-spartan-regular.woff2',
             'league-spartan-bold.woff2',
-            'TX-02-Regular.woff2',
-            'TX-02-Bold.woff2',
+            'berkeley-mono-regular.woff2',
+            'berkeley-mono-bold.woff2',
         ];
 
         this.fontService.loadFonts(fontFiles).subscribe(
@@ -75,14 +63,12 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                 this.fonts = fonts;
                 this.fontsLoaded = true;
                 if (this.data) {
-                    this.createSvg();
                     this.drawChart();
                 }
             },
             error => {
                 console.error('Error loading fonts:', error);
                 if (this.data) {
-                    this.createSvg();
                     this.drawChart();
                 }
             }
@@ -109,261 +95,44 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         // Clone the SVG
         const clonedSvg = svgElement.cloneNode(true) as SVGElement;
 
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clonedSvg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
         // Set basic SVG attributes for higher resolution
         const scale = 4;
-        clonedSvg.setAttribute('width', `${this.width * scale}`);
-        clonedSvg.setAttribute('height', `${this.height * scale}`);
+        const width = this.width * scale;
+        const height = this.height * scale;
+
+        clonedSvg.setAttribute('width', `${width}`);
+        clonedSvg.setAttribute('height', `${height}`);
         clonedSvg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
-        clonedSvg.style.backgroundColor = 'transparent';
-        clonedSvg.setAttribute('background-color', 'transparent'); // Ensure transparency
 
-        // Create fixed font definitions that handle the Berkeley Mono/TX-02 mapping
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        defs.innerHTML = this.getFontDefinitions();
-        clonedSvg.insertBefore(defs, clonedSvg.firstChild);
-
-        // Collect all filter ids used in the SVG
-        const usedFilterIds = new Set<string>();
-        const elementsWithFilters = clonedSvg.querySelectorAll('[filter]');
-        elementsWithFilters.forEach((el) => {
-            const filterAttr = el.getAttribute('filter');
-            if (filterAttr && filterAttr.startsWith('url(#')) {
-                // Extract ID from url(#filterId)
-                const filterId = filterAttr.substring(5, filterAttr.length - 1);
-                usedFilterIds.add(filterId);
+        clonedSvg.querySelectorAll('rect').forEach(rect => {
+            if (rect.getAttribute('width') === '100%' || rect.getAttribute('width') === `${width}`) {
+                rect.remove();
             }
         });
 
-        // Add necessary filter definitions
-        const missingFilters = [
-            'innerShadow', 'distressedEdges', 'outerRimShadow',
-            'blur1px', 'enhancedNeedleGlow', 'displayGlow',
-            'stickyNoteTextShadow' // Add the sticky note text shadow filter
-        ];
-
-        // TypeScript safety: defs is guaranteed to exist at this point
-        const defElement = defs;
-        missingFilters.forEach(filterId => {
-            if (usedFilterIds.has(filterId) && !defElement.querySelector(`#${filterId}`)) {
-                this.createFilterDirectly(defElement, filterId);
+        // Add style for text rendering
+        const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+        styleElement.textContent = `
+            text {
+                text-rendering: geometricPrecision;
+                shape-rendering: geometricPrecision;
             }
-        });
+        `;
+        clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
 
-        this.applyCorrectFontAttributes(clonedSvg);
-
-        this.enhanceStickyNoteForExport(clonedSvg);
-
-        this.postProcessSpecificElements(clonedSvg);
-
-        // Serialize to string with proper XML declaration
         const serializer = new XMLSerializer();
         let svgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
     ${serializer.serializeToString(clonedSvg)}`;
 
+        // Embed fonts
+        svgString = this.fontService.embedFontsInSVG(svgString, this.fonts);
+
         // Save file with corrected SVG string
         this.BRADYBALLUtil.saveSVGToFile(svgString, 'percentile_rank.svg');
-    }
-
-    private enhanceStickyNoteForExport(svgElement: SVGElement): void {
-        // Find all sticky note text elements
-        const stickyNoteTexts = svgElement.querySelectorAll('.sticky-note-text, .sticky-note-shadow');
-
-        // Enhance each text element with proper styling
-        stickyNoteTexts.forEach((textElement) => {
-            const svgTextElement = textElement as SVGTextElement;
-            const isShadow = svgTextElement.classList.contains('sticky-note-shadow');
-
-            // Set explicit font attributes
-            svgTextElement.style.fontFamily = "'League Spartan', sans-serif";
-            svgTextElement.setAttribute('font-family', "'League Spartan', sans-serif");
-            svgTextElement.style.fontWeight = 'bold';
-            svgTextElement.setAttribute('font-weight', 'bold');
-
-            // Set proper fill color
-            if (isShadow) {
-                svgTextElement.style.fill = "rgba(0,0,0,0.35)";
-                svgTextElement.setAttribute('fill', 'rgba(0,0,0,0.35)');
-                // Apply filter if it exists
-                const filter = svgTextElement.getAttribute('filter');
-                if (filter) {
-                    svgTextElement.style.filter = filter;
-                }
-            } else {
-                svgTextElement.style.fill = this.BLACK_COLOR;
-                svgTextElement.setAttribute('fill', this.BLACK_COLOR);
-            }
-
-            // Explicitly set text rendering for better font display
-            svgTextElement.setAttribute('text-rendering', 'geometricPrecision');
-            textElement.setAttribute('text-rendering', 'geometricPrecision');
-        });
-    }
-
-    // Add this to your createFilterDirectly method to include the sticky note text shadow
-    private createFilterDirectly(defs: Element, filterId: string): void {
-        switch (filterId) {
-            // ... existing cases ...
-
-            case 'stickyNoteTextShadow':
-                // Create text shadow filter specifically for sticky note
-                const textShadowFilter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
-                textShadowFilter.setAttribute('id', 'stickyNoteTextShadow');
-                textShadowFilter.setAttribute('x', '-20%');
-                textShadowFilter.setAttribute('y', '-20%');
-                textShadowFilter.setAttribute('width', '140%');
-                textShadowFilter.setAttribute('height', '140%');
-
-                const feDropShadow = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
-                feDropShadow.setAttribute('dx', '1');
-                feDropShadow.setAttribute('dy', '1');
-                feDropShadow.setAttribute('stdDeviation', '0.5');
-                feDropShadow.setAttribute('flood-opacity', '0.2');
-                feDropShadow.setAttribute('flood-color', '#000000');
-
-                textShadowFilter.appendChild(feDropShadow);
-                defs.appendChild(textShadowFilter);
-                break;
-
-            // ... other cases ...
-        }
-    }
-
-    private getFontDefinitions(): string {
-        return `
-            <style>
-                @font-face {
-                    font-family: 'League Spartan';
-                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['league-spartan-regular.woff2']}) format('woff2');
-                    font-weight: normal;
-                    font-style: normal;
-                }
-                @font-face {
-                    font-family: 'League Spartan';
-                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['league-spartan-bold.woff2']}) format('woff2');
-                    font-weight: bold;
-                    font-style: normal;
-                }
-                
-                /* TX-02 fonts with proper naming to match CSS */
-                @font-face {
-                    font-family: 'TX-02';
-                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['TX-02-Regular.woff2']}) format('woff2');
-                    font-weight: normal;
-                    font-style: normal;
-                }
-                @font-face {
-                    font-family: 'TX-02';
-                    src: url(data:application/font-woff2;charset=utf-8;base64,${this.fonts['TX-02-Bold.woff2']}) format('woff2');
-                    font-weight: bold;
-                    font-style: normal;
-                }
-                
-                /* Color Variables */
-                :root {
-                    --bb-cream-color: ${this.CREAM_COLOR};
-                    --bb-red-card-color: ${this.RED_COLOR};
-                    --bb-black-color: ${this.BLACK_COLOR};
-                    --bb-white-color: ${this.WHITE_COLOR};
-                    --bb-pale-yellow: ${this.YELLOW_COLOR};
-                }
-                
-                .bb-text-bold { font-weight: bold }
-                .bb-text-berkeley-mono { font-family: 'TX-02', 'Berkeley Mono', monospace; color: var(--bb-white-color); }
-                .bb-text-league-spartan { font-family: 'League Spartan', sans-serif; color: var(--bb-black-color); }
-
-                /* Ensure all text has proper rendering */
-                text {
-                    text-rendering: geometricPrecision;
-                    shape-rendering: geometricPrecision;
-                }
-                
-                /* Special selection for tick labels and digital display */
-                .ticks text {
-                    font-family: 'TX-02', 'Berkeley Mono', monospace !important;
-                    fill: #ffffff !important;
-                }
-                .digital-display text {
-                    font-family: 'TX-02', 'Berkeley Mono', monospace !important;
-                    fill: #ffffff !important;
-                }
-                
-                /* Special styling for sticky note text */
-                .sticky-note-text {
-                    font-family: 'League Spartan', sans-serif !important;
-                    font-weight: bold !important;
-                    fill: ${this.BLACK_COLOR} !important;
-                    text-rendering: geometricPrecision;
-                }
-                .sticky-note-shadow {
-                    font-family: 'League Spartan', sans-serif !important;
-                    font-weight: bold !important;
-                    fill: rgba(0,0,0,0.35) !important;
-                    filter: url(#stickyNoteTextShadow);
-                }
-            </style>
-        `;
-    }
-
-    // Special handling for specific elements like tick labels and digital display
-    private postProcessSpecificElements(svgElement: SVGElement): void {
-        // Process tick labels specifically to use TX-02 font
-        const tickLabels = svgElement.querySelectorAll('.ticks text');
-        tickLabels.forEach(label => {
-            label.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
-
-            if (label.textContent && !isNaN(parseFloat(label.textContent.trim()))) {
-                label.setAttribute('fill', '#ffffff');
-                (label as SVGElement).style.fill = '#ffffff';
-            }
-        });
-
-        // Fix digital display text to use TX-02 font
-        const digitalDisplay = svgElement.querySelectorAll('.digital-display text');
-        digitalDisplay.forEach(text => {
-            text.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
-            text.setAttribute('fill', '#ffffff');
-            (text as SVGElement).style.fill = '#ffffff';
-        });
-    }
-
-    // Apply correct font attributes to all text elements
-    private applyCorrectFontAttributes(svgElement: SVGElement): void {
-        const textElements = svgElement.querySelectorAll('text');
-
-        textElements.forEach((textElement: SVGTextElement) => {
-            const classList = Array.from(textElement.classList || []);
-
-            // Fix Berkeley Mono references to use TX-02
-            if (classList.includes('bb-text-berkeley-mono')) {
-                textElement.style.fontFamily = "'TX-02', 'Berkeley Mono', monospace";
-                textElement.setAttribute('font-family', "'TX-02', 'Berkeley Mono', monospace");
-                textElement.style.fill = "#ffffff";
-                textElement.setAttribute('fill', '#ffffff');
-
-                // Add explicit font-weight if it's bold
-                if (classList.includes('bb-text-bold')) {
-                    textElement.style.fontWeight = 'bold';
-                    textElement.setAttribute('font-weight', 'bold');
-                }
-            }
-            // Handle League Spartan text
-            else if (classList.includes('bb-text-league-spartan')) {
-                textElement.style.fontFamily = "'League Spartan', sans-serif";
-                textElement.setAttribute('font-family', "'League Spartan', sans-serif");
-
-                if (classList.includes('bb-text-bold')) {
-                    textElement.style.fontWeight = 'bold';
-                    textElement.setAttribute('font-weight', 'bold');
-                }
-            }
-
-            // Preserve filter effects
-            const filter = textElement.getAttribute('filter');
-            if (filter) {
-                textElement.style.filter = filter;
-            }
-        });
     }
 
     private drawDescription(): void {
@@ -563,42 +332,44 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
         fontSize = findOptimalFontSize();
 
-        // Create a text group for better organization
         const textGroup = stickyNote.append('g')
             .attr('class', 'sticky-note-text');
 
-        // Draw the final text with enhanced shadow for better readability
         finalLines.forEach((line, i) => {
-            // Text shadow (darker and more defined for better visibility in export)
             textGroup.append('text')
-                .attr('class', 'bb-text-league-spartan bb-text-bold sticky-note-shadow')
+                .attr('class', 'bb-text-league-spartan bb-text-bold')
                 .attr('font-family', 'League Spartan')
                 .attr('font-weight', 'bold')
                 .attr('font-size', `${fontSize}px`)
-                .attr('fill', 'rgba(0,0,0,0.35)') // Darker shadow
+                .attr('fill', 'rgba(0,0,0,0.35)')
+                .attr('style', 'rgba(0,0,0,0.35)')
                 .attr('x', 41)
                 .attr('y', 36 + (i * lineHeight))
                 .attr('filter', 'url(#stickyNoteTextShadow)')
+                .attr('text-rendering', 'geometricPrecision')
                 .text(line);
 
-            // Main text with explicitly set attributes to ensure export quality
             textGroup.append('text')
-                .attr('class', 'bb-text-league-spartan bb-text-bold sticky-note-text')
+                .attr('class', 'bb-text-league-spartan bb-text-bold')
                 .attr('font-family', 'League Spartan')
                 .attr('font-weight', 'bold')
                 .attr('font-size', `${fontSize}px`)
                 .attr('fill', this.BLACK_COLOR)
+                .attr('style', this.BLACK_COLOR)
                 .attr('x', 40)
                 .attr('y', 35 + (i * lineHeight))
+                .attr('text-rendering', 'geometricPrecision')
                 .text(line);
         });
     }
 
     private drawChart(): void {
-        if (!this.data || typeof this.data.percentile !== 'number') {
+        if (!this.data || !this.data.percentile) {
             this.chartReady = false;
             return;
         }
+
+        this.createSvg();
 
         this.svg.selectAll("*").remove();
         this.createFilters();
@@ -652,7 +423,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('stroke-width', gaugeRadius * 0.20)
             .attr('opacity', 0.9);
 
-        // NEW: Add inner texture with diagonal pattern
         const innerRadius = gaugeRadius * 0.70;
         gaugeGroup.append('circle')
             .attr('r', innerRadius)
@@ -710,7 +480,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('fill', '#111111');
 
         // Create concentric circular stripes (horizontal lines)
-        // This creates the subtle horizontal lines seen in the GT3 RS
         for (let i = 0; i < 40; i++) {
             concentricPattern.append('circle')
                 .attr('cx', 100)
@@ -826,7 +595,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         // Add the counter-balance part extending out the back (also yellow)
         needleGroup.append('path')
             .attr('d', `M ${leftBase.x},${leftBase.y} L ${counterTip.x},${counterTip.y} L ${rightBase.x},${rightBase.y} Z`)
-            .attr('fill', '#FFDD00') // Same bright yellow for continuity
+            .attr('fill', '#FFDD00')
             .attr('stroke', '#444')
             .attr('stroke-width', 1);
 
@@ -856,9 +625,9 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
     private drawTicks(group: any, radius: number, startAngle: number, endAngle: number): void {
         const ticksGroup = group.append('g').attr('class', 'ticks');
-        const majorTickLength = radius * 0.09;  // For numbered ticks
-        const mediumTickLength = radius * 0.05; // For ticks at .5 intervals
-        const smallTickLength = radius * 0.05;  // For minor ticks
+        const majorTickLength = radius * 0.09;
+        const mediumTickLength = radius * 0.05;
+        const smallTickLength = radius * 0.05;
 
         // Define tick widths for different sizes
         const majorTickWidth = 3;
@@ -888,7 +657,7 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
 
             motionBlur.append('feGaussianBlur')
                 .attr('in', 'SourceGraphic')
-                .attr('stdDeviation', `${level * 0.3},0`) // Very subtle horizontal blur, no vertical blur
+                .attr('stdDeviation', `${level * 0.3},0`)
                 .attr('result', 'blur');
         });
 
@@ -1005,26 +774,28 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
                         .attr('font-weight', 'bold')
                         .attr('text-anchor', textAnchor)
                         .attr('dominant-baseline', 'middle')
-                        .attr('fill', '#ffffff') // Keep text white
+                        .attr('fill', this.WHITE_COLOR)
+                        .style('fill', this.WHITE_COLOR)
                         .attr('font-size', '14px')
-                        .attr('filter', `${filterValue} url(#textShadow-${i})`) // Add subtle shadow for better readability
+                        .attr('filter', `${filterValue} url(#textShadow-${i})`)
+                        .attr('text-rendering', 'geometricPrecision')
                         .text(value);
 
-                    // If we want to simulate the blur from the example clock even more accurately
-                    // We could add a duplicate text slightly offset to create a motion trail effect
                     if (value < currentValue) {
                         const distanceFromCurrent = currentValue - value;
                         if (distanceFromCurrent > 2) {
                             ticksGroup.append('text')
-                                .attr('x', labelX - 2) // Slight offset to create motion trail
+                                .attr('x', labelX - 2)
                                 .attr('y', labelY)
                                 .attr('class', 'bb-text-berkeley-mono bb-text-bold')
                                 .attr('text-anchor', textAnchor)
                                 .attr('dominant-baseline', 'middle')
-                                .attr('fill', '#ffffff')
+                                .attr('fill', this.WHITE_COLOR)
+                                .style('fill', this.WHITE_COLOR)
                                 .attr('font-size', '14px')
-                                .attr('opacity', 0.4) // Semi-transparent
+                                .attr('opacity', 0.4)
                                 .attr('filter', filterValue)
+                                .attr('text-rendering', 'geometricPrecision')
                                 .text(value);
                         }
                     }
@@ -1094,7 +865,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('fill', 'url(#screenPattern)')
             .attr('opacity', 0.8);
 
-        // Define a silver gradient in your defs section (add this where you define other patterns/gradients)
         const silverGradient = this.svg.select('defs').append('linearGradient')
             .attr('id', 'silverGradient')
             .attr('x1', '0%')
@@ -1126,16 +896,17 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('stroke-width', 2)
             .attr('filter', 'url(#blur1px)');
 
-        // Display the percentile with enhanced glow - larger like in image 2
         digitalGroup.append('text')
             .attr('x', 0)
             .attr('y', displayY + displayHeight * 0.42)
             .attr('text-anchor', 'middle')
             .attr('dominant-baseline', 'middle')
             .attr('fill', this.DIGITAL_COLOR)
+            .style('fill', this.DIGITAL_COLOR)
             .attr('class', 'bb-text-berkeley-mono bb-text-bold')
             .attr('font-size', '36px')
             .attr('filter', 'url(#displayGlow)')
+            .attr('text-rendering', 'geometricPrecision')
             .text(`${Math.round(percentile)}%`);
 
         // Add RANK text to the right of the percentage
@@ -1153,11 +924,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
     }
 
     private drawDashboardContainer(): void {
-        interface GradientStop {
-            offset: string;
-            color: string;
-        }
-
         const containerGroup = this.svg.append('g');
         const defs = this.svg.select('defs').empty() ? this.svg.append('defs') : this.svg.select('defs');
 
@@ -1248,8 +1014,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         const digitalMerge = digitalGlow.append('feMerge');
         digitalMerge.append('feMergeNode').attr('in', 'blur');
         digitalMerge.append('feMergeNode').attr('in', 'SourceGraphic');
-
-        // Rest of the filter setup...
     }
 
     private createVintageEffects(): void {
@@ -1306,76 +1070,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         rimMerge.append('feMergeNode').attr('in', 'SourceGraphic');
     }
 
-    private addTubeEffects(defs: any): void {
-        const tubeGlow = defs.append('filter')
-            .attr('id', 'tubeGlow')
-            .attr('height', '300%')
-            .attr('width', '300%')
-            .attr('x', '-100%')
-            .attr('y', '-100%');
-
-        tubeGlow.append('feGaussianBlur')
-            .attr('stdDeviation', '1')
-            .attr('result', 'coloredBlur');
-
-        // Tube inner shadow for depth
-        const tubeInnerShadow = defs.append('filter')
-            .attr('id', 'tubeInnerShadow')
-            .attr('x', '-50%')
-            .attr('y', '-50%')
-            .attr('width', '200%')
-            .attr('height', '200%');
-
-        tubeInnerShadow.append('feGaussianBlur')
-            .attr('stdDeviation', '2')
-            .attr('result', 'blur');
-
-        tubeInnerShadow.append('feOffset')
-            .attr('dx', '0')
-            .attr('dy', '2');
-
-        // Liquid effect
-        const liquidEffect = defs.append('filter')
-            .attr('id', 'liquidEffect')
-            .attr('height', '300%')
-            .attr('width', '300%')
-            .attr('x', '-100%')
-            .attr('y', '-100%');
-
-        liquidEffect.append('feGaussianBlur')
-            .attr('stdDeviation', '2')
-            .attr('result', 'blur');
-
-        liquidEffect.append('feComposite')
-            .attr('operator', 'in')
-            .attr('in2', 'SourceGraphic');
-
-        // Glass highlight gradient
-        const glassHighlight = defs.append('linearGradient')
-            .attr('id', 'glassHighlight')
-            .attr('gradientUnits', 'userSpaceOnUse')
-            .attr('x1', '0%')
-            .attr('y1', '0%')
-            .attr('x2', '0%')
-            .attr('y2', '100%');
-
-        glassHighlight.append('stop')
-            .attr('offset', '0%')
-            .attr('stop-color', '#ffffff')
-            .attr('stop-opacity', '0.4');
-
-        glassHighlight.append('stop')
-            .attr('offset', '50%')
-            .attr('stop-color', '#ffffff')
-            .attr('stop-opacity', '0.1');
-
-        glassHighlight.append('stop')
-            .attr('offset', '100%')
-            .attr('stop-color', '#ffffff')
-            .attr('stop-opacity', '0.2');
-    }
-
-    // Creates all gradient definitions needed for metallic effects
     private createGradients(defs: any): void {
         // Screw base gradient
         const screwGradient = defs.append('radialGradient')
@@ -1404,7 +1098,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         screwHighlight.append('stop').attr('offset', '100%').attr('stop-color', 'rgba(255,255,255,0)');
     }
 
-    // Creates shadow effects and screen patterns
     private createFiltersAndPatterns(defs: any): void {
         // Inner shadow for depth effect
         const innerShadow = defs.append('filter')
@@ -1504,7 +1197,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
             .attr('filter', 'url(#innerShadow)');
     }
 
-    // Draws the screen area with scan line effect
     private drawScreen(containerGroup: any): void {
         const screenGroup = containerGroup.append('g')
             .attr('clip-path', 'url(#screenClip)');
@@ -1567,7 +1259,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
     }
 
     private addGaugeEffects(defs: any): void {
-        // Gauge glow effect
         const gaugeGlow = defs.append('filter')
             .attr('id', 'gaugeGlow')
             .attr('height', '300%')
@@ -1583,7 +1274,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
         glowMerge.append('feMergeNode').attr('in', 'coloredBlur');
         glowMerge.append('feMergeNode').attr('in', 'SourceGraphic');
 
-        // Metallic overlay for shine
         const metallicOverlay = defs.append('linearGradient')
             .attr('id', 'metallicOverlay')
             .attr('gradientUnits', 'userSpaceOnUse')
@@ -1609,7 +1299,6 @@ export class PercentileRankComponent implements OnInit, OnChanges, AfterViewInit
     }
 
     private createLCDScreenEffect(defs: any): void {
-        // Vintage LCD effect from your older code
         const lcdScreen = defs.append('pattern')
             .attr('id', 'lcdScreen')
             .attr('patternUnits', 'userSpaceOnUse')
