@@ -1,0 +1,307 @@
+/* CRT Effects Variables */
+:root {
+  --crt-scanline-opacity: 0.15;
+  --crt-flicker-opacity: 0.95;
+  --crt-phosphor-color: var(--bb-blue-color);
+  --crt-glow-color: rgba(64, 94, 155, 0.3);
+}
+
+/* CRT Effects - Global Body Styles */
+/* Scanlines Effect */
+body:not(.crt-scanlines-disabled)::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(64, 94, 155, var(--crt-scanline-opacity)) 2px,
+    rgba(64, 94, 155, var(--crt-scanline-opacity)) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Screen Flicker Effect */
+body:not(.crt-flicker-disabled) {
+  animation: flicker 0.15s infinite linear;
+}
+
+@keyframes flicker {
+  0% { opacity: var(--crt-flicker-opacity); }
+  98% { opacity: var(--crt-flicker-opacity); }
+  99% { opacity: 0.96; }
+  100% { opacity: var(--crt-flicker-opacity); }
+}
+
+/* Screen Glow Effect */
+body:not(.crt-glow-disabled) {
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%);
+}
+
+/* Rolling Scan Effect */
+body:not(.crt-rolling-scan-disabled)::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(64, 94, 155, 0.1) 50%,
+    transparent 100%
+  );
+  animation: rollingScan 3s infinite linear;
+  pointer-events: none;
+  z-index: 999;
+}
+
+@keyframes rollingScan {
+  0% { transform: translateY(-100vh); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Header Styles */
+.bb-header {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  border-bottom: 2px solid var(--bb-blue-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  overflow: hidden;
+  padding: 1rem 2rem;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  
+  // Grid background effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(64, 94, 155, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(64, 94, 155, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+  }
+}
+
+.bb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 10;
+  position: absolute;
+  left: 20%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.bb-header-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.bb-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 10;
+  position: absolute;
+  right: 20%;
+  transform: translateX(50%);
+  pointer-events: auto;
+}
+
+.bb-brand {
+  font-family: var(--font-berkeley-mono);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--bb-white-color);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  // CRT text effect for brand
+  body:not(.crt-phosphor-disabled) & {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px var(--bb-blue-color),
+      0 0 15px var(--bb-blue-color),
+      0 0 20px var(--bb-blue-color);
+    animation: textGlow 2s ease-in-out infinite alternate;
+  }
+  
+  &:hover {
+    color: var(--bb-white-color);
+  }
+}
+
+.bb-nav-item {
+  font-family: var(--font-berkeley-mono);
+  font-size: 0.875rem;
+  color: #d1d5db;
+  text-transform: none;
+  letter-spacing: 1px;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: none;
+  transition: all 0.3s ease;
+  background: none;
+  position: relative;
+  cursor: pointer;
+  
+  // CRT text effect for nav items
+  body:not(.crt-phosphor-disabled) & {
+    text-shadow: 
+      0 0 3px currentColor,
+      0 0 6px var(--bb-blue-color),
+      0 0 9px var(--bb-blue-color);
+  }
+  
+  &:hover, &.active {
+    color: var(--bb-white-color);
+    border-bottom: 2px solid var(--bb-white-color);
+    
+    // Enhanced glow on hover
+    body:not(.crt-phosphor-disabled) & {
+      text-shadow: 
+        0 0 5px currentColor,
+        0 0 10px var(--bb-blue-color),
+        0 0 15px var(--bb-blue-color);
+    }
+  }
+}
+
+/* CRT Text Glow Animation */
+@keyframes textGlow {
+  from {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px var(--bb-blue-color),
+      0 0 15px var(--bb-blue-color),
+      0 0 20px var(--bb-blue-color);
+  }
+  to {
+    text-shadow: 
+      0 0 8px currentColor,
+      0 0 15px var(--bb-blue-color),
+      0 0 20px var(--bb-blue-color),
+      0 0 25px var(--bb-blue-color);
+  }
+}
+
+/* Settings Dropdown (if you want to add it back later) */
+.bb-settings-container {
+  position: relative;
+}
+
+.bb-settings-btn {
+  background: none;
+  border: none;
+}
+
+.bb-settings-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 1rem;
+  width: 200px;
+  background: #000000;
+  border: 1px solid var(--bb-blue-color);
+  z-index: 100;
+}
+
+.bb-settings-item {
+  padding: 0.75rem 1rem;
+  font-family: var(--font-berkeley-mono);
+  font-size: 0.75rem;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(64, 94, 155, 0.2);
+    color: var(--bb-white-color);
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .bb-header {
+    flex-direction: row;
+    padding: 1rem;
+    justify-content: space-between;
+  }
+
+  .bb-header-left {
+    position: static;
+    transform: none;
+    order: 1;
+  }
+
+  .bb-header-center {
+    position: static;
+    transform: none;
+    order: 2;
+    flex: 1;
+    text-align: center;
+  }
+
+  .bb-header-right {
+    position: static;
+    transform: none;
+    order: 3;
+  }
+
+  .bb-brand {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .bb-nav-item {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bb-header {
+    padding: 0.75rem;
+  }
+
+  .bb-brand {
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+  }
+
+  .bb-header-left,
+  .bb-header-right {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bb-nav-item {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+}

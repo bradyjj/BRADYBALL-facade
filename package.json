@@ -21,6 +21,7 @@
         "@nguniversal/express-engine": "^16.2.0",
         "@popperjs/core": "^2.11.8",
         "@supabase/supabase-js": "^2.44.4",
+        "@types/three": "^0.178.0",
         "bootstrap": "^5.3.3",
         "bootstrap-icons": "^1.11.3",
         "d3": "^7.9.0",
@@ -29,6 +30,7 @@
         "jspdf": "^2.5.2",
         "rxjs": "~7.8.0",
         "svgo": "^3.3.2",
+        "three": "^0.178.0",
         "tslib": "^2.6.3",
         "zone.js": "~0.13.0"
     },

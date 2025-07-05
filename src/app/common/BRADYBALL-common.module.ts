@@ -7,6 +7,7 @@ import { BRADYBALLHeaderComponent } from "./BRADYBALL-header/BRADYBALL-header.co
 import { BRADYBALLFooterComponent } from "./BRADYBALL-footer/BRADYBALL-footer.component";
 import { AppRoutingModule } from "../app.routing";
 import { PitchComponent } from "./pitch/pitch.component";
+import { HeaderComponent } from './header/header.component';
 
 @NgModule({
     imports: [
@@ -20,11 +21,14 @@ import { PitchComponent } from "./pitch/pitch.component";
         BRADYBALLFooterComponent,
         BRADYBALLHeaderComponent,
         PitchComponent,
+        HeaderComponent
     ],
     declarations: [
         BRADYBALLFooterComponent,
         BRADYBALLHeaderComponent,
         PitchComponent,
+        HeaderComponent,
+        HeaderComponent
     ]
 })
 export class BRADYBALLCommonModule { }
