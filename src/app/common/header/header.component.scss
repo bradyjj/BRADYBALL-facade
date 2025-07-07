@@ -1,72 +1,3 @@
-/* CRT Effects Variables */
-:root {
-  --crt-scanline-opacity: 0.15;
-  --crt-flicker-opacity: 0.95;
-  --crt-phosphor-color: var(--bb-blue-color);
-  --crt-glow-color: rgba(64, 94, 155, 0.3);
-}
-
-/* CRT Effects - Global Body Styles */
-/* Scanlines Effect */
-body:not(.crt-scanlines-disabled)::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(64, 94, 155, var(--crt-scanline-opacity)) 2px,
-    rgba(64, 94, 155, var(--crt-scanline-opacity)) 4px
-  );
-  pointer-events: none;
-  z-index: 1000;
-}
-
-/* Screen Flicker Effect */
-body:not(.crt-flicker-disabled) {
-  animation: flicker 0.15s infinite linear;
-}
-
-@keyframes flicker {
-  0% { opacity: var(--crt-flicker-opacity); }
-  98% { opacity: var(--crt-flicker-opacity); }
-  99% { opacity: 0.96; }
-  100% { opacity: var(--crt-flicker-opacity); }
-}
-
-/* Screen Glow Effect */
-body:not(.crt-glow-disabled) {
-  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.3) 100%);
-}
-
-/* Rolling Scan Effect */
-body:not(.crt-rolling-scan-disabled)::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(64, 94, 155, 0.1) 50%,
-    transparent 100%
-  );
-  animation: rollingScan 3s infinite linear;
-  pointer-events: none;
-  z-index: 999;
-}
-
-@keyframes rollingScan {
-  0% { transform: translateY(-100vh); }
-  100% { transform: translateY(100vh); }
-}
-
 /* Header Styles */
 .bb-header {
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
@@ -141,16 +72,6 @@ body:not(.crt-rolling-scan-disabled)::after {
   text-decoration: none;
   transition: all 0.3s ease;
   
-  // CRT text effect for brand
-  body:not(.crt-phosphor-disabled) & {
-    text-shadow: 
-      0 0 5px currentColor,
-      0 0 10px var(--bb-blue-color),
-      0 0 15px var(--bb-blue-color),
-      0 0 20px var(--bb-blue-color);
-    animation: textGlow 2s ease-in-out infinite alternate;
-  }
-  
   &:hover {
     color: var(--bb-white-color);
   }
@@ -170,43 +91,9 @@ body:not(.crt-rolling-scan-disabled)::after {
   position: relative;
   cursor: pointer;
   
-  // CRT text effect for nav items
-  body:not(.crt-phosphor-disabled) & {
-    text-shadow: 
-      0 0 3px currentColor,
-      0 0 6px var(--bb-blue-color),
-      0 0 9px var(--bb-blue-color);
-  }
-  
   &:hover, &.active {
     color: var(--bb-white-color);
     border-bottom: 2px solid var(--bb-white-color);
-    
-    // Enhanced glow on hover
-    body:not(.crt-phosphor-disabled) & {
-      text-shadow: 
-        0 0 5px currentColor,
-        0 0 10px var(--bb-blue-color),
-        0 0 15px var(--bb-blue-color);
-    }
-  }
-}
-
-/* CRT Text Glow Animation */
-@keyframes textGlow {
-  from {
-    text-shadow: 
-      0 0 5px currentColor,
-      0 0 10px var(--bb-blue-color),
-      0 0 15px var(--bb-blue-color),
-      0 0 20px var(--bb-blue-color);
-  }
-  to {
-    text-shadow: 
-      0 0 8px currentColor,
-      0 0 15px var(--bb-blue-color),
-      0 0 20px var(--bb-blue-color),
-      0 0 25px var(--bb-blue-color);
   }
 }
 

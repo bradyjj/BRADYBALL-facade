@@ -96,6 +96,8 @@ export class FontService {
             .bb-text-eb-garamond { font-family: 'EB Garamond', serif; }
             .bb-text-merriweather { font-family: 'Merriweather', serif; }
             .bb-text-courier-prime { font-family: 'Courier Prime', monospace; }
+            .bb-text-berkeley-mono { font-family: 'Berkeley Mono', monospace; }
+            .bb-text-squada-one { font-family: 'Squada One', monospace; }
         `;
     
         styleElement.textContent = styleContent;
@@ -144,6 +146,9 @@ export class FontService {
         if (filename.includes('pinegrove')) return 'Pinegrove';
         if (filename.includes('special-elite')) return 'Special Elite';
         if (filename.includes('league-spartan')) return 'League Spartan';
+        if (filename.includes('squada-one')) return 'Squada One';
+        if (filename.includes('berkeley-mono')) return 'Berkeley Mono';
+        if (filename.includes('TX-02')) return 'Berkeley Mono';
         return 'sans-serif';
     }
 

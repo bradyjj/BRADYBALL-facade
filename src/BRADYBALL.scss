@@ -62,13 +62,11 @@
     --font-merriweather: 'Merriweather', serif;
     --font-courier-prime: 'Courier Prime', monospace;
     --font-berkeley-mono: 'TX-02', monospace;
+    --font-squada-one: 'Squada One', monospace;
 
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
-    --crt-glow: rgba(0, 100, 255, 0.04);
-    --crt-glow-secondary: rgba(150, 0, 255, 0.02);
-    --crt-vignette: rgba(0, 0, 0, 0.5);
     --primary: transparent;
     --secondary: whitesmoke;
     --tertiary: whitesmoke;
@@ -167,6 +165,11 @@
 
 .bb-text-berkeley-mono {
     font-family: var(--font-berkeley-mono);
+    color: var(--bb-black-color);
+}
+
+.bb-text-berkeley-mono {
+    font-family: var(--font-squada-mono);
     color: var(--bb-black-color);
 }
 

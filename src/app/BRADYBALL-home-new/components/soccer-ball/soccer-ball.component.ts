@@ -234,7 +234,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.soccerBall = new THREE.Group();
 
         const geometry = new THREE.IcosahedronGeometry(3, 1);
-        
+
         const material = new THREE.MeshBasicMaterial({
             color: 0x00AE6B,
             wireframe: true,
@@ -299,18 +299,32 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         satellite.textGroup = this.createTextLabel(satellite.name);
         satellite.group.add(satellite.textGroup);
 
-        satellite.mesh.userData['satellite'] = satellite;
-        satellite.textGroup.userData['satellite'] = satellite;
+        // Assign userData to the group only
+        satellite.group.userData['satellite'] = satellite;
 
         this.scene.add(satellite.group);
 
-        if (satellite.textGroup) {
-            satellite.textGroup.children.forEach((child, idx) => {
-                if (idx > 2) {
-                    console.warn('Unexpected mesh in textGroup:', child, child.position);
-                }
-            });
-        }
+        // In createTextLabel, after creating each mesh:
+        const textValue = satellite.name.toUpperCase();
+        const background = satellite.textGroup.children[0] as THREE.Mesh;
+        const border = satellite.textGroup.children[1] as THREE.Mesh;
+        const textPlane = satellite.textGroup.children[2] as THREE.Mesh;
+        background.name = `${textValue}_background`;
+        border.name = `${textValue}_border`;
+        textPlane.name = `${textValue}_textPlane`;
+
+        // Calculate initial position for the satellite
+        const x = Math.cos(satellite.timeOffset) * satellite.orbitRadius;
+        const z = Math.sin(satellite.timeOffset) * satellite.orbitRadius;
+
+        satellite.position.set(x, 0, z);
+
+        const rotationMatrix = new THREE.Matrix4();
+        rotationMatrix.makeRotationY(-satellite.orbitAngle);
+        rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(satellite.orbitTilt));
+        satellite.position.applyMatrix4(rotationMatrix);
+
+        satellite.group.position.copy(satellite.position);
     }
 
     private createTextLabel(text: string): THREE.Group {
@@ -319,7 +333,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         // World units for label
         const labelHeight = 0.8;
         const paddingX = 0.25;
-        const fontFamily = 'TX-02, Arial, Helvetica, sans-serif';
+        const fontFamily = 'Squada One, Arial, Helvetica, sans-serif';
         const fontWeight = 'bold';
 
         const textValue = text.toUpperCase();
@@ -386,20 +400,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         });
         const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld), textMaterial);
 
-        // Calculate offset: 1/3 from left, at top edge
-        const offsetX = (-boxWidthWorld / 6) + (boxWidthWorld / 3);
-        const offsetY = -boxHeightWorld / 2;
+        // Position like in React version: offset from satellite
+        const offsetX = 0.8;
+        const offsetY = 0.8;
 
-        background.position.set(offsetX, offsetY, 0);
-        border.position.set(offsetX, offsetY, -0.01);
-        textPlane.position.set(offsetX, offsetY, 0.01);
+        background.position.set(offsetX, offsetY, -0.1);
+        border.position.set(offsetX, offsetY, -0.11);
+        textPlane.position.set(offsetX, offsetY, 0);
 
         textGroup.add(background);
         textGroup.add(border);
         textGroup.add(textPlane);
-
-        console.log('textGroup children:', textGroup.children.map(child => child.position));
-        console.log('textGroup child count:', textGroup.children.length);
 
         return textGroup;
     }
@@ -454,22 +465,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        const intersectableMeshes: THREE.Object3D[] = [];
-        this.satellites.forEach(satellite => {
-            if (satellite.mesh) {
-                intersectableMeshes.push(satellite.mesh);
-            }
-            if (satellite.textGroup && satellite.textGroup.children.length > 1) {
-                // Only make the border (white frame) hoverable
-                const border = satellite.textGroup.children[1] as THREE.Mesh;
-                if (border) {
-                    intersectableMeshes.push(border);
-                }
-            }
-        });
-
-        const intersects = this.raycaster.intersectObjects(intersectableMeshes);
-
+        // Reset all satellites to default colors
         this.satellites.forEach(satellite => {
             if (satellite.mesh) {
                 (satellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
@@ -486,30 +482,28 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             }
         });
 
+        // Handle hover state
+        const groups = this.satellites
+            .map(satellite => satellite.group)
+            .filter((group): group is THREE.Group => !!group);
+        const intersects = this.raycaster.intersectObjects(groups, true);
         if (intersects.length > 0) {
             let intersectedSatellite: CategorySatellite | null = null;
-            
             for (const intersect of intersects) {
-                if (intersect.object.userData['satellite']) {
-                    intersectedSatellite = intersect.object.userData['satellite'];
-                    break;
-                }
-                let parent = intersect.object.parent;
-                while (parent && !intersectedSatellite) {
-                    if (parent.userData['satellite']) {
-                        intersectedSatellite = parent.userData['satellite'];
+                let obj: THREE.Object3D | null = intersect.object;
+                while (obj) {
+                    if (obj.userData && obj.userData['satellite']) {
+                        intersectedSatellite = obj.userData['satellite'];
                         break;
                     }
-                    parent = parent.parent;
+                    obj = obj.parent;
                 }
                 if (intersectedSatellite) break;
             }
-
-            if (intersectedSatellite && intersectedSatellite.mesh) {
-                (intersectedSatellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
-                this.hoveredSatellite = intersectedSatellite;
-                this.canvasRef.nativeElement.style.cursor = 'pointer';
-
+            if (intersectedSatellite) {
+                if (intersectedSatellite.mesh) {
+                    (intersectedSatellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
+                }
                 if (intersectedSatellite.textGroup) {
                     const border = intersectedSatellite.textGroup.children[1] as THREE.Mesh;
                     const textPlane = intersectedSatellite.textGroup.children[2] as THREE.Mesh;
@@ -520,6 +514,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
                         (textPlane.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
                     }
                 }
+                this.hoveredSatellite = intersectedSatellite;
+                this.canvasRef.nativeElement.style.cursor = 'pointer';
             }
         } else {
             this.hoveredSatellite = null;
@@ -588,12 +584,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
     private async loadFont(): Promise<void> {
         return new Promise((resolve) => {
-            // Use the existing font service to load TX-02 font
-            const fontFiles = ['TX-02-Bold.woff2'];
+            const fontFiles = ['squada-one-regular.ttf'];
 
             this.fontService.loadFonts(fontFiles).subscribe(
                 (fonts) => {
-                    console.log('Fonts loaded via service:', fonts);
                     this.fontLoaded = true;
                     resolve();
                 },
