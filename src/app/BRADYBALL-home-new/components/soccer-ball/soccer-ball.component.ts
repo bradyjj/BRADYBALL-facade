@@ -1,6 +1,7 @@
 import { Component, ElementRef, ViewChild, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import * as THREE from 'three';
+import { FontService } from '../../../../assets/fonts/font.service';
 
 interface CategorySatellite {
     id: string;
@@ -43,6 +44,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private lastMouseTime = 0;
     private lastMouseMove = { x: 0, y: 0 };
     private spherical = new THREE.Spherical();
+    private fontLoaded = false;
 
     // Example categories data
     private readonly categoryData = [
@@ -50,13 +52,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         { id: 'defense', name: 'Defense' },
         { id: 'offense', name: 'Offense' },
         { id: 'midfield', name: 'Midfield' },
-        { id: 'goalkeeping', name: 'Goalkeeping' },
         { id: 'fitness', name: 'Fitness' }
     ];
 
-    constructor(private router: Router) { }
+    constructor(private router: Router, private fontService: FontService) { }
 
-    ngOnInit() {
+    async ngOnInit() {
+        await this.loadFont();
         this.initThreeJS();
         this.createSoccerBall();
         this.createSatellites();
@@ -85,9 +87,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x000000);
 
-        // Camera
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // Camera (top-down view)
+        this.camera = new THREE.PerspectiveCamera(95, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0, 10, 15);
+        this.camera.lookAt(0, 0, 0);
 
         // Renderer
         this.renderer = new THREE.WebGLRenderer({
@@ -106,6 +109,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         // Add OrbitControls (you'll need to import this)
         this.setupOrbitControls();
+
+        // Only set this once!
+        this.spherical.setFromVector3(this.camera.position);
     }
 
     private setupOrbitControls() {
@@ -113,8 +119,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         let mouseX = 0;
         let mouseY = 0;
 
-        // Convert current camera position to spherical coordinates
-        this.spherical.setFromVector3(this.camera.position);
+        // Convert current camera position to spherical coordinates (top-down)
+        this.spherical.set(15, Math.PI / 2, 0); // radius, phi (90deg), theta (0deg)
 
         const onMouseDown = (event: MouseEvent) => {
             isMouseDown = true;
@@ -146,11 +152,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             const rotateSpeed = 0.005;
 
             // Update spherical coordinates
-            this.spherical.theta -= deltaX * rotateSpeed; // Horizontal rotation
-            this.spherical.phi += deltaY * rotateSpeed;   // Vertical rotation (reversed)
-
-            // Clamp phi to prevent flipping
-            this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi));
+            this.spherical.theta -= deltaX * rotateSpeed;
+            this.spherical.phi += deltaY * rotateSpeed;
 
             // Update camera position
             this.camera.position.setFromSpherical(this.spherical);
@@ -170,16 +173,14 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         const onWheel = (event: WheelEvent) => {
             event.preventDefault();
-            const zoomSpeed = 0.1;
+            const zoomSpeed = 0.025;
 
-            // Update radius in spherical coordinates (FIXED: reversed direction)
-            if (event.deltaY > 0 && this.spherical.radius > 5) {
-                this.spherical.radius *= (1 - zoomSpeed); // Zoom in when scrolling down
-            } else if (event.deltaY < 0 && this.spherical.radius < 30) {
-                this.spherical.radius *= (1 + zoomSpeed); // Zoom out when scrolling up
+            if (event.deltaY > 0 && this.spherical.radius < 30) {
+                this.spherical.radius *= (1 + zoomSpeed);
+            } else if (event.deltaY < 0 && this.spherical.radius > 5) {
+                this.spherical.radius *= (1 - zoomSpeed);
             }
 
-            // Update camera position
             this.camera.position.setFromSpherical(this.spherical);
             this.camera.lookAt(0, 0, 0);
         };
@@ -218,9 +219,6 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
                 this.spherical.theta -= this.rotationVelocity.theta;
                 this.spherical.phi += this.rotationVelocity.phi;
 
-                // Clamp phi
-                this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi));
-
                 // Apply damping
                 this.rotationVelocity.theta *= damping;
                 this.rotationVelocity.phi *= damping;
@@ -235,12 +233,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private createSoccerBall() {
         this.soccerBall = new THREE.Group();
 
-        // Create soccer ball geometry (icosahedron for soccer ball shape)
         const geometry = new THREE.IcosahedronGeometry(3, 1);
-
-        // Create soccer ball material with wireframe
+        
         const material = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
+            color: 0x00AE6B,
             wireframe: true,
             wireframeLinewidth: 2
         });
@@ -248,48 +244,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         const ball = new THREE.Mesh(geometry, material);
         this.soccerBall.add(ball);
 
-        // Add soccer ball pattern (optional - creates the classic black/white pattern)
-        this.createSoccerBallPattern();
-
         this.scene.add(this.soccerBall);
-    }
-
-    private createSoccerBallPattern() {
-        // Create the classic soccer ball pentagon/hexagon pattern
-        const pentagons = new THREE.Group();
-        const hexagons = new THREE.Group();
-
-        // Pentagon material (black)
-        const pentagonMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
-
-        // Hexagon material (white)
-        const hexagonMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
-        // Create pentagons (12 total)
-        for (let i = 0; i < 12; i++) {
-            const pentagonGeometry = new THREE.ConeGeometry(0.3, 0.1, 5);
-            const pentagon = new THREE.Mesh(pentagonGeometry, pentagonMaterial);
-
-            // Position pentagons on the sphere surface
-            const phi = Math.acos(1 - 2 * (i + 0.5) / 12);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
-
-            pentagon.position.setFromSphericalCoords(3.1, phi, theta);
-            pentagon.lookAt(0, 0, 0);
-
-            pentagons.add(pentagon);
-        }
-
-        this.soccerBall.add(pentagons);
     }
 
     private generateOrbitConfigurations(count: number): { angle: number; tilt: number }[] {
         const configurations: { angle: number; tilt: number }[] = [];
-        const goldenRatio = (1 + Math.sqrt(5)) / 2;
+        const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ≈ 2.39996
 
         for (let i = 0; i < count; i++) {
-            const y = count === 1 ? 0 : 1 - (i / Math.max(count - 1, 1)) * 2;
-            const theta = 2 * Math.PI * i / goldenRatio;
+            const y = 1 - (i / (count - 1)) * 2; // y goes from 1 to -1
+            const radius = Math.sqrt(1 - y * y);
+            const theta = goldenAngle * i;
             const angle = theta;
             const tilt = Math.acos(y);
 
@@ -309,8 +274,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
                 id: category.id,
                 name: category.name,
                 orbitRadius: 5 + (index * 2),
-                orbitSpeed: 0.003 / (1 + index * 0.05), // Even slower orbit speed
-                rotationSpeed: 0.001 + (index * 0.0005), // Much slower rotation
+                orbitSpeed: 0.001 / (1 + index * 0.05), // Slower orbit speed
+                rotationSpeed: 0.0003 + (index * 0.0001), // Slower rotation
                 orbitAngle: config.angle,
                 orbitTilt: config.tilt,
                 position: new THREE.Vector3(),
@@ -324,63 +289,117 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     }
 
     private createSatelliteGroup(satellite: CategorySatellite) {
-        // Main satellite group
         satellite.group = new THREE.Group();
 
-        // Satellite mesh (sphere)
         const geometry = new THREE.SphereGeometry(0.15, 8, 8);
         const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
         satellite.mesh = new THREE.Mesh(geometry, material);
         satellite.group.add(satellite.mesh);
 
-        // Text label
         satellite.textGroup = this.createTextLabel(satellite.name);
         satellite.group.add(satellite.textGroup);
 
-        // Add user data for raycasting
         satellite.mesh.userData['satellite'] = satellite;
+        satellite.textGroup.userData['satellite'] = satellite;
 
         this.scene.add(satellite.group);
+
+        if (satellite.textGroup) {
+            satellite.textGroup.children.forEach((child, idx) => {
+                if (idx > 2) {
+                    console.warn('Unexpected mesh in textGroup:', child, child.position);
+                }
+            });
+        }
     }
 
     private createTextLabel(text: string): THREE.Group {
         const textGroup = new THREE.Group();
 
-        // Create background plane
-        const textWidth = text.length * 0.4;
-        const bgGeometry = new THREE.PlaneGeometry(textWidth + 0.4, 0.8);
+        // World units for label
+        const labelHeight = 0.8;
+        const paddingX = 0.25;
+        const fontFamily = 'TX-02, Arial, Helvetica, sans-serif';
+        const fontWeight = 'bold';
+
+        const textValue = text.toUpperCase();
+        const minWidth = 2.5;
+        const charWidth = 0.365;
+        const textWidthWorld = Math.max(minWidth, textValue.length * charWidth);
+        const boxWidthWorld = textWidthWorld + paddingX * 2;
+        const boxHeightWorld = labelHeight * 1.2;
+
+        // Canvas size in px (higher = sharper)
+        const scale = 256;
+        const canvasWidth = Math.round(boxWidthWorld * scale);
+        const canvasHeight = Math.round(boxHeightWorld * scale);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        const ctx = canvas.getContext('2d')!;
+
+        // Font size in px to match world unit height
+        const fontSizePx = Math.floor(labelHeight * scale * 0.8); // tweak 0.8 as needed
+        const fontString = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
+
+        // Draw function (can be called again after font loads)
+        function drawText(font: string) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = font;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'white';
+            ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
+        }
+
+        // Draw with fallback font first
+        drawText(`${fontWeight} ${fontSizePx}px Arial, Helvetica, sans-serif`);
+
+        // Create texture
+        const textTexture = new THREE.CanvasTexture(canvas);
+        textTexture.generateMipmaps = false;
+        textTexture.minFilter = THREE.LinearFilter;
+        textTexture.magFilter = THREE.LinearFilter;
+
+        // After TX-02 loads, redraw and update texture
+        if (document.fonts && document.fonts.load) {
+            document.fonts.load(fontString).then(() => {
+                drawText(fontString);
+                textTexture.needsUpdate = true;
+            });
+        }
+
+        // Background and border
+        const bgGeometry = new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld);
         const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const background = new THREE.Mesh(bgGeometry, bgMaterial);
-        background.position.set(1, 1, 0);
-        textGroup.add(background);
 
-        // Create border
-        const borderGeometry = new THREE.PlaneGeometry(textWidth + 0.5, 0.9);
+        const borderGeometry = new THREE.PlaneGeometry(boxWidthWorld + 0.15, boxHeightWorld + 0.1);
         const borderMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const border = new THREE.Mesh(borderGeometry, borderMaterial);
-        border.position.set(1, 1, -0.01);
-        textGroup.add(border);
 
-        // For text, we'll use a simple approach with canvas texture
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d')!;
-        canvas.width = 256;
-        canvas.height = 64;
-
-        context.fillStyle = 'white';
-        context.font = '24px Arial';
-        context.textAlign = 'center';
-        context.fillText(text.toUpperCase(), 128, 40);
-
-        const textTexture = new THREE.CanvasTexture(canvas);
         const textMaterial = new THREE.MeshBasicMaterial({
             map: textTexture,
-            transparent: true
+            transparent: true,
+            alphaTest: 0.1
         });
-        const textPlane = new THREE.PlaneGeometry(textWidth, 0.6);
-        const textMesh = new THREE.Mesh(textPlane, textMaterial);
-        textMesh.position.set(1, 1, 0.01);
-        textGroup.add(textMesh);
+        const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld), textMaterial);
+
+        // Calculate offset: 1/3 from left, at top edge
+        const offsetX = (-boxWidthWorld / 6) + (boxWidthWorld / 3);
+        const offsetY = -boxHeightWorld / 2;
+
+        background.position.set(offsetX, offsetY, 0);
+        border.position.set(offsetX, offsetY, -0.01);
+        textPlane.position.set(offsetX, offsetY, 0.01);
+
+        textGroup.add(background);
+        textGroup.add(border);
+        textGroup.add(textPlane);
+
+        console.log('textGroup children:', textGroup.children.map(child => child.position));
+        console.log('textGroup child count:', textGroup.children.length);
 
         return textGroup;
     }
@@ -396,9 +415,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
             const position = new THREE.Vector3(x, 0, z);
 
-            // Apply orbit transformations
-            position.applyAxisAngle(new THREE.Vector3(0, 1, 0), satellite.orbitAngle);
-            position.applyAxisAngle(new THREE.Vector3(1, 0, 0), satellite.orbitTilt);
+            const rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.makeRotationY(-satellite.orbitAngle);
+            rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(satellite.orbitTilt));
+            position.applyMatrix4(rotationMatrix);
 
             points.push(position);
         }
@@ -434,25 +454,72 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        const intersectableMeshes = this.satellites
-            .map(s => s.mesh!)
-            .filter(mesh => mesh);
+        const intersectableMeshes: THREE.Object3D[] = [];
+        this.satellites.forEach(satellite => {
+            if (satellite.mesh) {
+                intersectableMeshes.push(satellite.mesh);
+            }
+            if (satellite.textGroup && satellite.textGroup.children.length > 1) {
+                // Only make the border (white frame) hoverable
+                const border = satellite.textGroup.children[1] as THREE.Mesh;
+                if (border) {
+                    intersectableMeshes.push(border);
+                }
+            }
+        });
 
         const intersects = this.raycaster.intersectObjects(intersectableMeshes);
 
-        // Reset all satellites to default color
         this.satellites.forEach(satellite => {
             if (satellite.mesh) {
                 (satellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
             }
+            if (satellite.textGroup) {
+                const border = satellite.textGroup.children[1] as THREE.Mesh;
+                const textPlane = satellite.textGroup.children[2] as THREE.Mesh;
+                if (border && border.material) {
+                    (border.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+                }
+                if (textPlane && textPlane.material) {
+                    (textPlane.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+                }
+            }
         });
 
         if (intersects.length > 0) {
-            const intersectedSatellite = intersects[0].object.userData['satellite'] as CategorySatellite;
+            let intersectedSatellite: CategorySatellite | null = null;
+            
+            for (const intersect of intersects) {
+                if (intersect.object.userData['satellite']) {
+                    intersectedSatellite = intersect.object.userData['satellite'];
+                    break;
+                }
+                let parent = intersect.object.parent;
+                while (parent && !intersectedSatellite) {
+                    if (parent.userData['satellite']) {
+                        intersectedSatellite = parent.userData['satellite'];
+                        break;
+                    }
+                    parent = parent.parent;
+                }
+                if (intersectedSatellite) break;
+            }
+
             if (intersectedSatellite && intersectedSatellite.mesh) {
-                (intersectedSatellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0x4a90e2);
+                (intersectedSatellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
                 this.hoveredSatellite = intersectedSatellite;
                 this.canvasRef.nativeElement.style.cursor = 'pointer';
+
+                if (intersectedSatellite.textGroup) {
+                    const border = intersectedSatellite.textGroup.children[1] as THREE.Mesh;
+                    const textPlane = intersectedSatellite.textGroup.children[2] as THREE.Mesh;
+                    if (border && border.material) {
+                        (border.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
+                    }
+                    if (textPlane && textPlane.material) {
+                        (textPlane.material as THREE.MeshBasicMaterial).color.setHex(0x277DFF);
+                    }
+                }
             }
         } else {
             this.hoveredSatellite = null;
@@ -462,7 +529,6 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
     private onMouseClick(event: MouseEvent) {
         if (this.hoveredSatellite) {
-            // Navigate to the category page
             this.router.navigate(['/player-analysis'], {
                 queryParams: { category: this.hoveredSatellite.id }
             });
@@ -492,15 +558,15 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
                 satellite.position.set(x, 0, z);
 
-                // Apply orbit transformations
-                satellite.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), satellite.orbitAngle);
-                satellite.position.applyAxisAngle(new THREE.Vector3(1, 0, 0), satellite.orbitTilt);
+                const rotationMatrix = new THREE.Matrix4();
+                rotationMatrix.makeRotationY(-satellite.orbitAngle);
+                rotationMatrix.multiply(new THREE.Matrix4().makeRotationX(satellite.orbitTilt));
+                satellite.position.applyMatrix4(rotationMatrix);
 
                 satellite.group.position.copy(satellite.position);
                 satellite.group.rotation.y += satellite.rotationSpeed;
 
-                // Make text face camera but very infrequently to reduce movement
-                if (satellite.textGroup && Math.floor(Date.now() / 500) % 2 === 0) {
+                if (satellite.textGroup) {
                     satellite.textGroup.lookAt(this.camera.position);
                 }
             }
@@ -518,5 +584,23 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         // Update renderer size
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    private async loadFont(): Promise<void> {
+        return new Promise((resolve) => {
+            // Use the existing font service to load TX-02 font
+            const fontFiles = ['TX-02-Bold.woff2'];
+
+            this.fontService.loadFonts(fontFiles).subscribe(
+                (fonts) => {
+                    console.log('Fonts loaded via service:', fonts);
+                    this.fontLoaded = true;
+                    resolve();
+                },
+                (error) => {
+                    console.warn('Failed to load fonts via service.', error);
+                }
+            );
+        });
     }
 }

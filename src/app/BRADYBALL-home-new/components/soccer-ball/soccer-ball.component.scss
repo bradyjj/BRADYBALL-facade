@@ -20,11 +20,6 @@
       border-radius: 0;
       box-shadow: none;
       
-      // CRT effect integration (optional - remove if you don't want any glow)
-      body:not(.crt-phosphor-disabled) & {
-        box-shadow: none;
-      }
-      
       &:hover {
         box-shadow: none;
       }

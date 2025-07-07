@@ -12,10 +12,12 @@ import { BRADYBALLCommonModule } from "./common/BRADYBALL-common.module";
 import { FontService } from "../assets/fonts/font.service";
 import { BRADYBALLHomeNewModule } from "./BRADYBALL-home-new/BRADYBALL-home-new.module";
 import { SoccerBallComponent } from "./BRADYBALL-home-new/components/soccer-ball/soccer-ball.component";
+import { MyComponentComponent } from './my-component/my-component.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        MyComponentComponent,
     ],
     imports: [
         BrowserModule,
