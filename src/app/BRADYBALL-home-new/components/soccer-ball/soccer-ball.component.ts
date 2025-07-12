@@ -247,18 +247,25 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.scene.add(this.soccerBall);
     }
 
-    private generateOrbitConfigurations(count: number): { angle: number; tilt: number }[] {
-        const configurations: { angle: number; tilt: number }[] = [];
-        const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ≈ 2.39996
+    private generateOrbitConfigurations(count: number): { angle: number; tilt: number; timeOffset: number }[] {
+        const configurations: { angle: number; tilt: number; timeOffset: number }[] = [];
+
+        // Use Fibonacci sphere distribution for better spacing
+        const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle in radians
 
         for (let i = 0; i < count; i++) {
             const y = 1 - (i / (count - 1)) * 2; // y goes from 1 to -1
-            const radius = Math.sqrt(1 - y * y);
-            const theta = goldenAngle * i;
+            const radius = Math.sqrt(1 - y * y); // radius at y
+            const theta = phi * i; // golden angle increment
+
+            // Convert to spherical coordinates
             const angle = theta;
             const tilt = Math.acos(y);
 
-            configurations.push({ angle, tilt });
+            // Calculate initial time offset for even distribution around the orbit
+            const timeOffset = (i / count) * Math.PI * 2;
+
+            configurations.push({ angle, tilt, timeOffset });
         }
 
         return configurations;
@@ -273,13 +280,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             const satellite: CategorySatellite = {
                 id: category.id,
                 name: category.name,
-                orbitRadius: 5 + (index * 2),
-                orbitSpeed: 0.001 / (1 + index * 0.05), // Slower orbit speed
-                rotationSpeed: 0.0003 + (index * 0.0001), // Slower rotation
+                orbitRadius: 5 + (index * 2), // Restore original varying radius
+                orbitSpeed: 0.001 / (1 + index * 0.05), // Restore original varying speed
+                rotationSpeed: 0.0003 + (index * 0.0001), // Restore original varying rotation
                 orbitAngle: config.angle,
                 orbitTilt: config.tilt,
                 position: new THREE.Vector3(),
-                timeOffset: Math.random() * Math.PI * 2
+                timeOffset: config.timeOffset // Use deterministic timeOffset for consistent placement
             };
 
             this.createSatelliteGroup(satellite);
@@ -296,7 +303,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         satellite.mesh = new THREE.Mesh(geometry, material);
         satellite.group.add(satellite.mesh);
 
-        satellite.textGroup = this.createTextLabel(satellite.name);
+        satellite.textGroup = this.createTextLabel(satellite.name, satellite.orbitRadius);
         satellite.group.add(satellite.textGroup);
 
         // Assign userData to the group only
@@ -327,24 +334,25 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         satellite.group.position.copy(satellite.position);
     }
 
-    private createTextLabel(text: string): THREE.Group {
+    private createTextLabel(text: string, orbitRadius: number): THREE.Group {
         const textGroup = new THREE.Group();
 
         // World units for label
-        const labelHeight = 0.8;
+        const labelHeight = 0.8 + (orbitRadius * 0.07);
         const paddingX = 0.25;
         const fontFamily = 'Squada One, Arial, Helvetica, sans-serif';
         const fontWeight = 'bold';
 
         const textValue = text.toUpperCase();
-        const minWidth = 2.5;
+        // Example scaling: base size + a factor of orbitRadius
+        const minWidth = 2.5 + (orbitRadius * 0.18);
         const charWidth = 0.365;
         const textWidthWorld = Math.max(minWidth, textValue.length * charWidth);
         const boxWidthWorld = textWidthWorld + paddingX * 2;
         const boxHeightWorld = labelHeight * 1.2;
 
         // Canvas size in px (higher = sharper)
-        const scale = 256;
+        const scale = 512; // or 256
         const canvasWidth = Math.round(boxWidthWorld * scale);
         const canvasHeight = Math.round(boxHeightWorld * scale);
 
@@ -354,7 +362,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         const ctx = canvas.getContext('2d')!;
 
         // Font size in px to match world unit height
-        const fontSizePx = Math.floor(labelHeight * scale * 0.8); // tweak 0.8 as needed
+        const fontSizePx = Math.floor(labelHeight * scale * 0.8);
         const fontString = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
 
         // Draw function (can be called again after font loads)
@@ -372,8 +380,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
         // Create texture
         const textTexture = new THREE.CanvasTexture(canvas);
-        textTexture.generateMipmaps = false;
-        textTexture.minFilter = THREE.LinearFilter;
+        textTexture.generateMipmaps = true;
+        textTexture.minFilter = THREE.LinearMipmapLinearFilter;
         textTexture.magFilter = THREE.LinearFilter;
 
         // After TX-02 loads, redraw and update texture
@@ -401,8 +409,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld), textMaterial);
 
         // Position like in React version: offset from satellite
-        const offsetX = 0.8;
-        const offsetY = 0.8;
+        const offsetX = boxWidthWorld / 3;
+        const offsetY = 0.45 + boxHeightWorld / 2;
 
         background.position.set(offsetX, offsetY, -0.1);
         border.position.set(offsetX, offsetY, -0.11);

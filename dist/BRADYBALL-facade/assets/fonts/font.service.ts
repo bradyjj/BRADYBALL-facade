@@ -56,11 +56,11 @@ export class FontService {
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgString, 'image/svg+xml');
         const svgElement = doc.documentElement;
-    
+
         // Create a style element
         const styleElement = doc.createElementNS('http://www.w3.org/2000/svg', 'style');
         styleElement.setAttribute('type', 'text/css');
-    
+
         // Font face declarations
         let styleContent = Object.entries(fonts).map(([filename, base64]) => {
             const fontFamily = this.getFontFamilyFromFilename(filename);
@@ -75,7 +75,7 @@ export class FontService {
             }
             `;
         }).join('\n');
-    
+
         // Add CSS variables and classes
         styleContent += `
             :root {
@@ -99,15 +99,15 @@ export class FontService {
             .bb-text-berkeley-mono { font-family: 'Berkeley Mono', monospace; }
             .bb-text-squada-one { font-family: 'Squada One', monospace; }
         `;
-    
+
         styleElement.textContent = styleContent;
-    
+
         // Insert the style element as the first child of the SVG
         svgElement.insertBefore(styleElement, svgElement.firstChild);
-    
+
         // Ensure font properties are set on text elements
         this.ensureFontPropertiesOnTextElements(doc);
-    
+
         // Serialize back to string
         return new XMLSerializer().serializeToString(doc);
     }
@@ -116,11 +116,11 @@ export class FontService {
         doc.querySelectorAll('text, tspan').forEach(element => {
             const textElement = element as SVGTextElement | SVGTSpanElement;
             const computedStyle = window.getComputedStyle(textElement);
-    
+
             // Set font-family
             const fontFamily = computedStyle.fontFamily || 'inherit';
             textElement.setAttribute('font-family', fontFamily);
-    
+
             // Set font-weight
             let fontWeight = computedStyle.fontWeight;
             if (textElement.classList.contains('bb-text-bold')) fontWeight = '700';
@@ -129,11 +129,11 @@ export class FontService {
             else if (textElement.classList.contains('bb-text-extra-bold')) fontWeight = '800';
             else if (textElement.classList.contains('bb-text-black')) fontWeight = '900';
             textElement.setAttribute('font-weight', fontWeight);
-    
+
             // Set color
             const color = computedStyle.color || '#000000';
             textElement.setAttribute('fill', color);
-    
+
             // Explicitly set text-rendering for better font display
             textElement.setAttribute('text-rendering', 'optimizeLegibility');
         });
