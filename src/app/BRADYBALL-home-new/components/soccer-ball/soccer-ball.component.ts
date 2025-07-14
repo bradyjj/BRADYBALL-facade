@@ -27,6 +27,7 @@ interface CategorySatellite {
 export class SoccerBallComponent implements OnInit, OnDestroy {
     @ViewChild('threeCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
 
+    public loading = true;
     private scene!: THREE.Scene;
     private camera!: THREE.PerspectiveCamera;
     private renderer!: THREE.WebGLRenderer;
@@ -45,14 +46,20 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private lastMouseMove = { x: 0, y: 0 };
     private spherical = new THREE.Spherical();
     private fontLoaded = false;
+    private lastRaycastTime = 0;
+    private readonly raycastInterval = 1000 / 30; // 30fps
+    private lastWheelTime = 0;
+    private lastWheelDelta = { theta: 0, phi: 0 };
+    private lastTouchX: number | null = null;
+    private lastTouchY: number | null = null;
 
     // Example categories data
     private readonly categoryData = [
         { id: 'passing', name: 'Passing' },
-        { id: 'defense', name: 'Defense' },
-        { id: 'offense', name: 'Offense' },
-        { id: 'midfield', name: 'Midfield' },
-        { id: 'fitness', name: 'Fitness' }
+        { id: 'blog', name: 'Blog' },
+        { id: 'projects', name: 'Projects' },
+        { id: 'about', name: 'About' },
+        { id: 'publications', name: 'Publications' }
     ];
 
     constructor(private router: Router, private fontService: FontService) { }
@@ -64,6 +71,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.createSatellites();
         this.setupEventListeners();
         this.animate();
+        this.loading = false;
     }
 
     ngOnDestroy() {
@@ -85,7 +93,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private initThreeJS() {
         // Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000000);
+        this.scene.background = null;
 
         // Camera (top-down view)
         this.camera = new THREE.PerspectiveCamera(95, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -95,9 +103,11 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         // Renderer
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvasRef.nativeElement,
-            antialias: true
+            antialias: true,
+            alpha: true // <-- This is critical!
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setClearColor(0x000000, 0); // 0 alpha for transparent
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
@@ -171,26 +181,42 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             mouseY = event.clientY;
         };
 
-        const onWheel = (event: WheelEvent) => {
-            event.preventDefault();
-            const zoomSpeed = 0.025;
-
-            if (event.deltaY > 0 && this.spherical.radius < 30) {
-                this.spherical.radius *= (1 + zoomSpeed);
-            } else if (event.deltaY < 0 && this.spherical.radius > 5) {
-                this.spherical.radius *= (1 - zoomSpeed);
-            }
-
-            this.camera.position.setFromSpherical(this.spherical);
-            this.camera.lookAt(0, 0, 0);
-        };
-
-        // Add event listeners
         this.canvasRef.nativeElement.addEventListener('mousedown', onMouseDown);
         this.canvasRef.nativeElement.addEventListener('mouseup', onMouseUp);
         this.canvasRef.nativeElement.addEventListener('mouseleave', onMouseUp);
         this.canvasRef.nativeElement.addEventListener('mousemove', onMouseMove);
-        this.canvasRef.nativeElement.addEventListener('wheel', onWheel);
+
+        // Add wheel event for trackpad swipe (globe spin)
+        const onWheel = (event: WheelEvent) => {
+            // Only handle if not zooming (no ctrlKey)
+            if (!event.ctrlKey) {
+                event.preventDefault();
+                const rotateSpeed = 0.0005; // Much slower for trackpad gestures
+                let dTheta = 0, dPhi = 0;
+                if (event.shiftKey) {
+                    dTheta = -event.deltaY * rotateSpeed;
+                } else {
+                    dPhi = event.deltaY * rotateSpeed;
+                    dTheta = -event.deltaX * rotateSpeed;
+                }
+                this.spherical.theta += dTheta;
+                this.spherical.phi += dPhi;
+                this.camera.position.setFromSpherical(this.spherical);
+                this.camera.lookAt(0, 0, 0);
+                // Store for momentum
+                this.lastWheelDelta.theta = dTheta;
+                this.lastWheelDelta.phi = dPhi;
+                this.lastWheelTime = Date.now();
+            }
+        };
+        this.canvasRef.nativeElement.addEventListener('mousedown', onMouseDown);
+        this.canvasRef.nativeElement.addEventListener('mouseup', onMouseUp);
+        this.canvasRef.nativeElement.addEventListener('mouseleave', onMouseUp);
+        this.canvasRef.nativeElement.addEventListener('mousemove', onMouseMove);
+        this.canvasRef.nativeElement.addEventListener('wheel', (e) => {
+            onWheel(e);
+            requestAnimationFrame(this.applyWheelMomentum);
+        }, { passive: false });
 
         // Global mouse up handler
         document.addEventListener('mouseup', onMouseUp);
@@ -229,6 +255,23 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             }
         };
     }
+
+    private applyWheelMomentum = () => {
+        const now = Date.now();
+        if (now - this.lastWheelTime < 100) {
+            // Apply with damping
+            const damping = 0.96;
+            this.lastWheelDelta.theta *= damping;
+            this.lastWheelDelta.phi *= damping;
+            this.spherical.theta += this.lastWheelDelta.theta;
+            this.spherical.phi += this.lastWheelDelta.phi;
+            this.camera.position.setFromSpherical(this.spherical);
+            this.camera.lookAt(0, 0, 0);
+            if (Math.abs(this.lastWheelDelta.theta) > 0.001 || Math.abs(this.lastWheelDelta.phi) > 0.001) {
+                requestAnimationFrame(this.applyWheelMomentum);
+            }
+        }
+    };
 
     private createSoccerBall() {
         this.soccerBall = new THREE.Group();
@@ -334,38 +377,36 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         satellite.group.position.copy(satellite.position);
     }
 
+    private getMaxLabelLength(): number {
+        return Math.max(...this.categoryData.map(cat => cat.name.length));
+    }
+
     private createTextLabel(text: string, orbitRadius: number): THREE.Group {
         const textGroup = new THREE.Group();
-
         // World units for label
         const labelHeight = 0.8 + (orbitRadius * 0.07);
         const paddingX = 0.25;
         const fontFamily = 'Squada One, Arial, Helvetica, sans-serif';
         const fontWeight = 'bold';
-
         const textValue = text.toUpperCase();
-        // Example scaling: base size + a factor of orbitRadius
-        const minWidth = 2.5 + (orbitRadius * 0.18);
+        const maxLen = this.getMaxLabelLength();
         const charWidth = 0.365;
-        const textWidthWorld = Math.max(minWidth, textValue.length * charWidth);
+        const baseFontSize = labelHeight * 0.8 * 512; // scale for canvas
+        let fontSizePx = baseFontSize;
+        if (textValue.length > 10) {
+            fontSizePx = Math.max(16, baseFontSize * (10 / textValue.length));
+        }
+        const textWidthWorld = maxLen * charWidth;
         const boxWidthWorld = textWidthWorld + paddingX * 2;
         const boxHeightWorld = labelHeight * 1.2;
-
-        // Canvas size in px (higher = sharper)
-        const scale = 512; // or 256
+        const scale = 512;
         const canvasWidth = Math.round(boxWidthWorld * scale);
         const canvasHeight = Math.round(boxHeightWorld * scale);
-
         const canvas = document.createElement('canvas');
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         const ctx = canvas.getContext('2d')!;
-
-        // Font size in px to match world unit height
-        const fontSizePx = Math.floor(labelHeight * scale * 0.8);
         const fontString = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
-
-        // Draw function (can be called again after font loads)
         function drawText(font: string) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.font = font;
@@ -374,52 +415,37 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             ctx.fillStyle = 'white';
             ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
         }
-
-        // Draw with fallback font first
-        drawText(`${fontWeight} ${fontSizePx}px Arial, Helvetica, sans-serif`);
-
-        // Create texture
-        const textTexture = new THREE.CanvasTexture(canvas);
-        textTexture.generateMipmaps = true;
-        textTexture.minFilter = THREE.LinearMipmapLinearFilter;
-        textTexture.magFilter = THREE.LinearFilter;
-
-        // After TX-02 loads, redraw and update texture
+        drawText(fontString);
         if (document.fonts && document.fonts.load) {
             document.fonts.load(fontString).then(() => {
                 drawText(fontString);
                 textTexture.needsUpdate = true;
             });
         }
-
-        // Background and border
+        const textTexture = new THREE.CanvasTexture(canvas);
+        textTexture.generateMipmaps = true;
+        textTexture.minFilter = THREE.LinearMipmapLinearFilter;
+        textTexture.magFilter = THREE.LinearFilter;
         const bgGeometry = new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld);
         const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const background = new THREE.Mesh(bgGeometry, bgMaterial);
-
         const borderGeometry = new THREE.PlaneGeometry(boxWidthWorld + 0.15, boxHeightWorld + 0.1);
         const borderMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const border = new THREE.Mesh(borderGeometry, borderMaterial);
-
         const textMaterial = new THREE.MeshBasicMaterial({
             map: textTexture,
             transparent: true,
             alphaTest: 0.1
         });
         const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld), textMaterial);
-
-        // Position like in React version: offset from satellite
         const offsetX = boxWidthWorld / 3;
         const offsetY = 0.45 + boxHeightWorld / 2;
-
         background.position.set(offsetX, offsetY, -0.1);
         border.position.set(offsetX, offsetY, -0.11);
         textPlane.position.set(offsetX, offsetY, 0);
-
         textGroup.add(background);
         textGroup.add(border);
         textGroup.add(textPlane);
-
         return textGroup;
     }
 
@@ -467,6 +493,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     }
 
     private onMouseMove(event: MouseEvent) {
+        const now = Date.now();
+        if (now - this.lastRaycastTime < this.raycastInterval) return;
+        this.lastRaycastTime = now;
+
         const rect = this.canvasRef.nativeElement.getBoundingClientRect();
         this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -532,11 +562,12 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     }
 
     private onMouseClick(event: MouseEvent) {
-        if (this.hoveredSatellite) {
-            this.router.navigate(['/player-analysis'], {
-                queryParams: { category: this.hoveredSatellite.id }
-            });
-        }
+        // Remove router navigation for now, just keep hover effect
+        // if (this.hoveredSatellite) {
+        //     this.router.navigate(['/player-analysis'], {
+        //         queryParams: { category: this.hoveredSatellite.id }
+        //     });
+        // }
     }
 
     private animate() {

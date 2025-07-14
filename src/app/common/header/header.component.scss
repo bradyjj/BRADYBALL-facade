@@ -1,65 +1,86 @@
 /* Header Styles */
 .bb-header {
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-  border-bottom: 2px solid var(--bb-blue-color);
+  background: none;
+  border: none;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 50;
-  overflow: hidden;
-  padding: 1rem 2rem;
-  min-height: 80px;
+  padding: 2.5rem 2.5rem 0 2.5rem;
+  min-height: 120px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  pointer-events: none;
-  
-  // Grid background effect
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    bottom: 0;
-    background-image: 
-      linear-gradient(rgba(64, 94, 155, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(64, 94, 155, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-  }
+  box-shadow: none;
+  pointer-events: auto;
 }
 
 .bb-header-left {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  z-index: 10;
-  position: absolute;
-  left: 20%;
-  transform: translateX(-50%);
-  pointer-events: auto;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  position: static;
+  left: unset;
+  transform: none;
 }
 
-.bb-header-center {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  pointer-events: auto;
+.bb-header-title {
+  font-family: 'TX-02', 'Berkeley Mono', monospace;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #bfc9d5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.bb-header-subtitle {
+  font-family: 'TX-02', 'Berkeley Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3df2ad;
+  margin-top: 0.2rem;
+  letter-spacing: 0.04em;
+}
+
+.bb-header-degree {
+  font-family: 'TX-02', 'Berkeley Mono', monospace;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #bfc9d5;
+  opacity: 0.7;
+  margin-top: 0.1rem;
+  letter-spacing: 0.03em;
 }
 
 .bb-header-right {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  z-index: 10;
-  position: absolute;
-  right: 20%;
-  transform: translateX(50%);
+  align-items: flex-start;
+  justify-content: flex-end;
+  position: static;
+  right: unset;
+  transform: none;
+  height: 100%;
+}
+
+.bb-header-menu {
+  font-family: 'TX-02', 'Berkeley Mono', monospace;
+  font-size: 1.2rem;
+  color: #bfc9d5;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  margin-top: 0.3rem;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+  z-index: 3000;
   pointer-events: auto;
+}
+
+.bb-header-menu:hover {
+  color: #00AE6B !important;
 }
 
 .bb-brand {
@@ -135,29 +156,23 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .bb-header {
-    flex-direction: row;
-    padding: 1rem;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.2rem 1rem 0 1rem;
+    min-height: 90px;
   }
-
-  .bb-header-left {
-    position: static;
-    transform: none;
-    order: 1;
+  .bb-header-title {
+    font-size: 2rem;
   }
-
-  .bb-header-center {
-    position: static;
-    transform: none;
-    order: 2;
-    flex: 1;
-    text-align: center;
+  .bb-header-subtitle {
+    font-size: 1rem;
   }
-
+  .bb-header-degree {
+    font-size: 0.85rem;
+  }
   .bb-header-right {
-    position: static;
-    transform: none;
-    order: 3;
+    align-items: flex-end;
+    margin-top: 0.5rem;
   }
 
   .bb-brand {
