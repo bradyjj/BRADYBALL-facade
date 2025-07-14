@@ -65,13 +65,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     constructor(private router: Router, private fontService: FontService) { }
 
     async ngOnInit() {
-        await this.loadFont();
+        await this.loadFont(); // Wait for font to load
         this.initThreeJS();
         this.createSoccerBall();
         this.createSatellites();
         this.setupEventListeners();
         this.animate();
-        this.loading = false;
+        this.loading = false; // Only now show the scene
     }
 
     ngOnDestroy() {
@@ -385,47 +385,70 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         const textGroup = new THREE.Group();
         // World units for label
         const labelHeight = 0.8 + (orbitRadius * 0.07);
-        const paddingX = 0.25;
+        const paddingX = 0.25; // reduced horizontal padding
+        const paddingY = 0.25; // keep vertical padding
         const fontFamily = 'Squada One, Arial, Helvetica, sans-serif';
         const fontWeight = 'bold';
         const textValue = text.toUpperCase();
-        const maxLen = this.getMaxLabelLength();
-        const charWidth = 0.365;
-        const baseFontSize = labelHeight * 0.8 * 512; // scale for canvas
+        const scale = 512;
+
+        // Estimate font size in px for canvas
+        const baseFontSize = labelHeight * 0.8 * scale; // scale for canvas
         let fontSizePx = baseFontSize;
         if (textValue.length > 10) {
             fontSizePx = Math.max(16, baseFontSize * (10 / textValue.length));
         }
-        const textWidthWorld = maxLen * charWidth;
-        const boxWidthWorld = textWidthWorld + paddingX * 2;
-        const boxHeightWorld = labelHeight * 1.2;
-        const scale = 512;
+        const fontString = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
+
+        // Create a temp canvas to measure text
+        const measureCanvas = document.createElement('canvas');
+        const measureCtx = measureCanvas.getContext('2d')!;
+        measureCtx.font = fontString;
+        const textMetrics = measureCtx.measureText(textValue);
+        const textWidthPx = textMetrics.width;
+        // Approximate text height (ascent + descent)
+        const textHeightPx = (textMetrics.actualBoundingBoxAscent || fontSizePx) + (textMetrics.actualBoundingBoxDescent || fontSizePx * 0.3);
+
+        // Convert to world units
+        const textWidthWorld = textWidthPx / scale;
+        const textHeightWorld = textHeightPx / scale;
+        const boxWidthWorld = textWidthWorld + 2 * paddingX;
+        const boxHeightWorld = textHeightWorld + 2 * paddingY;
+
+        // Now create the actual canvas for the label
         const canvasWidth = Math.round(boxWidthWorld * scale);
         const canvasHeight = Math.round(boxHeightWorld * scale);
         const canvas = document.createElement('canvas');
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         const ctx = canvas.getContext('2d')!;
-        const fontString = `${fontWeight} ${fontSizePx}px ${fontFamily}`;
-        function drawText(font: string) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = font;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = 'white';
-            ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
-        }
-        drawText(fontString);
+        ctx.font = fontString;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+        // Draw text centered in the box
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
+
+        // If font loading is async, update texture when loaded
         if (document.fonts && document.fonts.load) {
             document.fonts.load(fontString).then(() => {
-                drawText(fontString);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = fontString;
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(textValue, canvas.width / 2, canvas.height / 2);
                 textTexture.needsUpdate = true;
             });
         }
+
         const textTexture = new THREE.CanvasTexture(canvas);
         textTexture.generateMipmaps = true;
         textTexture.minFilter = THREE.LinearMipmapLinearFilter;
         textTexture.magFilter = THREE.LinearFilter;
+
+        // Background and border
         const bgGeometry = new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld);
         const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const background = new THREE.Mesh(bgGeometry, bgMaterial);
@@ -438,7 +461,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             alphaTest: 0.1
         });
         const textPlane = new THREE.Mesh(new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld), textMaterial);
-        const offsetX = boxWidthWorld / 3;
+
+        // Offset the label so the dot is 1/3 from the left edge of the box
+        const offsetX = boxWidthWorld / 6;
         const offsetY = 0.45 + boxHeightWorld / 2;
         background.position.set(offsetX, offsetY, -0.1);
         border.position.set(offsetX, offsetY, -0.11);
@@ -624,14 +649,20 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private async loadFont(): Promise<void> {
         return new Promise((resolve) => {
             const fontFiles = ['squada-one-regular.ttf'];
-
             this.fontService.loadFonts(fontFiles).subscribe(
-                (fonts) => {
+                async (fonts) => {
+                    // Wait for browser to confirm font is ready
+                    const fontString = 'bold 32px Squada One, Arial, Helvetica, sans-serif';
+                    if (document.fonts && document.fonts.load) {
+                        await document.fonts.load(fontString);
+                        await document.fonts.ready;
+                    }
                     this.fontLoaded = true;
                     resolve();
                 },
                 (error) => {
                     console.warn('Failed to load fonts via service.', error);
+                    resolve();
                 }
             );
         });
