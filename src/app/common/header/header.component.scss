@@ -6,14 +6,14 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: 2000; // Same as footer
   padding: 2.5rem 2.5rem 0 2.5rem;
   min-height: 120px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   box-shadow: none;
-  pointer-events: auto;
+  pointer-events: none; // Allow soccer ball to receive events through header container
 }
 
 .bb-header-left {
@@ -24,6 +24,7 @@
   position: static;
   left: unset;
   transform: none;
+  pointer-events: auto;
 }
 
 .bb-header-title {
@@ -63,6 +64,44 @@
   right: unset;
   transform: none;
   height: 100%;
+  pointer-events: auto;
+}
+
+.bb-header-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 4000;
+}
+
+.menu-dot-timeline-row {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.menu-dot-left {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00AE6B;
+  margin-right: 0.7rem;
+  margin-left: 0;
+  /* Center dot with MENU text */
+  position: relative;
+  top: 2px;
+  z-index: 3500;
+}
+
+.menu-overlay {
+  position: absolute;
+  top: 2.2rem;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  z-index: 5000;
+  pointer-events: auto;
 }
 
 .bb-header-menu {
@@ -71,16 +110,33 @@
   color: #bfc9d5;
   letter-spacing: 0.12em;
   font-weight: 700;
-  margin-top: 0.3rem;
+  margin-top: 0;
   cursor: pointer;
   user-select: none;
   transition: color 0.2s;
   z-index: 3000;
   pointer-events: auto;
+  display: flex;
+  align-items: center;
 }
 
+.bb-header-menu.menu-open,
 .bb-header-menu:hover {
   color: #00AE6B !important;
+}
+
+.menu-timeline-container {
+  position: relative;
+  margin-left: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+app-menu {
+  position: relative;
+  top: 0;
+  right: 0;
+  z-index: 4000;
 }
 
 .bb-brand {

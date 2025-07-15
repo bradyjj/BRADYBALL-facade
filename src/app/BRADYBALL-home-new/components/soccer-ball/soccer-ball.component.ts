@@ -19,6 +19,15 @@ interface CategorySatellite {
     timeOffset: number;
 }
 
+// Example categories data
+export const categoryData = [
+    { id: 'news', name: 'News' },
+    { id: 'blog', name: 'Blog' },
+    { id: 'about', name: 'About' },
+    { id: 'projects', name: 'Projects' },
+    { id: 'publications', name: 'Publications' }
+];
+
 @Component({
     selector: 'soccer-ball',
     templateUrl: './soccer-ball.component.html',
@@ -53,25 +62,16 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     private lastTouchX: number | null = null;
     private lastTouchY: number | null = null;
 
-    // Example categories data
-    private readonly categoryData = [
-        { id: 'passing', name: 'Passing' },
-        { id: 'blog', name: 'Blog' },
-        { id: 'projects', name: 'Projects' },
-        { id: 'about', name: 'About' },
-        { id: 'publications', name: 'Publications' }
-    ];
-
     constructor(private router: Router, private fontService: FontService) { }
 
     async ngOnInit() {
-        await this.loadFont(); // Wait for font to load
+        await this.loadFont();
         this.initThreeJS();
         this.createSoccerBall();
         this.createSatellites();
         this.setupEventListeners();
         this.animate();
-        this.loading = false; // Only now show the scene
+        this.loading = false;
     }
 
     ngOnDestroy() {
@@ -83,7 +83,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
             this.controls.dispose();
         }
         if (this.cleanup) {
-            this.cleanup(); // Clean up event listeners
+            this.cleanup();
         }
         if (this.renderer) {
             this.renderer.dispose();
@@ -104,8 +104,12 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvasRef.nativeElement,
             antialias: true,
-            alpha: true // <-- This is critical!
+            alpha: true
         });
+        
+        // Set higher pixel ratio for better resolution (similar to zoom out effect)
+        const pixelRatio = Math.min(window.devicePixelRatio * 1.5, 3); // Cap at 3x to avoid performance issues
+        this.renderer.setPixelRatio(pixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setClearColor(0x000000, 0); // 0 alpha for transparent
 
@@ -315,9 +319,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     }
 
     private createSatellites() {
-        const configs = this.generateOrbitConfigurations(this.categoryData.length);
+        const configs = this.generateOrbitConfigurations(categoryData.length);
 
-        this.categoryData.forEach((category, index) => {
+        categoryData.forEach((category: { id: string; name: string }, index: number) => {
             const config = configs[index];
 
             const satellite: CategorySatellite = {
@@ -378,22 +382,22 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
     }
 
     private getMaxLabelLength(): number {
-        return Math.max(...this.categoryData.map(cat => cat.name.length));
+        return Math.max(...categoryData.map((cat: { id: string; name: string }) => cat.name.length));
     }
 
     private createTextLabel(text: string, orbitRadius: number): THREE.Group {
         const textGroup = new THREE.Group();
         // World units for label
         const labelHeight = 0.8 + (orbitRadius * 0.07);
-        const paddingX = 0.25; // reduced horizontal padding
-        const paddingY = 0.25; // keep vertical padding
+        const paddingX = 0.25;
+        const paddingY = 0.25;
         const fontFamily = 'Squada One, Arial, Helvetica, sans-serif';
         const fontWeight = 'bold';
         const textValue = text.toUpperCase();
         const scale = 512;
 
         // Estimate font size in px for canvas
-        const baseFontSize = labelHeight * 0.8 * scale; // scale for canvas
+        const baseFontSize = labelHeight * 0.8 * scale;
         let fontSizePx = baseFontSize;
         if (textValue.length > 10) {
             fontSizePx = Math.max(16, baseFontSize * (10 / textValue.length));
@@ -642,7 +646,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
 
-        // Update renderer size
+        // Update renderer size with maintained pixel ratio
+        const pixelRatio = Math.min(window.devicePixelRatio * 1.5, 3);
+        this.renderer.setPixelRatio(pixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
