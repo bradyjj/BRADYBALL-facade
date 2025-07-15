@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { categoryData } from '../../BRADYBALL-home-new/components/soccer-ball/soccer-ball.component';
+import { categoryData } from '../../BRADYBALL-home/components/soccer-ball/soccer-ball.component';
 
 @Component({
     selector: 'app-header',
