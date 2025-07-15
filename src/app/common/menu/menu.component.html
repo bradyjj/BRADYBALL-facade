@@ -1,0 +1,42 @@
+<div class="UIHome__list" [class.menu-active]="menuOpen">
+  <div class="UIHome__listLabel" 
+       [class.menu-open]="menuOpen" 
+       [class.closing]="isClosing"
+       (mouseenter)="onMenuMouseEnter()" 
+       (mouseleave)="onMenuMouseLeave()" 
+       (click)="openMenu()">MENU</div>
+  <div class="UIHome__itemContainer" 
+       *ngIf="menuOpen" 
+       [class.closing]="isClosing"
+       (mouseenter)="onMenuContainerMouseEnter()"
+       (mouseleave)="onMenuContainerMouseLeave()">
+    <div 
+      class="UIHome__item" 
+      *ngFor="let category of categories; let i = index"
+      [class.menu-visible]="menuOpen && !isClosing"
+      [class.closing]="isClosing"
+      [class.hovered]="hoveredIndex === i"
+      [style.top]="(98.1 + (i * 50)) + 'px'"
+      [style.right]="'65px'"
+      (mouseenter)="onMenuItemEnter(i)"
+      (mouseleave)="onMenuItemLeave()"
+    >
+      <div class="UIHome__itemTitle" [attr.data-id]="getDataId(category)">
+        <span class="UIHome__itemPrefix">_{{ (i + 1) | number:'2.0' }}.</span>
+        <span class="UIHome__itemText">{{ category.toUpperCase() }}</span>
+      </div>
+    </div>
+    
+    <!-- Dashed Line Histogram -->
+    <div class="UIHome__histogramContainer">
+      <div 
+        class="UIHome__histogramLine" 
+        *ngFor="let lineInfo of getHistogramLines(); let i = index"
+        [style.top]="lineInfo.position + 'px'"
+        [style.width]="getDashedLineLength(lineInfo) + 'px'"
+        [class.entry-line]="lineInfo.type === 'entry'"
+        [class.intermediate-line]="lineInfo.type === 'intermediate'"
+      ></div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+.new-home-center-container {
+  width: 100vw;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+@media (max-width: 768px) {
+  .new-home-center-container {
+    padding-top: 120px;
+    padding-bottom: 80px;
+  }
+}

@@ -1,0 +1,325 @@
+.UIHome__list {
+  position: relative;
+  width: 500px; // Increased from 400px for more space
+  height: 32px;
+  display: block;
+  opacity: 1;
+  pointer-events: none;
+  cursor: inherit;
+}
+
+.UIHome__listLabel {
+  font-family: 'TX-02', 'Berkeley Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #bfc9d5;
+  letter-spacing: 0.12em;
+  text-align: right;
+  cursor: pointer;
+  transition: color 0.2s;
+  opacity: 0.5;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.UIHome__listLabel.menu-open {
+  color: #00AE6B;
+  opacity: 1;
+}
+
+.UIHome__itemContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px; // Increased from 300px for more text space
+  height: 100vh;
+  pointer-events: auto;
+  z-index: 5;
+}
+
+// Add the green dot next to MENU when active with pie slice animation
+.UIHome__listLabel.menu-open::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00AE6B;
+  z-index: 25;
+  animation: pieFill 0.2s ease-out forwards; // Faster animation (was 0.3s)
+}
+
+// Hide dot completely when menu is not open
+.UIHome__listLabel:not(.menu-open)::before {
+  display: none;
+}
+
+// Reverse animation when menu closes
+.UIHome__listLabel.closing::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00AE6B;
+  z-index: 25;
+  animation: pieUnfill 0.15s ease-in forwards; // Faster reverse animation
+}
+
+// Pie slice fill animation - starts as 1/4 slice in 4th quadrant and grows counter-clockwise
+@keyframes pieFill {
+  0% {
+    clip-path: polygon(50% 50%, 50% 75%, 75% 75%, 75% 50%); // 1/4 slice in 4th quadrant (bottom-right)
+  }
+  25% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 50%, 75% 50%); // Grows to bottom half
+  }
+  50% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 0%, 50% 0%, 50% 50%); // Grows to right half
+  }
+  75% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 0%, 0% 0%, 0% 50%, 50% 50%); // Grows to top half
+  }
+  100% {
+    clip-path: none; // Full circle
+  }
+}
+
+// Reverse pie animation - shrinks counter-clockwise back to 1/4 slice
+@keyframes pieUnfill {
+  0% {
+    clip-path: none; // Full circle
+  }
+  25% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 0%, 0% 0%, 0% 50%, 50% 50%); // Shrinks to top half
+  }
+  50% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 0%, 50% 0%, 50% 50%); // Shrinks to right half
+  }
+  75% {
+    clip-path: polygon(50% 50%, 50% 75%, 100% 75%, 100% 50%, 75% 50%); // Shrinks to bottom half
+  }
+  100% {
+    clip-path: polygon(50% 50%, 50% 75%, 75% 75%, 75% 50%); // Back to 1/4 slice in 4th quadrant
+  }
+}
+
+// Add the vertical timeline line with drawing animation
+.UIHome__itemContainer::after {
+  content: '';
+  position: absolute;
+  right: 68px; // Adjusted to find the perfect center alignment
+  top: 16px;
+  width: 2px;
+  height: calc(98.1px + (4 * 50px) - 15px); // Reduced height to stop at final dot (subtracted 8px to center on dot)
+  background: #00AE6B;
+  opacity: 1; // Full opacity
+  z-index: 1; // Lower z-index so dots appear on top
+  transform-origin: top;
+  transform: scaleY(0);
+  animation: drawLine 0.25s ease-out 0.2s forwards; // Faster animation (was 0.4s, starts earlier)
+}
+
+// Line drawing animation
+@keyframes drawLine {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+// Reverse line animation when menu closes
+.UIHome__itemContainer.closing::after {
+  animation: undrawLine 0.15s ease-in forwards; // Faster reverse animation
+}
+
+@keyframes undrawLine {
+  0% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0);
+  }
+}
+
+// Menu entries fade in after line is drawn
+.UIHome__item {
+  color: #000;
+  text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff, 0 1px 0 #fff;
+  letter-spacing: 0.2rem;
+  font-size: 1.5rem;
+  text-align: right;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  line-height: 0.9;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+  font-family: 'Squada One', cursive;
+  font-weight: 700;
+  pointer-events: auto;
+  z-index: 10;
+  transition: all 0.3s ease;
+  min-width: 250px; // Ensure minimum width for text expansion
+}
+
+.UIHome__item.menu-visible {
+  animation: fadeInEntry 0.2s ease-out 0.45s forwards; // Faster animation (was 0.3s) and starts earlier (was 0.7s)
+}
+
+@keyframes fadeInEntry {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+  }
+  100% {
+    opacity: 0.741676;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.UIHome__item.menu-visible:nth-child(2) {
+  animation: fadeInEntry 0.2s ease-out 0.5s forwards; // Faster and earlier
+}
+
+.UIHome__item.menu-visible:nth-child(3) {
+  animation: fadeInEntry 0.2s ease-out 0.55s forwards; // Faster and earlier
+}
+
+.UIHome__item.menu-visible:nth-child(4) {
+  animation: fadeInEntry 0.2s ease-out 0.6s forwards; // Faster and earlier
+}
+
+.UIHome__item.menu-visible:nth-child(5) {
+  animation: fadeInEntry 0.2s ease-out 0.65s forwards; // Faster and earlier
+}
+
+// Reverse animations for menu entries when closing
+.UIHome__item.closing {
+  animation: fadeOutEntry 0.2s ease-in forwards;
+}
+
+@keyframes fadeOutEntry {
+  0% {
+    opacity: 0.741676;
+    transform: translateY(-50%) translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(10px);
+  }
+}
+
+// Hover effects for menu entries
+.UIHome__item:hover {
+  color: #fff !important;
+  opacity: 1 !important;
+  font-size: 1.8rem; // Slightly larger text
+  transform: translateY(-50%) scale(1.05); // Slightly larger overall
+  text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 -2px 0 #000, 0 2px 0 #000, 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000; // Black outline for white text
+}
+
+.UIHome__itemTitle {
+  position: relative;
+  display: inline-block;
+  padding-right: 20px; // Space for the dot
+  min-width: 200px; // Ensure minimum width for text
+}
+
+// Separate styling for prefix and main text
+.UIHome__itemPrefix {
+  font-size: 1rem; // Smaller font size for prefix
+  font-family: 'Squada One', cursive; // Keep same font as main text
+  font-weight: 700; // Match main text weight
+  transition: all 0.3s ease;
+}
+
+.UIHome__itemText {
+  font-size: 1.5rem; // Keep main text size
+  font-family: 'Squada One', cursive;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+// Scale prefix and text together on hover
+.UIHome__item:hover .UIHome__itemPrefix {
+  font-size: 1.2rem; // Scale up prefix proportionally
+}
+
+.UIHome__item:hover .UIHome__itemText {
+  font-size: 1.8rem; // Scale up main text proportionally
+}
+
+.UIHome__itemTitle::after {
+  content: '';
+  position: absolute;
+  right: 0px; // Adjusted to center the dot perfectly on the line
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00AE6B; // Exact same color as MENU dot and line
+  opacity: 1; // Full opacity
+  z-index: 50; // Much higher z-index to ensure dots are on top of line
+  transition: all 0.3s ease;
+  transform-origin: center; // Ensure scaling happens from center
+}
+
+// Only size changes on hover, no opacity or color changes
+.UIHome__item:hover .UIHome__itemTitle::after {
+  transform: translateY(-50%) scale(1.25); // 25% bigger dot for hovered item
+  width: 10px;
+  height: 10px;
+  background: #00AE6B; // Maintain same color
+  z-index: 50; // Keep high z-index
+  right: -1px; // Adjust position to keep dot centered when scaled
+  // No opacity or color changes
+}
+
+// Removed adjacent dot scaling - only the hovered item's dot will scale
+
+// Solid Line Histogram
+.UIHome__histogramContainer {
+  position: fixed; // Fixed positioning to align with screen edge
+  top: 140px; // Move down slightly more to align with first menu dot
+  right: 0; // Align to the very edge of the screen
+  width: 120px; // Slightly wider to accommodate longer lines
+  height: calc(100vh - 140px); // Adjust height to account for top offset
+  pointer-events: none; // No interaction needed
+  z-index: 2; // Between line and dots
+}
+
+.UIHome__histogramLine {
+  position: absolute;
+  right: 0; // Start from the very edge of the screen
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: #fff; // All lines are white
+  transition: width 0.1s ease; // Faster transition for smoother wave effect
+  opacity: 0.6; // Default opacity
+}
+
+// Entry lines (main menu item lines)
+.UIHome__histogramLine.entry-line {
+  height: 2px;
+  opacity: 0.6; // Same opacity as others
+}
+
+// Intermediate lines (between menu items)
+.UIHome__histogramLine.intermediate-line {
+  height: 2px; // Same height as entry lines
+  opacity: 0.6; // Same opacity as others
+}

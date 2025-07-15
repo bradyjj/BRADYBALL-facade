@@ -82,6 +82,11 @@
           },
           "defaultConfiguration": "development"
         }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
       }
     }
   }
