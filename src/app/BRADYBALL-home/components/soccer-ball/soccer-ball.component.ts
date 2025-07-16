@@ -80,6 +80,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 	// Zoom animation properties
 	private defaultCameraPosition = new THREE.Vector3(0, 10, 15);
+	private zoomStartPosition = new THREE.Vector3();
 	private zoomTargetPosition = new THREE.Vector3();
 	private isZooming = false;
 	private zoomStartTime = 0;
@@ -736,6 +737,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.zoomStartTime = Date.now();
 		this.currentCategory = satellite.id;
 
+		// Store current camera position as the starting point for zoom
+		this.zoomStartPosition.copy(this.camera.position);
+
 		// Calculate zoom target position (closer to the satellite)
 		const zoomDistance = 3; // Distance from satellite
 		const direction = satellite.position.clone().normalize();
@@ -782,9 +786,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Smooth easing function
 		const easedProgress = this.easeInOutCubic(progress);
 
-		// Interpolate camera position
+		// Interpolate camera position from current position to target
 		this.camera.position.lerpVectors(
-			this.defaultCameraPosition,
+			this.zoomStartPosition,
 			this.zoomTargetPosition,
 			easedProgress,
 		);
@@ -846,6 +850,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Only go back if clicking on the overlay background, not the monitor
 		if (event.target === event.currentTarget) {
 			this.goBackToDefaultView();
+		}
+	}
+
+	public zoomToCategory(categoryName: string) {
+		// Find the satellite that matches the category name
+		const satellite = this.satellites.find(
+			(sat) => sat.name.toLowerCase() === categoryName.toLowerCase(),
+		);
+
+		if (satellite && !this.isZooming) {
+			this.zoomToSatellite(satellite);
 		}
 	}
 }

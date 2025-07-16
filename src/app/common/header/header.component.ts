@@ -9,6 +9,7 @@ import { categoryData } from '../../BRADYBALL-home/components/soccer-ball/soccer
 export class HeaderComponent implements OnInit {
 	@Input() isZoomed = false;
 	@Output() bradyballClick = new EventEmitter<void>();
+	@Output() categorySelected = new EventEmitter<string>();
 
 	isSettingsOpen = false;
 	menuOpen = false;
@@ -30,5 +31,9 @@ export class HeaderComponent implements OnInit {
 
 	onBradyballClick() {
 		this.bradyballClick.emit();
+	}
+
+	onCategorySelected(category: string) {
+		this.categorySelected.emit(category);
 	}
 }

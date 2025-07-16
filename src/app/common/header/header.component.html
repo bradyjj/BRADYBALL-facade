@@ -5,6 +5,9 @@
 		<div class="bb-header-degree" [class.hidden]="isZoomed">M.Sc. AI - KU LEUVEN</div>
 	</div>
 	<div class="bb-header-right">
-		<app-menu [categories]="categories"></app-menu>
+		<app-menu
+			[categories]="categories"
+			(categorySelected)="onCategorySelected($event)"
+		></app-menu>
 	</div>
 </header>
