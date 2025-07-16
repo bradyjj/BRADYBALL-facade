@@ -1,0 +1,187 @@
+// CRT Monitor Overlay Styles
+.crt-monitor-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 140px; // Reduced top spacing to make monitor larger
+	background: rgba(0, 0, 0, 0.8);
+	z-index: 3000;
+	pointer-events: auto;
+}
+
+.crt-monitor {
+	width: 90vw;
+	max-width: 1200px;
+	height: 70vh; // Reduced height to equalize top and bottom spacing
+	background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+	border: 3px solid #333;
+	border-radius: 15px;
+	box-shadow:
+		0 0 20px rgba(0, 174, 107, 0.3),
+		inset 0 0 20px rgba(0, 0, 0, 0.5);
+	position: relative;
+	overflow: hidden;
+
+	// CRT scanlines effect
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(0, 0, 0, 0.1) 2px,
+			rgba(0, 0, 0, 0.1) 4px
+		);
+		pointer-events: none;
+		z-index: 2;
+	}
+
+	// CRT glow effect
+	&::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: radial-gradient(ellipse at center, rgba(0, 174, 107, 0.1) 0%, transparent 70%);
+		pointer-events: none;
+		z-index: 1;
+	}
+}
+
+// About section specific styling
+.crt-monitor.about-section {
+	width: calc(210mm + 80px); // A4 width + padding
+	max-width: calc(210mm + 80px);
+	min-width: calc(210mm + 80px);
+}
+
+.crt-header {
+	padding: 20px 30px 15px 30px;
+	border-bottom: 2px solid #00ae6b;
+	position: relative;
+	z-index: 3;
+}
+
+.crt-title {
+	font-family: 'Squada One', Arial, Helvetica, sans-serif;
+	font-size: 2.5rem;
+	font-weight: bold;
+	color: #00ae6b;
+	margin: 0;
+	text-shadow: 0 0 10px rgba(0, 174, 107, 0.5);
+	letter-spacing: 2px;
+}
+
+.crt-underline {
+	height: 2px;
+	background: linear-gradient(90deg, #00ae6b, #ffffff, #00ae6b);
+	margin-top: 8px;
+	box-shadow: 0 0 8px rgba(0, 174, 107, 0.6);
+}
+
+.crt-content {
+	height: calc(100% - 100px);
+	position: relative;
+	z-index: 3;
+	padding: 20px;
+	overflow-y: auto;
+
+	// Custom scrollbar for CRT aesthetic
+	&::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: #1a1a1a;
+		border-radius: 4px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: #00ae6b;
+		border-radius: 4px;
+		box-shadow: 0 0 5px rgba(0, 174, 107, 0.5);
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background: #00d47a;
+	}
+}
+
+// Responsive design
+@media (max-width: 1200px) {
+	.crt-monitor.about-section {
+		width: calc(210mm + 40px);
+		max-width: calc(210mm + 40px);
+		min-width: calc(210mm + 40px);
+	}
+}
+
+@media (max-width: 768px) {
+	.crt-monitor-overlay {
+		padding-top: 80px;
+	}
+
+	.crt-monitor {
+		width: 95vw;
+		height: 80vh;
+	}
+
+	.crt-monitor.about-section {
+		width: 95vw;
+		max-width: 95vw;
+		min-width: auto;
+	}
+
+	.crt-header {
+		padding: 15px 20px 10px 20px;
+	}
+
+	.crt-title {
+		font-size: 2rem;
+	}
+
+	.crt-content {
+		padding: 15px;
+	}
+}
+
+@media (max-width: 480px) {
+	.crt-monitor-overlay {
+		padding-top: 60px;
+	}
+
+	.crt-monitor {
+		width: 98vw;
+		height: 85vh;
+	}
+
+	.crt-monitor.about-section {
+		width: 98vw;
+		max-width: 98vw;
+	}
+
+	.crt-header {
+		padding: 10px 15px 8px 15px;
+	}
+
+	.crt-title {
+		font-size: 1.5rem;
+		letter-spacing: 1px;
+	}
+
+	.crt-content {
+		padding: 10px;
+	}
+}

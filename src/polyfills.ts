@@ -3,7 +3,7 @@
  * You can add your own extra polyfills to this file.
  */
 
-import 'zone.js';  // Included with Angular CLI.
+import 'zone.js'; // Included with Angular CLI.
 
 /***************************************************************************************************
  * APPLICATION IMPORTS

@@ -1,12 +1,12 @@
-import { Component } from "@angular/core";
+import { Component } from '@angular/core';
 
 @Component({
-    selector: 'home-page',
-    templateUrl: './home-page.component.html',
-    styleUrls: ['./home-page.component.scss']
+	selector: 'home-page',
+	templateUrl: './home-page.component.html',
+	styleUrls: ['./home-page.component.scss'],
 })
-export class HomePageComponent { 
-    refreshPage(): void {
-        window.location.reload();
-    }
+export class HomePageComponent {
+	refreshPage(): void {
+		window.location.reload();
+	}
 }

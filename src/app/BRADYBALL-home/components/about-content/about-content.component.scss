@@ -1,0 +1,125 @@
+.about-content {
+	font-family: 'TX-02', monospace;
+	color: #ffffff;
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
+
+.crt-section-title {
+	font-family: 'TX-02', monospace;
+	font-size: 1.1rem;
+	font-weight: bold;
+	color: #00ae6b;
+	margin: 20px 0 10px 0;
+	text-shadow: 0 0 5px rgba(0, 174, 107, 0.3);
+}
+
+.crt-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 20px;
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid #333;
+	border-radius: 4px;
+	overflow: hidden;
+
+	td {
+		padding: 8px 12px;
+		border-bottom: 1px solid #333;
+		vertical-align: top;
+
+		&:first-child {
+			font-weight: bold;
+			color: #00ae6b;
+			width: 30%;
+			background: rgba(0, 174, 107, 0.1);
+		}
+
+		&:last-child {
+			width: 70%;
+		}
+	}
+
+	tr:last-child td {
+		border-bottom: none;
+	}
+}
+
+.clemson-link {
+	color: #f56600 !important; // Clemson orange
+	text-decoration: none;
+	transition: color 0.3s ease;
+
+	&:hover {
+		color: #ff8c42 !important; // Lighter Clemson orange on hover
+		text-shadow: 0 0 5px rgba(245, 102, 0, 0.5);
+	}
+}
+
+.contact-link {
+	color: #277dff !important; // Same blue as satellite hover
+	text-decoration: none;
+	transition: color 0.3s ease;
+
+	&:hover {
+		color: #4a9eff !important; // Lighter blue on hover
+		text-shadow: 0 0 5px rgba(39, 125, 255, 0.5);
+	}
+}
+
+// Download button styling
+.resume-download-section {
+	display: flex;
+	justify-content: center;
+	margin: 15px 0;
+}
+
+.crt-download-btn {
+	position: relative;
+	background: transparent;
+	border: 2px solid #00ae6b;
+	color: #00ae6b;
+	padding: 12px 24px;
+	font-family: 'TX-02', monospace;
+	font-size: 0.9rem;
+	font-weight: bold;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	overflow: hidden;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	box-shadow: 0 0 10px rgba(0, 174, 107, 0.3);
+
+	&:hover {
+		background: rgba(0, 174, 107, 0.1);
+		box-shadow: 0 0 20px rgba(0, 174, 107, 0.6);
+		text-shadow: 0 0 5px rgba(0, 174, 107, 0.8);
+
+		.btn-glow {
+			opacity: 1;
+			transform: translateX(100%);
+		}
+	}
+
+	&:active {
+		transform: scale(0.98);
+		box-shadow: 0 0 15px rgba(0, 174, 107, 0.8);
+	}
+
+	.btn-text {
+		position: relative;
+		z-index: 2;
+	}
+
+	.btn-glow {
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(0, 174, 107, 0.3), transparent);
+		transition: all 0.5s ease;
+		opacity: 0;
+		z-index: 1;
+	}
+}

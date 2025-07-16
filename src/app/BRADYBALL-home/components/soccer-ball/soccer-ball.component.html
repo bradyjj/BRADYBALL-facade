@@ -1,8 +1,101 @@
 <div class="soccer-ball-container">
-    <canvas #threeCanvas class="three-canvas"></canvas>
-    <div class="scene-controls" *ngIf="hoveredSatellite">
-    </div>
-    <div *ngIf="loading" class="soccer-ball-spinner-overlay">
-        <div class="soccer-ball-spinner"></div>
-    </div>
+	<canvas #threeCanvas class="three-canvas"></canvas>
+	<div class="scene-controls" *ngIf="hoveredSatellite"></div>
+	<div *ngIf="loading" class="soccer-ball-spinner-overlay">
+		<div class="soccer-ball-spinner"></div>
+	</div>
+
+	<!-- CRT Monitor Overlay -->
+	<crt-monitor
+		[title]="getCategoryTitle()"
+		[showMonitor]="showCrtMonitor"
+		[isAboutSection]="getCategoryContent() === 'about'"
+		(overlayClick)="onOverlayClick($event)"
+	>
+		<!-- Dynamic content based on category -->
+		<div class="category-content" [ngSwitch]="getCategoryContent()">
+			<!-- About content -->
+			<about-content *ngSwitchCase="'about'"></about-content>
+
+			<!-- News content -->
+			<div *ngSwitchCase="'news'" class="news-content">
+				<h2 class="crt-section-title">Latest News</h2>
+				<div class="news-item">
+					<h3>New Project Launch</h3>
+					<p>
+						Excited to announce the launch of BRADYBALL - a comprehensive soccer
+						analytics platform.
+					</p>
+					<span class="news-date">2024-01-15</span>
+				</div>
+				<div class="news-item">
+					<h3>Career Update</h3>
+					<p>
+						Started new position as Full-stack Software Engineer at Manhattan
+						Associates.
+					</p>
+					<span class="news-date">2024-01-01</span>
+				</div>
+			</div>
+
+			<!-- Blog content -->
+			<div *ngSwitchCase="'blog'" class="blog-content">
+				<h2 class="crt-section-title">Recent Posts</h2>
+				<div class="blog-post">
+					<h3>Building a Soccer Analytics Platform</h3>
+					<p>
+						Exploring the challenges and solutions in creating comprehensive player
+						performance analysis tools.
+					</p>
+					<span class="blog-date">2024-01-10</span>
+				</div>
+				<div class="blog-post">
+					<h3>The Future of Sports Technology</h3>
+					<p>
+						How AI and machine learning are revolutionizing sports analytics and player
+						development.
+					</p>
+					<span class="blog-date">2024-01-05</span>
+				</div>
+			</div>
+
+			<!-- Projects content -->
+			<div *ngSwitchCase="'projects'" class="projects-content">
+				<h2 class="crt-section-title">Featured Projects</h2>
+				<div class="project-item">
+					<h3>BRADYBALL Analytics Platform</h3>
+					<p>
+						A comprehensive soccer analytics platform built with Angular and Three.js.
+					</p>
+					<div class="project-tech">Angular • Three.js • TypeScript • SCSS</div>
+				</div>
+				<div class="project-item">
+					<h3>Machine Learning Research</h3>
+					<p>Computer vision and machine learning research at Clemson University.</p>
+					<div class="project-tech">Python • TensorFlow • OpenCV • PyTorch</div>
+				</div>
+			</div>
+
+			<!-- Publications content -->
+			<div *ngSwitchCase="'publications'" class="publications-content">
+				<h2 class="crt-section-title">Academic Publications</h2>
+				<div class="publication-item">
+					<h3>Computer Vision in Sports Analytics</h3>
+					<p>
+						Research paper on applying computer vision techniques to soccer player
+						performance analysis.
+					</p>
+					<span class="publication-date">2023-12-01</span>
+				</div>
+				<div class="publication-item">
+					<h3>Machine Learning for Player Development</h3>
+					<p>
+						Study on using ML algorithms to predict player potential and development
+						trajectories.
+					</p>
+					<span class="publication-date">2023-11-15</span>
+				</div>
+			</div>
+		</div>
+	</crt-monitor>
 </div>

@@ -1,0 +1,16 @@
+<!-- CRT Monitor Overlay -->
+<div *ngIf="showMonitor" class="crt-monitor-overlay" (click)="onOverlayClick($event)">
+	<div
+		class="crt-monitor"
+		[class.about-section]="isAboutSection"
+		(click)="$event.stopPropagation()"
+	>
+		<div class="crt-header">
+			<h1 class="crt-title">{{ title }}</h1>
+			<div class="crt-underline"></div>
+		</div>
+		<div class="crt-content">
+			<ng-content></ng-content>
+		</div>
+	</div>
+</div>

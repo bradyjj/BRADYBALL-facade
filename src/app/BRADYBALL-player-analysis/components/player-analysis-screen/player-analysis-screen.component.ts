@@ -1,21 +1,20 @@
 import { Component } from '@angular/core';
 
 @Component({
-    selector: 'player-analysis-screen',
-    templateUrl: './player-analysis-screen.component.html',
-    styleUrls: ['./player-analysis-screen.component.scss'],
+	selector: 'player-analysis-screen',
+	templateUrl: './player-analysis-screen.component.html',
+	styleUrls: ['./player-analysis-screen.component.scss'],
 })
 export class PlayerAnalysisScreenComponent {
+	isCollapsed = false;
 
-    isCollapsed = false;
-    
-    constructor() { }
+	constructor() {}
 
-    refreshPage(): void {
-        window.location.reload();
-    }
+	refreshPage(): void {
+		window.location.reload();
+	}
 
-    onHeaderCollapseChanged(collapsed: boolean): void {
-        this.isCollapsed = collapsed;
-    }
+	onHeaderCollapseChanged(collapsed: boolean): void {
+		this.isCollapsed = collapsed;
+	}
 }
