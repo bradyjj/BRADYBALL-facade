@@ -1,10 +1,10 @@
 <header class="bb-header">
-  <div class="bb-header-left">
-    <div class="bb-header-title">BRADYBALL</div>
-    <div class="bb-header-subtitle">BRADY JACOBS</div>
-    <div class="bb-header-degree">M.Sc. AI - KU LEUVEN</div>
-  </div>
-  <div class="bb-header-right">
-    <app-menu [categories]="categories"></app-menu>
-  </div>
+	<div class="bb-header-left">
+		<div class="bb-header-title" (click)="onBradyballClick()">BRADYBALL</div>
+		<div class="bb-header-subtitle" [class.hidden]="isZoomed">BRADY JACOBS</div>
+		<div class="bb-header-degree" [class.hidden]="isZoomed">M.Sc. AI - KU LEUVEN</div>
+	</div>
+	<div class="bb-header-right">
+		<app-menu [categories]="categories"></app-menu>
+	</div>
 </header>

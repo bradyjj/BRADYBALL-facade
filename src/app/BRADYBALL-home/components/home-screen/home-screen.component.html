@@ -1,5 +1,5 @@
 <div class="container-fluid p-0 bb-page-wrapper">
-    <app-header></app-header>
-    <soccer-ball></soccer-ball>
-    <app-footer></app-footer>
+	<app-header [isZoomed]="isZoomed" (bradyballClick)="onBradyballClick()"></app-header>
+	<soccer-ball (zoomStateChanged)="onZoomStateChanged($event)"></soccer-ball>
+	<app-footer></app-footer>
 </div>

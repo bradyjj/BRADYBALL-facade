@@ -1,56 +1,59 @@
-@import "./BRADYBALL.scss";
+@import './BRADYBALL.scss';
 
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    min-height: 100vh;
-    width: 100vw;
-    background: none;
-    overflow-x: hidden;
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100vh;
+	min-height: 100vh;
+	width: 100vw;
+	background: none;
+	overflow-x: hidden;
 }
 
 :host {
-    display: block;
-    min-height: 100vh;
-    background: none;
+	display: block;
+	min-height: 100vh;
+	background: none;
 }
 
 .bb-space-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-    background: var(--bb-night-gradient);
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	z-index: 0;
+	pointer-events: none;
+	overflow: hidden;
+	background: var(--bb-night-gradient);
 }
 
 #space-canvas {
-    width: 100vw;
-    height: 100vh;
-    display: block;
-    background: transparent !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
+	width: 100vw;
+	height: 100vh;
+	display: block;
+	background: transparent !important;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 0;
 }
 
-.header-container, .content-container, .main-content {
-    background: transparent !important;
-    box-shadow: none !important;
+.header-container,
+.content-container,
+.main-content {
+	background: transparent !important;
+	box-shadow: none !important;
 }
 
 .main-content {
-    width: 75%;
-    margin: auto;
-    transition: width 0.3s;
-    background-color: var(--bb-cream-off-white-color);
+	width: 75%;
+	margin: auto;
+	transition: width 0.3s;
+	background-color: var(--bb-cream-off-white-color);
 
-    &.expanded {
-        width: calc(100% - 3.75rem);
-    }
+	&.expanded {
+		width: calc(100% - 3.75rem);
+	}
 }

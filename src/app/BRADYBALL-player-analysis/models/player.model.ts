@@ -1,17 +1,17 @@
-import { PlayerStat } from "./player-stat.model";
+import { PlayerStat } from './player-stat.model';
 
 export class Player {
-    player?: string;
+	player?: string;
 
-    league?: string;
+	league?: string;
 
-    team?: string;
+	team?: string;
 
-    position?: string;
+	position?: string;
 
-    age?: number;
+	age?: number;
 
-    born?: string;
+	born?: string;
 
-    playerStats?: PlayerStat[];
+	playerStats?: PlayerStat[];
 }

@@ -1,28 +1,34 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { categoryData } from '../../BRADYBALL-home/components/soccer-ball/soccer-ball.component';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.scss']
+	selector: 'app-header',
+	templateUrl: './header.component.html',
+	styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit {
-    isSettingsOpen = false;
-    menuOpen = false;
-    categories = ['About', 'News', 'Blog', 'Projects', 'Publications'];
+	@Input() isZoomed = false;
+	@Output() bradyballClick = new EventEmitter<void>();
 
-    ngOnInit() {
-    }
+	isSettingsOpen = false;
+	menuOpen = false;
+	categories = ['About', 'News', 'Blog', 'Projects', 'Publications'];
 
-    toggleSettings() {
-        this.isSettingsOpen = !this.isSettingsOpen;
-    }
+	ngOnInit() {}
 
-    openMenu() {
-        this.menuOpen = true;
-    }
+	toggleSettings() {
+		this.isSettingsOpen = !this.isSettingsOpen;
+	}
 
-    closeMenu() {
-        this.menuOpen = false;
-    }
+	openMenu() {
+		this.menuOpen = true;
+	}
+
+	closeMenu() {
+		this.menuOpen = false;
+	}
+
+	onBradyballClick() {
+		this.bradyballClick.emit();
+	}
 }

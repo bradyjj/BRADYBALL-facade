@@ -1,52 +1,115 @@
 .soccer-ball-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  margin: 0;
-  padding: 0;
-  z-index: 100;
-  pointer-events: auto;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	margin: 0;
+	padding: 0;
+	z-index: 100;
+	pointer-events: auto;
 }
 
 .three-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
-  background: transparent;
-  margin: 0;
-  padding: 0;
-  pointer-events: auto;
+	width: 100vw;
+	height: 100vh;
+	display: block;
+	background: transparent;
+	margin: 0;
+	padding: 0;
+	pointer-events: auto;
 }
 
 .soccer-ball-spinner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(16, 19, 26, 0.55);
-  z-index: 2000;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(16, 19, 26, 0.55);
+	z-index: 2000;
 }
 
 .soccer-ball-spinner {
-  width: 56px;
-  height: 56px;
-  border: 6px solid #222b36;
-  border-top: 6px solid #00AE6B;
-  border-radius: 50%;
-  animation: soccer-ball-spin 1s linear infinite;
+	width: 56px;
+	height: 56px;
+	border: 6px solid #222b36;
+	border-top: 6px solid #00ae6b;
+	border-radius: 50%;
+	animation: soccer-ball-spin 1s linear infinite;
 }
 
 @keyframes soccer-ball-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+// Category content styles
+.category-content {
+	font-family: 'TX-02', monospace;
+	color: #ffffff;
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
+
+.crt-section-title {
+	font-family: 'TX-02', monospace;
+	font-size: 1.1rem;
+	font-weight: bold;
+	color: #00ae6b;
+	margin: 20px 0 10px 0;
+	text-shadow: 0 0 5px rgba(0, 174, 107, 0.3);
+}
+
+// News, Blog, Projects, Publications Styles
+.news-item,
+.blog-post,
+.project-item,
+.publication-item {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid #333;
+	border-radius: 4px;
+	padding: 15px;
+	margin-bottom: 15px;
+
+	h3 {
+		font-size: 1rem;
+		font-weight: bold;
+		color: #00ae6b;
+		margin: 0 0 8px 0;
+		text-shadow: 0 0 5px rgba(0, 174, 107, 0.3);
+	}
+
+	p {
+		font-size: 0.8rem;
+		color: #bfc9d5;
+		line-height: 1.4;
+		margin: 0 0 8px 0;
+	}
+
+	.news-date,
+	.blog-date,
+	.publication-date {
+		font-size: 0.7rem;
+		color: #00ae6b;
+		font-weight: bold;
+	}
+
+	.project-tech {
+		font-size: 0.7rem;
+		color: #bfc9d5;
+		font-style: italic;
+		margin-top: 8px;
+	}
 }
