@@ -21,4 +21,10 @@ export class HomeScreenComponent {
 			this.soccerBall.goBackToDefaultView();
 		}
 	}
+
+	onCategorySelected(category: string) {
+		if (this.soccerBall) {
+			this.soccerBall.zoomToCategory(category);
+		}
+	}
 }

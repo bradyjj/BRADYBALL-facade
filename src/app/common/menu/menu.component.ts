@@ -1,4 +1,4 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 
 @Component({
 	selector: 'app-menu',
@@ -7,6 +7,7 @@ import { Component, Input, HostListener } from '@angular/core';
 })
 export class MenuComponent {
 	@Input() categories: string[] = [];
+	@Output() categorySelected = new EventEmitter<string>();
 	menuOpen = false;
 	isClosing = false;
 	isHoveringMenu = false;
@@ -75,6 +76,11 @@ export class MenuComponent {
 
 	getDataId(category: string): string {
 		return category.toLowerCase().replace(/\s+/g, '-');
+	}
+
+	onCategoryClick(category: string) {
+		this.categorySelected.emit(category);
+		this.closeMenu();
 	}
 
 	getHistogramPeak(i: number): number {
