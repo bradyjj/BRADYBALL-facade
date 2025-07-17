@@ -14,6 +14,13 @@
 	justify-content: space-between;
 	box-shadow: none;
 	pointer-events: none; // Allow soccer ball to receive events through header container
+	transition: transform 0.5s ease, opacity 0.5s ease;
+
+	&.hidden {
+		transform: translateY(-100%);
+		opacity: 0;
+		pointer-events: none;
+	}
 }
 
 .bb-header-left {
@@ -235,13 +242,20 @@ app-menu {
 /* Mobile Responsive */
 @media (max-width: 768px) {
 	.bb-header {
-		flex-direction: column;
+		flex-direction: row;
 		align-items: flex-start;
+		justify-content: space-between;
 		padding: 1.2rem 1rem 0 1rem;
 		min-height: 90px;
 	}
 	.bb-header-title {
 		font-size: 2rem;
+		transition: opacity 0.5s ease, transform 0.5s ease;
+
+		.bb-header.hidden & {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
 	}
 	.bb-header-subtitle {
 		font-size: 1rem;
@@ -251,7 +265,8 @@ app-menu {
 	}
 	.bb-header-right {
 		align-items: flex-end;
-		margin-top: 0.5rem;
+		margin-top: 0;
+		display: flex;
 	}
 
 	.bb-brand {

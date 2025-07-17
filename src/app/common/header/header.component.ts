@@ -8,6 +8,7 @@ import { categoryData } from '../../BRADYBALL-home/components/soccer-ball/soccer
 })
 export class HeaderComponent implements OnInit {
 	@Input() isZoomed = false;
+	@Input() isHidden = false;
 	@Output() bradyballClick = new EventEmitter<void>();
 	@Output() categorySelected = new EventEmitter<string>();
 

@@ -5,6 +5,10 @@
 		[class.about-section]="isAboutSection"
 		(click)="$event.stopPropagation()"
 	>
+		<button class="crt-close-btn" (click)="onCloseClick()">
+			<span class="btn-text">CLOSE</span>
+			<span class="btn-glow"></span>
+		</button>
 		<div class="crt-header">
 			<h1 class="crt-title">{{ title }}</h1>
 			<div class="crt-underline"></div>

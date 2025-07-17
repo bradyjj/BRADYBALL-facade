@@ -1,300 +1,300 @@
-<!DOCTYPE html>
-<html lang="en" data-critters-container>
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<title>BRADYBALL.net</title>
+		<base href="/"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<link rel="icon" type="image/x-icon" href="favicon.ico"/>
 
-<head>
-  <meta charset="utf-8">
-  <title>BRADYBALL.net</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <style type="text/css">@font-face{font-family:'Squada One';font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/squadaone/v19/BCasqZ8XsOrx4mcOk6Mtaac2WRJnDgo.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}</style>
+		<!-- Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com"/>
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+		<link href="https://fonts.googleapis.com/css2?family=Squada+One&amp;display=swap" rel="stylesheet"/>
 
-  <!-- Local Fonts -->
-  <style>
-    @font-face {
-      font-family: 'Pinegrove';
-      src: url('/assets/fonts/pinegrove.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+		<!-- Local Fonts -->
+		<style>
+			@font-face {
+				font-family: 'Pinegrove';
+				src: url('/assets/fonts/pinegrove.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Courier Prime';
-      src: url('/assets/fonts/courier-prime-regular.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Courier Prime';
+				src: url('/assets/fonts/courier-prime-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Courier Prime';
-      src: url('/assets/fonts/courier-prime-bold.woff2') format('woff2');
-      font-weight: bold;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Courier Prime';
+				src: url('/assets/fonts/courier-prime-bold.woff2') format('woff2');
+				font-weight: bold;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'EB Garamond';
-      src: url('/assets/fonts/eb-garamond-regular.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'EB Garamond';
+				src: url('/assets/fonts/eb-garamond-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'EB Garamond';
-      src: url('/assets/fonts/eb-garamond-medium.woff2') format('woff2');
-      font-weight: 500;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'EB Garamond';
+				src: url('/assets/fonts/eb-garamond-medium.woff2') format('woff2');
+				font-weight: 500;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'EB Garamond';
-      src: url('/assets/fonts/eb-garamond-semi-bold.woff2') format('woff2');
-      font-weight: 600;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'EB Garamond';
+				src: url('/assets/fonts/eb-garamond-semi-bold.woff2') format('woff2');
+				font-weight: 600;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'EB Garamond';
-      src: url('/assets/fonts/eb-garamond-bold.woff2') format('woff2');
-      font-weight: bold;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'EB Garamond';
+				src: url('/assets/fonts/eb-garamond-bold.woff2') format('woff2');
+				font-weight: bold;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'EB Garamond';
-      src: url('/assets/fonts/eb-garamond-extra-bold.woff2') format('woff2');
-      font-weight: 800;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'EB Garamond';
+				src: url('/assets/fonts/eb-garamond-extra-bold.woff2') format('woff2');
+				font-weight: 800;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-regular.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-medium.woff2') format('woff2');
-      font-weight: 500;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-medium.woff2') format('woff2');
+				font-weight: 500;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-semi-bold.woff2') format('woff2');
-      font-weight: 600;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-semi-bold.woff2') format('woff2');
+				font-weight: 600;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-bold.woff2') format('woff2');
-      font-weight: bold;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-bold.woff2') format('woff2');
+				font-weight: bold;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-extra-bold.woff2') format('woff2');
-      font-weight: 800;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-extra-bold.woff2') format('woff2');
+				font-weight: 800;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'League Spartan';
-      src: url('/assets/fonts/league-spartan-black.woff2') format('woff2');
-      font-weight: 900;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'League Spartan';
+				src: url('/assets/fonts/league-spartan-black.woff2') format('woff2');
+				font-weight: 900;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Merriweather';
-      src: url('/assets/fonts/merriweather-regular.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Merriweather';
+				src: url('/assets/fonts/merriweather-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Merriweather';
-      src: url('/assets/fonts/merriweather-bold.woff2') format('woff2');
-      font-weight: bold;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Merriweather';
+				src: url('/assets/fonts/merriweather-bold.woff2') format('woff2');
+				font-weight: bold;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Merriweather';
-      src: url('/assets/fonts/merriweather-black.woff2') format('woff2');
-      font-weight: 900;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Merriweather';
+				src: url('/assets/fonts/merriweather-black.woff2') format('woff2');
+				font-weight: 900;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'Special Elite';
-      src: url('/assets/fonts/special-elite-regular.woff2') format('woff2');
-      font-weight: normal;
-      font-style: normal;
-    }
+			@font-face {
+				font-family: 'Special Elite';
+				src: url('/assets/fonts/special-elite-regular.woff2') format('woff2');
+				font-weight: normal;
+				font-style: normal;
+			}
 
-    /* TX-02 Font Family */
+			/* TX-02 Font Family */
 
-    /* Thin */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Thin.woff2') format('woff2');
-      font-weight: 100;
-      font-style: normal;
-    }
+			/* Thin */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Thin.woff2') format('woff2');
+				font-weight: 100;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Thin-Oblique.woff2') format('woff2');
-      font-weight: 100;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Thin-Oblique.woff2') format('woff2');
+				font-weight: 100;
+				font-style: italic;
+			}
 
-    /* Extra Light */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-ExtraLight.woff2') format('woff2');
-      font-weight: 200;
-      font-style: normal;
-    }
+			/* Extra Light */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-ExtraLight.woff2') format('woff2');
+				font-weight: 200;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-ExtraLight-Oblique.woff2') format('woff2');
-      font-weight: 200;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-ExtraLight-Oblique.woff2') format('woff2');
+				font-weight: 200;
+				font-style: italic;
+			}
 
-    /* Light */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Light.woff2') format('woff2');
-      font-weight: 300;
-      font-style: normal;
-    }
+			/* Light */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Light.woff2') format('woff2');
+				font-weight: 300;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Light-Oblique.woff2') format('woff2');
-      font-weight: 300;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Light-Oblique.woff2') format('woff2');
+				font-weight: 300;
+				font-style: italic;
+			}
 
-    /* Regular */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Regular.woff2') format('woff2');
-      font-weight: 400;
-      font-style: normal;
-    }
+			/* Regular */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Regular.woff2') format('woff2');
+				font-weight: 400;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Oblique.woff2') format('woff2');
-      font-weight: 400;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Oblique.woff2') format('woff2');
+				font-weight: 400;
+				font-style: italic;
+			}
 
-    /* Medium */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Medium.woff2') format('woff2');
-      font-weight: 500;
-      font-style: normal;
-    }
+			/* Medium */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Medium.woff2') format('woff2');
+				font-weight: 500;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Medium-Oblique.woff2') format('woff2');
-      font-weight: 500;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Medium-Oblique.woff2') format('woff2');
+				font-weight: 500;
+				font-style: italic;
+			}
 
-    /* Semi Bold */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-SemiBold.woff2') format('woff2');
-      font-weight: 600;
-      font-style: normal;
-    }
+			/* Semi Bold */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-SemiBold.woff2') format('woff2');
+				font-weight: 600;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-SemiBold-Oblique.woff2') format('woff2');
-      font-weight: 600;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-SemiBold-Oblique.woff2') format('woff2');
+				font-weight: 600;
+				font-style: italic;
+			}
 
-    /* Bold */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Bold.woff2') format('woff2');
-      font-weight: 700;
-      font-style: normal;
-    }
+			/* Bold */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Bold.woff2') format('woff2');
+				font-weight: 700;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Bold-Oblique.woff2') format('woff2');
-      font-weight: 700;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Bold-Oblique.woff2') format('woff2');
+				font-weight: 700;
+				font-style: italic;
+			}
 
-    /* Extra Bold */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-ExtraBold.woff2') format('woff2');
-      font-weight: 800;
-      font-style: normal;
-    }
+			/* Extra Bold */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-ExtraBold.woff2') format('woff2');
+				font-weight: 800;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-ExtraBold-Oblique.woff2') format('woff2');
-      font-weight: 800;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-ExtraBold-Oblique.woff2') format('woff2');
+				font-weight: 800;
+				font-style: italic;
+			}
 
-    /* Black */
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Black.woff2') format('woff2');
-      font-weight: 900;
-      font-style: normal;
-    }
+			/* Black */
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Black.woff2') format('woff2');
+				font-weight: 900;
+				font-style: normal;
+			}
 
-    @font-face {
-      font-family: 'TX-02';
-      src: url('/assets/fonts/TX-02-Black-Oblique.woff2') format('woff2');
-      font-weight: 900;
-      font-style: italic;
-    }
+			@font-face {
+				font-family: 'TX-02';
+				src: url('/assets/fonts/TX-02-Black-Oblique.woff2') format('woff2');
+				font-weight: 900;
+				font-style: italic;
+			}
 
-    @font-face {
-      font-family: 'Squada One';
-      src: url('/assets/fonts/squada-one-regular.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
-  </style>
+			@font-face {
+				font-family: 'Squada One';
+				src: url('/assets/fonts/squada-one-regular.ttf') format('truetype');
+				font-weight: normal;
+				font-style: normal;
+			}
+		</style>
 
-  <script>
-    if (typeof window !== 'undefined') {
-      document.write('<script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"><\/script>');
-    }
-  </script>
-<style>:root{--bb-black-color:#000000;--bb-white-color:#ffffff;--bb-brown-gold-color:#b07c29;--bb-red-color:#972828;--bb-red-card-color:#ad563b;--bb-dark-red-burgundy-color:#681e1e;--bb-orange-color:#ff5b00;--bb-blue-color:#405e9b;--bb-blue-card-color:#3a85c7;--bb-cream-off-white-color:#f8f5e3;--bb-cream-color:#ded2a2;--bb-green-color:#59c135;--bb-light-orange:#FF8C41;--bb-bright-orange:#ff5b00;--bb-dark-orange:#e65d35;--bb-pale-yellow:#ffe03d;--bb-light-green:#7baf56;--bb-medium-green:#98c475;--bb-dark-green:#2d3b24;--bb-burgundy:#a8021a;--bb-dark-burgundy:#972828;--bb-deeper-burgundy:#681e1e;--bb-steel-blue:#467a80;--bb-light-cream:#f0da9b;--bb-cream:#f8f5e3;--bb-navy:#25416c;--bb-medium-blue:#405e9b;--bb-light-blue:#3a85c7;--bb-forest-green:#01714f;--bb-warm-brown:#b07c29;--font-pinegrove:"Pinegrove", sans-serif;--font-special-elite:"Special Elite", sans-serif;--font-league-spartan:"League Spartan", sans-serif;--font-eb-garamond:"EB Garamond", serif;--font-merriweather:"Merriweather", serif;--font-courier-prime:"Courier Prime", monospace;--font-berkeley-mono:"TX-02", monospace;--font-squada-one:"Squada One", monospace;--foreground-rgb:255, 255, 255;--background-start-rgb:0, 0, 0;--background-end-rgb:0, 0, 0;--primary:transparent;--secondary:whitesmoke;--tertiary:whitesmoke;--bb-night-gradient:linear-gradient(180deg, #10131a 0%, #1a2233 100%)}html,body{margin:0;padding:0;height:100vh;min-height:100vh;width:100vw;background:none;overflow-x:hidden}@charset "UTF-8";:root{--bs-blue:#0d6efd;--bs-indigo:#6610f2;--bs-purple:#6f42c1;--bs-pink:#d63384;--bs-red:#dc3545;--bs-orange:#fd7e14;--bs-yellow:#ffc107;--bs-green:#198754;--bs-teal:#20c997;--bs-cyan:#0dcaf0;--bs-black:#000;--bs-white:#fff;--bs-gray:#6c757d;--bs-gray-dark:#343a40;--bs-gray-100:#f8f9fa;--bs-gray-200:#e9ecef;--bs-gray-300:#dee2e6;--bs-gray-400:#ced4da;--bs-gray-500:#adb5bd;--bs-gray-600:#6c757d;--bs-gray-700:#495057;--bs-gray-800:#343a40;--bs-gray-900:#212529;--bs-primary:#0d6efd;--bs-secondary:#6c757d;--bs-success:#198754;--bs-info:#0dcaf0;--bs-warning:#ffc107;--bs-danger:#dc3545;--bs-light:#f8f9fa;--bs-dark:#212529;--bs-primary-rgb:13,110,253;--bs-secondary-rgb:108,117,125;--bs-success-rgb:25,135,84;--bs-info-rgb:13,202,240;--bs-warning-rgb:255,193,7;--bs-danger-rgb:220,53,69;--bs-light-rgb:248,249,250;--bs-dark-rgb:33,37,41;--bs-primary-text-emphasis:#052c65;--bs-secondary-text-emphasis:#2b2f32;--bs-success-text-emphasis:#0a3622;--bs-info-text-emphasis:#055160;--bs-warning-text-emphasis:#664d03;--bs-danger-text-emphasis:#58151c;--bs-light-text-emphasis:#495057;--bs-dark-text-emphasis:#495057;--bs-primary-bg-subtle:#cfe2ff;--bs-secondary-bg-subtle:#e2e3e5;--bs-success-bg-subtle:#d1e7dd;--bs-info-bg-subtle:#cff4fc;--bs-warning-bg-subtle:#fff3cd;--bs-danger-bg-subtle:#f8d7da;--bs-light-bg-subtle:#fcfcfd;--bs-dark-bg-subtle:#ced4da;--bs-primary-border-subtle:#9ec5fe;--bs-secondary-border-subtle:#c4c8cb;--bs-success-border-subtle:#a3cfbb;--bs-info-border-subtle:#9eeaf9;--bs-warning-border-subtle:#ffe69c;--bs-danger-border-subtle:#f1aeb5;--bs-light-border-subtle:#e9ecef;--bs-dark-border-subtle:#adb5bd;--bs-white-rgb:255,255,255;--bs-black-rgb:0,0,0;--bs-font-sans-serif:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Liberation Sans",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--bs-font-monospace:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--bs-gradient:linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, 0));--bs-body-font-family:var(--bs-font-sans-serif);--bs-body-font-size:1rem;--bs-body-font-weight:400;--bs-body-line-height:1.5;--bs-body-color:#212529;--bs-body-color-rgb:33,37,41;--bs-body-bg:#fff;--bs-body-bg-rgb:255,255,255;--bs-emphasis-color:#000;--bs-emphasis-color-rgb:0,0,0;--bs-secondary-color:rgba(33, 37, 41, .75);--bs-secondary-color-rgb:33,37,41;--bs-secondary-bg:#e9ecef;--bs-secondary-bg-rgb:233,236,239;--bs-tertiary-color:rgba(33, 37, 41, .5);--bs-tertiary-color-rgb:33,37,41;--bs-tertiary-bg:#f8f9fa;--bs-tertiary-bg-rgb:248,249,250;--bs-heading-color:inherit;--bs-link-color:#0d6efd;--bs-link-color-rgb:13,110,253;--bs-link-decoration:underline;--bs-link-hover-color:#0a58ca;--bs-link-hover-color-rgb:10,88,202;--bs-code-color:#d63384;--bs-highlight-color:#212529;--bs-highlight-bg:#fff3cd;--bs-border-width:1px;--bs-border-style:solid;--bs-border-color:#dee2e6;--bs-border-color-translucent:rgba(0, 0, 0, .175);--bs-border-radius:.375rem;--bs-border-radius-sm:.25rem;--bs-border-radius-lg:.5rem;--bs-border-radius-xl:1rem;--bs-border-radius-xxl:2rem;--bs-border-radius-2xl:var(--bs-border-radius-xxl);--bs-border-radius-pill:50rem;--bs-box-shadow:0 .5rem 1rem rgba(0, 0, 0, .15);--bs-box-shadow-sm:0 .125rem .25rem rgba(0, 0, 0, .075);--bs-box-shadow-lg:0 1rem 3rem rgba(0, 0, 0, .175);--bs-box-shadow-inset:inset 0 1px 2px rgba(0, 0, 0, .075);--bs-focus-ring-width:.25rem;--bs-focus-ring-opacity:.25;--bs-focus-ring-color:rgba(13, 110, 253, .25);--bs-form-valid-color:#198754;--bs-form-valid-border-color:#198754;--bs-form-invalid-color:#dc3545;--bs-form-invalid-border-color:#dc3545}*,:after,:before{box-sizing:border-box}@media (prefers-reduced-motion:no-preference){:root{scroll-behavior:smooth}}body{margin:0;font-family:var(--bs-body-font-family);font-size:var(--bs-body-font-size);font-weight:var(--bs-body-font-weight);line-height:var(--bs-body-line-height);color:var(--bs-body-color);text-align:var(--bs-body-text-align);background-color:var(--bs-body-bg);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}:root{--bs-breakpoint-xs:0;--bs-breakpoint-sm:576px;--bs-breakpoint-md:768px;--bs-breakpoint-lg:992px;--bs-breakpoint-xl:1200px;--bs-breakpoint-xxl:1400px}</style><link rel="stylesheet" href="styles.1895bea11e785b27.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles.1895bea11e785b27.css"></noscript></head>
+		<script>
+			if (typeof window !== 'undefined') {
+				document.write(
+					'<script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"><\/script>',
+				);
+			}
+		</script>
+	<link rel="stylesheet" href="styles.css"></head>
 
-<body>
-  <app-root></app-root>
-<script src="runtime.224b2499c9ab9e43.js" type="module"></script><script src="polyfills.6cfd4717a4ab2a8e.js" type="module"></script><script src="main.d1bf6f5445ba52dc.js" type="module"></script></body>
-
+	<body>
+		<app-root></app-root>
+	<script src="runtime.js" type="module"></script><script src="polyfills.js" type="module"></script><script src="main.js" type="module"></script></body>
 </html>

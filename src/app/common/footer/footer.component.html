@@ -1,8 +1,9 @@
-<footer class="bb-footer">
+<footer class="bb-footer" [class.hidden]="isHidden">
 	<div class="bb-footer-left bb-text-tx02-berkeley">
-		© Copyright 2025 BRADYBALL. All rights reserved. Made in the USA.
+		<span class="mobile-only">© 2025 BRADYBALL. All rights reserved.</span>
+		<span class="desktop-only">© Copyright 2025 BRADYBALL.<br>All rights reserved. Made in the USA.</span>
 	</div>
-	<div class="bb-footer-right">
+	<div class="bb-footer-right desktop-only">
 		<a
 			href="https://twitter.com/BRADYBALLFC"
 			target="_blank"
@@ -18,7 +19,7 @@
 			>LINKEDIN</a
 		>
 		<a href="mailto:bradyjjacobs@gmail.com" class="bb-footer-link"
-			>BRADYJJACOBS&#64;GMAIL.COM</a
+			>EMAIL</a
 		>
 	</div>
 </footer>

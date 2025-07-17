@@ -11,6 +11,7 @@
 		[showMonitor]="showCrtMonitor"
 		[isAboutSection]="getCategoryContent() === 'about'"
 		(overlayClick)="onOverlayClick($event)"
+		(closeClick)="onCloseClick()"
 	>
 		<!-- Dynamic content based on category -->
 		<div class="category-content" [ngSwitch]="getCategoryContent()">

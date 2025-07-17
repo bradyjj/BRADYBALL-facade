@@ -52,6 +52,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	public showCrtMonitor = false;
 
 	@Output() zoomStateChanged = new EventEmitter<boolean>();
+	@Output() hideHeaderFooter = new EventEmitter<void>();
+	@Output() showHeaderFooter = new EventEmitter<void>();
 
 	private scene!: THREE.Scene;
 	private camera!: THREE.PerspectiveCamera;
@@ -77,9 +79,14 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	private lastWheelDelta = { theta: 0, phi: 0 };
 	private lastTouchX: number | null = null;
 	private lastTouchY: number | null = null;
+	private touchStartX: number | null = null;
+	private touchStartY: number | null = null;
+	private isTouching = false;
+	private touchStartTime: number = 0;
 
 	// Zoom animation properties
-	private defaultCameraPosition = new THREE.Vector3(0, 10, 15);
+	private defaultCameraPosition = new THREE.Vector3(0, 12, 18);
+	private mobileDefaultCameraPosition = new THREE.Vector3(0, 25, 35);
 	private zoomStartPosition = new THREE.Vector3();
 	private zoomTargetPosition = new THREE.Vector3();
 	private isZooming = false;
@@ -125,13 +132,20 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 		// Camera (top-down view)
 		this.camera = new THREE.PerspectiveCamera(
-			95,
+			75, // Reduced FOV for better mobile fit
 			window.innerWidth / window.innerHeight,
 			0.1,
 			1000,
 		);
-		this.camera.position.set(0, 10, 15);
+		this.camera.position.set(0, 12, 18); // Moved camera further back
 		this.camera.lookAt(0, 0, 0);
+
+		// Adjust camera for mobile devices
+		if (window.innerWidth <= 768) {
+			this.camera.fov = 45; // Even smaller FOV for mobile
+			this.camera.position.set(0, 25, 35); // Further back for mobile
+			this.camera.updateProjectionMatrix();
+		}
 
 		// Renderer
 		this.renderer = new THREE.WebGLRenderer({
@@ -167,7 +181,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		let mouseY = 0;
 
 		// Convert current camera position to spherical coordinates (top-down)
-		this.spherical.set(15, Math.PI / 2, 0); // radius, phi (90deg), theta (0deg)
+		const radius = window.innerWidth <= 768 ? 35 : 18; // Larger radius for mobile
+		this.spherical.set(radius, Math.PI / 2, 0); // radius, phi (90deg), theta (0deg)
 
 		const onMouseDown = (event: MouseEvent) => {
 			isMouseDown = true;
@@ -222,6 +237,37 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.canvasRef.nativeElement.addEventListener('mouseup', onMouseUp);
 		this.canvasRef.nativeElement.addEventListener('mouseleave', onMouseUp);
 		this.canvasRef.nativeElement.addEventListener('mousemove', onMouseMove);
+
+		// Add touch event listeners for mobile
+		this.canvasRef.nativeElement.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
+		this.canvasRef.nativeElement.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+		this.canvasRef.nativeElement.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: false });
+
+		// Add touch move for hover detection
+		this.canvasRef.nativeElement.addEventListener('touchmove', (event) => {
+			if (event.touches.length === 1) {
+				const touch = event.touches[0];
+				// Create a mouse event-like object for hover detection
+				const mouseEvent = {
+					clientX: touch.clientX,
+					clientY: touch.clientY
+				} as MouseEvent;
+				this.onMouseMove(mouseEvent);
+			}
+		}, { passive: false });
+
+		// Add touch start for hover detection
+		this.canvasRef.nativeElement.addEventListener('touchstart', (event) => {
+			if (event.touches.length === 1) {
+				const touch = event.touches[0];
+				// Create a mouse event-like object for hover detection
+				const mouseEvent = {
+					clientX: touch.clientX,
+					clientY: touch.clientY
+				} as MouseEvent;
+				this.onMouseMove(mouseEvent);
+			}
+		}, { passive: false });
 
 		// Add wheel event for trackpad swipe (globe spin)
 		const onWheel = (event: WheelEvent) => {
@@ -377,7 +423,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			const satellite: CategorySatellite = {
 				id: category.id,
 				name: category.name,
-				orbitRadius: 5 + index * 2, // Restore original varying radius
+				orbitRadius: window.innerWidth <= 768 ? (3 + index * 1.5) : (5 + index * 2), // Smaller orbits for mobile
 				orbitSpeed: 0.001 / (1 + index * 0.05), // Restore original varying speed
 				rotationSpeed: 0.0003 + index * 0.0001, // Restore original varying rotation
 				orbitAngle: config.angle,
@@ -403,8 +449,16 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		satellite.textGroup = this.createTextLabel(satellite.name, satellite.orbitRadius);
 		satellite.group.add(satellite.textGroup);
 
-		// Assign userData to the group only
+		// Assign userData to the group and all its children
 		satellite.group.userData['satellite'] = satellite;
+		satellite.mesh.userData['satellite'] = satellite;
+		
+		// Set userData on text group children
+		if (satellite.textGroup) {
+			satellite.textGroup.children.forEach(child => {
+				child.userData['satellite'] = satellite;
+			});
+		}
 
 		this.scene.add(satellite.group);
 
@@ -449,7 +503,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		const scale = 512;
 
 		// Estimate font size in px for canvas
-		const baseFontSize = labelHeight * 0.8 * scale;
+		let baseFontSize = labelHeight * 0.8 * scale;
+		
 		let fontSizePx = baseFontSize;
 		if (textValue.length > 10) {
 			fontSizePx = Math.max(16, baseFontSize * (10 / textValue.length));
@@ -508,9 +563,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 		// Background and border
 		const bgGeometry = new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld);
+		const borderGeometry = new THREE.PlaneGeometry(boxWidthWorld + 0.15, boxHeightWorld + 0.1);
+		
 		const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 		const background = new THREE.Mesh(bgGeometry, bgMaterial);
-		const borderGeometry = new THREE.PlaneGeometry(boxWidthWorld + 0.15, boxHeightWorld + 0.1);
 		const borderMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 		const border = new THREE.Mesh(borderGeometry, borderMaterial);
 		const textMaterial = new THREE.MeshBasicMaterial({
@@ -576,9 +632,23 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.canvasRef.nativeElement.addEventListener('click', (event) => {
 			this.onMouseClick(event);
 		});
+
+		// Add touch event support for mobile
+		this.canvasRef.nativeElement.addEventListener('touchstart', (event) => {
+			this.onTouchStart(event);
+		}, { passive: false });
+
+		this.canvasRef.nativeElement.addEventListener('touchmove', (event) => {
+			this.onTouchMove(event);
+		}, { passive: false });
+
+		this.canvasRef.nativeElement.addEventListener('touchend', (event) => {
+			this.onTouchEnd(event);
+		}, { passive: false });
 	}
 
 	private onMouseMove(event: MouseEvent) {
+		// Enable hover detection on both desktop and mobile
 		const now = Date.now();
 		if (now - this.lastRaycastTime < this.raycastInterval) return;
 		this.lastRaycastTime = now;
@@ -650,8 +720,61 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	}
 
 	private onMouseClick(event: MouseEvent) {
+		console.log('Mouse click detected. Hovered satellite:', this.hoveredSatellite?.name, 'Is zooming:', this.isZooming);
+		
 		if (this.hoveredSatellite && !this.isZooming) {
-			this.zoomToSatellite(this.hoveredSatellite);
+			console.log('Zooming to satellite:', this.hoveredSatellite.name);
+			
+			// Apply immediate visual feedback
+			this.applyVisualFeedback(this.hoveredSatellite);
+			
+			// Small delay to show the feedback before zooming
+			setTimeout(() => {
+				if (this.hoveredSatellite) {
+					this.zoomToSatellite(this.hoveredSatellite);
+				}
+			}, 150);
+		} else {
+			// Fallback: do raycasting on click if hover detection failed
+			const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+			this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+			this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+			this.raycaster.setFromCamera(this.mouse, this.camera);
+
+			const groups = this.satellites
+				.map((satellite) => satellite.group)
+				.filter((group): group is THREE.Group => !!group);
+			const intersects = this.raycaster.intersectObjects(groups, true);
+			
+			if (intersects.length > 0) {
+				let intersectedSatellite: CategorySatellite | null = null;
+				for (const intersect of intersects) {
+					let obj: THREE.Object3D | null = intersect.object;
+					while (obj) {
+						if (obj.userData && obj.userData['satellite']) {
+							intersectedSatellite = obj.userData['satellite'];
+							break;
+						}
+						obj = obj.parent;
+					}
+					if (intersectedSatellite) break;
+				}
+				
+				if (intersectedSatellite && !this.isZooming) {
+					console.log('Fallback: Zooming to satellite:', intersectedSatellite.name);
+					
+					// Apply immediate visual feedback
+					this.applyVisualFeedback(intersectedSatellite);
+					
+					// Small delay to show the feedback before zooming
+					setTimeout(() => {
+						if (intersectedSatellite) {
+							this.zoomToSatellite(intersectedSatellite);
+						}
+					}, 150);
+				}
+			}
 		}
 	}
 
@@ -700,7 +823,21 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	onWindowResize() {
 		// Update camera aspect ratio
 		this.camera.aspect = window.innerWidth / window.innerHeight;
+		
+		// Adjust camera for mobile devices
+		if (window.innerWidth <= 768) {
+			this.camera.fov = 45; // Smaller FOV for mobile - more zoomed out
+			this.camera.position.set(0, 25, 35); // Further back and higher for mobile
+		} else {
+			this.camera.fov = 75; // Normal FOV for desktop
+			this.camera.position.set(0, 12, 18); // Normal position for desktop
+		}
+		
 		this.camera.updateProjectionMatrix();
+
+		// Update spherical coordinates to match new camera position
+		const radius = window.innerWidth <= 768 ? 35 : 18;
+		this.spherical.set(radius, Math.PI / 2, 0);
 
 		// Update renderer size with maintained pixel ratio
 		const pixelRatio = Math.min(window.devicePixelRatio * 1.5, 3);
@@ -746,6 +883,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.zoomTargetPosition
 			.copy(satellite.position)
 			.add(direction.multiplyScalar(zoomDistance));
+
+		// Hide header and footer immediately when zoom starts
+		this.hideHeaderFooter.emit();
 
 		// Start zoom animation
 		this.animateZoom();
@@ -815,6 +955,9 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.zoomStartTime = Date.now();
 		this.showCrtMonitor = false;
 
+		// Show header and footer immediately when zoom back starts
+		this.showHeaderFooter.emit();
+
 		// Animate back to default position
 		this.animateZoomBack();
 	}
@@ -828,10 +971,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Smooth easing function
 		const easedProgress = this.easeInOutCubic(progress);
 
+		// Use appropriate default position based on screen size
+		const targetPosition = window.innerWidth <= 768 ? this.mobileDefaultCameraPosition : this.defaultCameraPosition;
+
 		// Interpolate camera position back to default
 		this.camera.position.lerpVectors(
 			this.zoomTargetPosition,
-			this.defaultCameraPosition,
+			targetPosition,
 			easedProgress,
 		);
 		this.camera.lookAt(0, 0, 0);
@@ -842,6 +988,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			this.isZooming = false;
 			this.isZoomed = false;
 			this.currentCategory = null;
+			
+			// Reset spherical coordinates to match the final camera position
+			this.spherical.setFromVector3(this.camera.position);
+			
+			// Reset momentum
+			this.rotationVelocity.theta = 0;
+			this.rotationVelocity.phi = 0;
+			
+			// Reset all satellite colors
+			this.resetAllSatelliteColors();
+			
 			this.zoomStateChanged.emit(false);
 		}
 	}
@@ -850,6 +1007,242 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Only go back if clicking on the overlay background, not the monitor
 		if (event.target === event.currentTarget) {
 			this.goBackToDefaultView();
+		}
+	}
+
+	public onCloseClick() {
+		this.goBackToDefaultView();
+	}
+
+	// Touch event handlers for mobile
+	private onTouchStart(event: TouchEvent) {
+		event.preventDefault();
+		if (event.touches.length === 1) {
+			const touch = event.touches[0];
+			this.touchStartX = touch.clientX;
+			this.touchStartY = touch.clientY;
+			this.lastTouchX = touch.clientX;
+			this.lastTouchY = touch.clientY;
+			this.isTouching = true;
+			this.touchStartTime = Date.now();
+			this.canvasRef.nativeElement.style.cursor = 'grabbing';
+			
+			// Stop momentum when user starts touching
+			this.rotationVelocity.theta = 0;
+			this.rotationVelocity.phi = 0;
+		}
+	}
+
+	private onTouchMove(event: TouchEvent) {
+		event.preventDefault();
+		if (!this.isTouching || event.touches.length !== 1) return;
+
+		const touch = event.touches[0];
+		const deltaX = touch.clientX - (this.lastTouchX || 0);
+		const deltaY = touch.clientY - (this.lastTouchY || 0);
+		const currentTime = Date.now();
+
+		// Check if this is a significant movement (more than 8px)
+		const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+		if (totalMovement > 8) { // Reduced threshold for more responsive rotation
+			// This is a drag, not a tap - handle rotation
+			const rotateSpeed = 0.01; // Increased for more responsive rotation
+
+			// Update spherical coordinates
+			this.spherical.theta -= deltaX * rotateSpeed;
+			this.spherical.phi += deltaY * rotateSpeed;
+
+			// Clamp phi to prevent over-rotation
+			this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi));
+
+			// Update camera position
+			this.camera.position.setFromSpherical(this.spherical);
+			this.camera.lookAt(0, 0, 0);
+
+			// Calculate velocity for momentum
+			const deltaTime = currentTime - this.lastMouseTime;
+			if (deltaTime > 10) {
+				this.rotationVelocity.theta = (deltaX * rotateSpeed) / (deltaTime / 16);
+				this.rotationVelocity.phi = (deltaY * rotateSpeed) / (deltaTime / 16);
+				this.lastMouseTime = currentTime;
+			}
+		} else {
+			// Small movement - treat as hover for mobile
+			this.handleTouchHover(touch);
+		}
+
+		this.lastTouchX = touch.clientX;
+		this.lastTouchY = touch.clientY;
+	}
+
+	private handleTouchHover(touch: Touch) {
+		// Convert touch position to normalized device coordinates
+		this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+		this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+		this.raycaster.setFromCamera(this.mouse, this.camera);
+
+		// Reset all satellites to default colors
+		this.satellites.forEach((satellite) => {
+			if (satellite.mesh) {
+				(satellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+			}
+			if (satellite.textGroup) {
+				const border = satellite.textGroup.children[1] as THREE.Mesh;
+				const textPlane = satellite.textGroup.children[2] as THREE.Mesh;
+				if (border && border.material) {
+					(border.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+				}
+				if (textPlane && textPlane.material) {
+					(textPlane.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+				}
+			}
+		});
+
+		// Handle hover state
+		const groups = this.satellites
+			.map((satellite) => satellite.group)
+			.filter((group): group is THREE.Group => !!group);
+		const intersects = this.raycaster.intersectObjects(groups, true);
+		if (intersects.length > 0) {
+			let intersectedSatellite: CategorySatellite | null = null;
+			for (const intersect of intersects) {
+				let obj: THREE.Object3D | null = intersect.object;
+				while (obj) {
+					if (obj.userData && obj.userData['satellite']) {
+						intersectedSatellite = obj.userData['satellite'];
+						break;
+					}
+					obj = obj.parent;
+				}
+				if (intersectedSatellite) break;
+			}
+			if (intersectedSatellite) {
+				if (intersectedSatellite.mesh) {
+					(intersectedSatellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(
+						0x277dff,
+					);
+				}
+				if (intersectedSatellite.textGroup) {
+					const border = intersectedSatellite.textGroup.children[1] as THREE.Mesh;
+					const textPlane = intersectedSatellite.textGroup.children[2] as THREE.Mesh;
+					if (border && border.material) {
+						(border.material as THREE.MeshBasicMaterial).color.setHex(0x277dff);
+					}
+					if (textPlane && textPlane.material) {
+						(textPlane.material as THREE.MeshBasicMaterial).color.setHex(0x277dff);
+					}
+				}
+				this.hoveredSatellite = intersectedSatellite;
+			}
+		} else {
+			this.hoveredSatellite = null;
+		}
+	}
+
+	private onTouchEnd(event: TouchEvent) {
+		event.preventDefault();
+		
+		// Check if this was a tap (quick touch with minimal movement)
+		const touchDuration = Date.now() - this.touchStartTime;
+		const hasMoved = this.touchStartX !== null && this.touchStartY !== null && this.lastTouchX !== null && this.lastTouchY !== null && 
+			(Math.abs(this.touchStartX - this.lastTouchX) > 10 || Math.abs(this.touchStartY - this.lastTouchY) > 10); // Reduced threshold
+		
+		if (touchDuration < 300 && !hasMoved && !this.isZooming) { // Reduced duration threshold
+			// This was a tap - check if we have a hovered satellite
+			if (this.hoveredSatellite) {
+				console.log('Touch: Zooming to hovered satellite:', this.hoveredSatellite.name);
+				
+				// Apply immediate visual feedback
+				this.applyVisualFeedback(this.hoveredSatellite);
+				
+				// Small delay to show the feedback before zooming
+				setTimeout(() => {
+					if (this.hoveredSatellite) {
+						this.zoomToSatellite(this.hoveredSatellite);
+					}
+				}, 50); // Very short delay for immediate response
+			} else {
+				// Fallback to raycasting if no hovered satellite
+				this.handleTouchClick(event);
+			}
+		}
+		
+		this.isTouching = false;
+		this.canvasRef.nativeElement.style.cursor = 'grab';
+		this.touchStartX = null;
+		this.touchStartY = null;
+		this.lastTouchX = null;
+		this.lastTouchY = null;
+	}
+
+	private handleTouchClick(event: TouchEvent) {
+		console.log('Touch click detected. Is zooming:', this.isZooming);
+		
+		if (event.changedTouches.length === 1 && !this.isZooming) {
+			const touch = event.changedTouches[0];
+			
+			// Convert touch position to normalized device coordinates
+			this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+			this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+			// Update the picking ray with the camera and mouse position
+			this.raycaster.setFromCamera(this.mouse, this.camera);
+
+			// Calculate objects intersecting the picking ray
+			const groups = this.satellites
+				.map((satellite) => satellite.group)
+				.filter((group): group is THREE.Group => !!group);
+			const intersects = this.raycaster.intersectObjects(groups, true);
+			
+			console.log('Touch intersects:', intersects.length);
+			
+			if (intersects.length > 0) {
+				// Find the closest intersection
+				const closestIntersect = intersects[0];
+				let intersectedSatellite: CategorySatellite | null = null;
+				
+				// Search up the object hierarchy to find the satellite
+				let obj: THREE.Object3D | null = closestIntersect.object;
+				while (obj) {
+					if (obj.userData && obj.userData['satellite']) {
+						intersectedSatellite = obj.userData['satellite'];
+						break;
+					}
+					obj = obj.parent;
+				}
+				
+				if (intersectedSatellite) {
+					console.log('Touch: Zooming to satellite:', intersectedSatellite.name);
+					
+					// Apply immediate visual feedback
+					this.applyVisualFeedback(intersectedSatellite);
+					
+					// Small delay to show the feedback before zooming
+					setTimeout(() => {
+						if (intersectedSatellite) {
+							this.zoomToSatellite(intersectedSatellite);
+						}
+					}, 50); // Very short delay for immediate response
+				}
+			}
+		}
+	}
+
+	private applyVisualFeedback(satellite: CategorySatellite) {
+		// Apply blue color to the clicked satellite
+		if (satellite.mesh) {
+			(satellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0x277dff);
+		}
+		if (satellite.textGroup) {
+			const border = satellite.textGroup.children[1] as THREE.Mesh;
+			const textPlane = satellite.textGroup.children[2] as THREE.Mesh;
+			if (border && border.material) {
+				(border.material as THREE.MeshBasicMaterial).color.setHex(0x277dff);
+			}
+			if (textPlane && textPlane.material) {
+				(textPlane.material as THREE.MeshBasicMaterial).color.setHex(0x277dff);
+			}
 		}
 	}
 
@@ -862,5 +1255,24 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		if (satellite && !this.isZooming) {
 			this.zoomToSatellite(satellite);
 		}
+	}
+
+	private resetAllSatelliteColors() {
+		this.satellites.forEach((satellite) => {
+			if (satellite.mesh) {
+				(satellite.mesh.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+			}
+			if (satellite.textGroup) {
+				const border = satellite.textGroup.children[1] as THREE.Mesh;
+				const textPlane = satellite.textGroup.children[2] as THREE.Mesh;
+				if (border && border.material) {
+					(border.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+				}
+				if (textPlane && textPlane.material) {
+					(textPlane.material as THREE.MeshBasicMaterial).color.setHex(0xffffff);
+				}
+			}
+		});
+		this.hoveredSatellite = null;
 	}
 }

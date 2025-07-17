@@ -6,6 +6,7 @@
 		(mouseenter)="onMenuMouseEnter()"
 		(mouseleave)="onMenuMouseLeave()"
 		(click)="openMenu()"
+		(touchstart)="openMenu()"
 	>
 		MENU
 	</div>
@@ -27,6 +28,7 @@
 			(mouseenter)="onMenuItemEnter(i)"
 			(mouseleave)="onMenuItemLeave()"
 			(click)="onCategoryClick(category)"
+			(touchstart)="onCategoryClick(category)"
 		>
 			<div class="UIHome__itemTitle" [attr.data-id]="getDataId(category)">
 				<span class="UIHome__itemPrefix">_{{ i + 1 | number: '2.0' }}.</span>

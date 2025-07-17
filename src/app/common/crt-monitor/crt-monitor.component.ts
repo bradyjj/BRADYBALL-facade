@@ -10,8 +10,13 @@ export class CrtMonitorComponent {
 	@Input() showMonitor: boolean = false;
 	@Input() isAboutSection: boolean = false;
 	@Output() overlayClick = new EventEmitter<MouseEvent>();
+	@Output() closeClick = new EventEmitter<void>();
 
 	onOverlayClick(event: MouseEvent) {
 		this.overlayClick.emit(event);
+	}
+
+	onCloseClick() {
+		this.closeClick.emit();
 	}
 }

@@ -1,3 +1,35 @@
+/* Global Styles */
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+	overflow: hidden; /* Prevent page scrolling */
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: 'TX-02', 'Berkeley Mono', monospace;
+	background: #0a0a0a;
+	color: #bfc9d5;
+	line-height: 1.6;
+}
+
+/* Allow scrolling only within CRT containers */
+.crt-content {
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+/* Ensure the main page wrapper doesn't scroll */
+.bb-page-wrapper {
+	height: 100vh;
+	overflow: hidden;
+	position: relative;
+}
+
 :root {
 	/* Base Colors */
 	--bb-black-color: #000000;
