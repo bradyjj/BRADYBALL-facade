@@ -11,9 +11,18 @@ export class HomeScreenComponent {
 	@ViewChild(SoccerBallComponent) soccerBall!: SoccerBallComponent;
 
 	public isZoomed = false;
+	public isHeaderFooterHidden = false;
 
 	onZoomStateChanged(isZoomed: boolean) {
 		this.isZoomed = isZoomed;
+	}
+
+	onHideHeaderFooter() {
+		this.isHeaderFooterHidden = true;
+	}
+
+	onShowHeaderFooter() {
+		this.isHeaderFooterHidden = false;
 	}
 
 	onBradyballClick() {

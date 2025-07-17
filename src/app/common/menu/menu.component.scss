@@ -372,3 +372,142 @@
 	height: 2px; // Same height as entry lines
 	opacity: 0.6; // Same opacity as others
 }
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+	.UIHome__list {
+		width: 300px;
+		height: 28px;
+	}
+
+	.UIHome__listLabel {
+		font-size: 1rem;
+		letter-spacing: 0.1em;
+	}
+
+	.UIHome__itemContainer {
+		width: 280px;
+	}
+
+	.UIHome__item {
+		font-size: 1.2rem;
+		letter-spacing: 0.15rem;
+		min-width: 200px;
+		min-height: 44px; // Ensure touch target size
+		display: flex;
+		align-items: center;
+	}
+
+	.UIHome__item:hover {
+		font-size: 1.4rem;
+		transform: translateY(-50%) scale(1.02);
+	}
+
+	.UIHome__itemTitle {
+		min-width: 150px;
+		padding-right: 15px;
+	}
+
+	.UIHome__itemPrefix {
+		font-size: 0.8rem;
+	}
+
+	.UIHome__itemText {
+		font-size: 1.2rem;
+	}
+
+	.UIHome__item:hover .UIHome__itemPrefix {
+		font-size: 0.9rem;
+	}
+
+	.UIHome__item:hover .UIHome__itemText {
+		font-size: 1.4rem;
+	}
+
+	.UIHome__itemTitle::after {
+		width: 6px;
+		height: 6px;
+	}
+
+	.UIHome__item:hover .UIHome__itemTitle::after {
+		width: 8px;
+		height: 8px;
+		transform: translateY(-50%) scale(1.2);
+	}
+
+	.UIHome__histogramContainer {
+		width: 80px;
+	}
+
+	.UIHome__histogramLine {
+		height: 1px;
+	}
+}
+
+@media (max-width: 480px) {
+	.UIHome__list {
+		width: 250px;
+		height: 24px;
+	}
+
+	.UIHome__listLabel {
+		font-size: 0.9rem;
+		letter-spacing: 0.08em;
+	}
+
+	.UIHome__itemContainer {
+		width: 230px;
+	}
+
+	.UIHome__item {
+		font-size: 1rem;
+		letter-spacing: 0.1rem;
+		min-width: 180px;
+		min-height: 40px;
+	}
+
+	.UIHome__item:hover {
+		font-size: 1.1rem;
+		transform: translateY(-50%) scale(1.01);
+	}
+
+	.UIHome__itemTitle {
+		min-width: 120px;
+		padding-right: 12px;
+	}
+
+	.UIHome__itemPrefix {
+		font-size: 0.7rem;
+	}
+
+	.UIHome__itemText {
+		font-size: 1rem;
+	}
+
+	.UIHome__item:hover .UIHome__itemPrefix {
+		font-size: 0.8rem;
+	}
+
+	.UIHome__item:hover .UIHome__itemText {
+		font-size: 1.1rem;
+	}
+
+	.UIHome__itemTitle::after {
+		width: 5px;
+		height: 5px;
+	}
+
+	.UIHome__item:hover .UIHome__itemTitle::after {
+		width: 6px;
+		height: 6px;
+		transform: translateY(-50%) scale(1.1);
+	}
+
+	.UIHome__histogramContainer {
+		width: 60px;
+	}
+
+	.UIHome__histogramLine {
+		height: 1px;
+	}
+}

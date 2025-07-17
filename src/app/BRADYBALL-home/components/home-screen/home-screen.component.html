@@ -1,9 +1,17 @@
 <div class="container-fluid p-0 bb-page-wrapper">
 	<app-header
 		[isZoomed]="isZoomed"
+		[isHidden]="isHeaderFooterHidden"
 		(bradyballClick)="onBradyballClick()"
 		(categorySelected)="onCategorySelected($event)"
 	></app-header>
-	<soccer-ball (zoomStateChanged)="onZoomStateChanged($event)"></soccer-ball>
-	<app-footer></app-footer>
+	<soccer-ball 
+		(zoomStateChanged)="onZoomStateChanged($event)"
+		(hideHeaderFooter)="onHideHeaderFooter()"
+		(showHeaderFooter)="onShowHeaderFooter()"
+	></soccer-ball>
+	<app-footer 
+		[isZoomed]="isZoomed"
+		[isHidden]="isHeaderFooterHidden"
+	></app-footer>
 </div>

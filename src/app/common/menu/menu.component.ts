@@ -21,6 +21,13 @@ export class MenuComponent {
 		}
 	}
 
+	@HostListener('document:touchmove', ['$event'])
+	onTouchMove(event: TouchEvent) {
+		if (this.menuOpen && event.touches.length > 0) {
+			this.mouseY = event.touches[0].clientY;
+		}
+	}
+
 	openMenu() {
 		this.isClosing = false;
 		this.menuOpen = true;

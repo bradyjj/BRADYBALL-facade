@@ -6,18 +6,17 @@
 	width: 100vw;
 	height: 100vh;
 	display: flex;
-	align-items: flex-start;
+	align-items: center;
 	justify-content: center;
-	padding-top: 140px; // Reduced top spacing to make monitor larger
 	background: rgba(0, 0, 0, 0.8);
-	z-index: 3000;
+	z-index: 10000;
 	pointer-events: auto;
 }
 
 .crt-monitor {
 	width: 90vw;
 	max-width: 1200px;
-	height: 70vh; // Reduced height to equalize top and bottom spacing
+	height: 70vh;
 	background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
 	border: 3px solid #333;
 	border-radius: 15px;
@@ -91,12 +90,72 @@
 	box-shadow: 0 0 8px rgba(0, 174, 107, 0.6);
 }
 
+.crt-close-btn {
+	position: absolute;
+	top: 20px;
+	right: 30px;
+	background: transparent;
+	border: 2px solid #F2283C;
+	border-radius: 8px;
+	color: #F2283C;
+	padding: 8px 16px;
+	font-family: 'TX-02', monospace;
+	font-size: 0.9rem;
+	font-weight: bold;
+	cursor: pointer;
+	z-index: 10;
+	transition: all 0.3s ease;
+	overflow: hidden;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	box-shadow: 0 0 10px rgba(242, 40, 60, 0.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	&:hover {
+		background: rgba(242, 40, 60, 0.1);
+		box-shadow: 0 0 20px rgba(242, 40, 60, 0.6);
+		text-shadow: 0 0 5px rgba(242, 40, 60, 0.8);
+
+		.btn-glow {
+			opacity: 1;
+			transform: translateX(100%);
+		}
+	}
+
+	&:active {
+		transform: scale(0.98);
+		box-shadow: 0 0 15px rgba(242, 40, 60, 0.8);
+	}
+
+	.btn-text {
+		position: relative;
+		z-index: 2;
+	}
+
+	.btn-glow {
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(242, 40, 60, 0.3), transparent);
+		transition: all 0.5s ease;
+		opacity: 0;
+		z-index: 1;
+	}
+}
+
 .crt-content {
 	height: calc(100% - 100px);
 	position: relative;
 	z-index: 3;
 	padding: 20px;
 	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+	scroll-behavior: smooth;
 
 	// Custom scrollbar for CRT aesthetic
 	&::-webkit-scrollbar {
@@ -130,18 +189,24 @@
 
 @media (max-width: 768px) {
 	.crt-monitor-overlay {
-		padding-top: 80px;
+		align-items: center;
+		padding: 0;
+		z-index: 10000; // Higher than header and footer
 	}
 
 	.crt-monitor {
-		width: 95vw;
-		height: 80vh;
+		width: 100vw;
+		height: 100vh;
+		max-width: 100vw;
+		border-radius: 0;
 	}
 
 	.crt-monitor.about-section {
-		width: 95vw;
-		max-width: 95vw;
+		width: 100vw;
+		height: 100vh;
+		max-width: 100vw;
 		min-width: auto;
+		border-radius: 0;
 	}
 
 	.crt-header {
@@ -149,27 +214,47 @@
 	}
 
 	.crt-title {
-		font-size: 2rem;
+		font-size: 2.2rem; /* Increased from 1.8rem */
+		letter-spacing: 1px;
 	}
 
 	.crt-content {
 		padding: 15px;
+		height: calc(100vh - 140px); /* Account for Chrome UI */
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		scroll-behavior: smooth;
+		/* Ensure content can scroll to bottom */
+		padding-bottom: 100px; /* Extra padding at bottom */
+	}
+
+	.crt-close-btn {
+		top: 15px;
+		right: 20px;
+		padding: 6px 12px;
+		font-size: 0.8rem;
 	}
 }
 
 @media (max-width: 480px) {
 	.crt-monitor-overlay {
-		padding-top: 60px;
+		align-items: center;
+		padding: 0;
+		z-index: 10000; // Higher than header and footer
 	}
 
 	.crt-monitor {
-		width: 98vw;
-		height: 85vh;
+		width: 100vw;
+		height: 100vh;
+		max-width: 100vw;
+		border-radius: 0;
 	}
 
 	.crt-monitor.about-section {
-		width: 98vw;
-		max-width: 98vw;
+		width: 100vw;
+		height: 100vh;
+		max-width: 100vw;
+		border-radius: 0;
 	}
 
 	.crt-header {
@@ -177,11 +262,24 @@
 	}
 
 	.crt-title {
-		font-size: 1.5rem;
-		letter-spacing: 1px;
+		font-size: 1.8rem; /* Increased from 1.3rem */
+		letter-spacing: 0.5px;
 	}
 
 	.crt-content {
 		padding: 10px;
+		height: calc(100vh - 120px); /* Account for Chrome UI */
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		scroll-behavior: smooth;
+		/* Ensure content can scroll to bottom */
+		padding-bottom: 80px; /* Extra padding at bottom */
+	}
+
+	.crt-close-btn {
+		top: 10px;
+		right: 15px;
+		padding: 5px 10px;
+		font-size: 0.7rem;
 	}
 }
