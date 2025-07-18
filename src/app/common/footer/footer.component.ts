@@ -9,6 +9,6 @@ import { Router } from '@angular/router';
 export class FooterComponent {
 	@Input() isZoomed = false;
 	@Input() isHidden = false;
-	
+
 	constructor(private router: Router) {}
 }
