@@ -68,15 +68,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	private isDestroyed = false;
 	private cleanup?: () => void;
 	private applyMomentum?: () => void;
-	private rotationVelocity = { theta: 0, phi: 0 };
+	private rotationVelocity = { x: 0, y: 0 };
 	private lastMouseTime = 0;
 	private lastMouseMove = { x: 0, y: 0 };
-	private spherical = new THREE.Spherical();
+	private cameraQuaternion = new THREE.Quaternion();
+	private cameraDistance = 22; // Zoomed in a bit from 25
+	private mobileCameraDistance = 40; // Zoomed in a bit from 45
 	private fontLoaded = false;
 	private lastRaycastTime = 0;
 	private readonly raycastInterval = 1000 / 30; // 30fps
 	private lastWheelTime = 0;
-	private lastWheelDelta = { theta: 0, phi: 0 };
+	private lastWheelDelta = { x: 0, y: 0 };
 	private lastTouchX: number | null = null;
 	private lastTouchY: number | null = null;
 	private touchStartX: number | null = null;
@@ -137,15 +139,16 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			0.1,
 			1000,
 		);
-		this.camera.position.set(0, 12, 18); // Moved camera further back
-		this.camera.lookAt(0, 0, 0);
 
-		// Adjust camera for mobile devices
+		// Set initial camera position based on screen size
 		if (window.innerWidth <= 768) {
 			this.camera.fov = 45; // Even smaller FOV for mobile
-			this.camera.position.set(0, 25, 35); // Further back for mobile
-			this.camera.updateProjectionMatrix();
+			this.camera.position.copy(this.mobileDefaultCameraPosition);
+		} else {
+			this.camera.position.copy(this.defaultCameraPosition);
 		}
+		this.camera.lookAt(0, 0, 0);
+		this.camera.updateProjectionMatrix();
 
 		// Renderer
 		this.renderer = new THREE.WebGLRenderer({
@@ -171,18 +174,56 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Add OrbitControls (you'll need to import this)
 		this.setupOrbitControls();
 
-		// Only set this once!
-		this.spherical.setFromVector3(this.camera.position);
+		// Calculate the correct quaternion for the initial camera position
+		this.calculateQuaternionFromPosition(this.camera.position);
+	}
+
+	private updateCameraPosition() {
+		const distance = window.innerWidth <= 768 ? this.mobileCameraDistance : this.cameraDistance;
+		const direction = new THREE.Vector3(0, 0, 1);
+		direction.applyQuaternion(this.cameraQuaternion);
+		this.camera.position.copy(direction.multiplyScalar(distance));
+		this.camera.lookAt(0, 0, 0);
+
+		// Console log for camera positioning
+		console.log('Camera Position:', {
+			x: this.camera.position.x.toFixed(2),
+			y: this.camera.position.y.toFixed(2),
+			z: this.camera.position.z.toFixed(2),
+			distance: distance,
+			quaternion: {
+				x: this.cameraQuaternion.x.toFixed(4),
+				y: this.cameraQuaternion.y.toFixed(4),
+				z: this.cameraQuaternion.z.toFixed(4),
+				w: this.cameraQuaternion.w.toFixed(4),
+			},
+		});
+	}
+
+	private calculateQuaternionFromPosition(position: THREE.Vector3) {
+		// Calculate the direction from origin to the camera position
+		const direction = position.clone().normalize();
+
+		// The default direction is (0, 0, 1) - we need to rotate this to match our camera direction
+		const defaultDirection = new THREE.Vector3(0, 0, 1);
+
+		// Calculate the rotation needed to go from default direction to our camera direction
+		const rotationAxis = new THREE.Vector3().crossVectors(defaultDirection, direction);
+		const rotationAngle = Math.acos(defaultDirection.dot(direction));
+
+		if (rotationAxis.length() > 0.001) {
+			rotationAxis.normalize();
+			this.cameraQuaternion.setFromAxisAngle(rotationAxis, rotationAngle);
+		} else {
+			// If directions are parallel, use identity quaternion
+			this.cameraQuaternion.identity();
+		}
 	}
 
 	private setupOrbitControls() {
 		let isMouseDown = false;
 		let mouseX = 0;
 		let mouseY = 0;
-
-		// Convert current camera position to spherical coordinates (top-down)
-		const radius = window.innerWidth <= 768 ? 35 : 18; // Larger radius for mobile
-		this.spherical.set(radius, Math.PI / 2, 0); // radius, phi (90deg), theta (0deg)
 
 		const onMouseDown = (event: MouseEvent) => {
 			isMouseDown = true;
@@ -193,8 +234,8 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			this.canvasRef.nativeElement.style.cursor = 'grabbing';
 
 			// Stop momentum when user starts dragging
-			this.rotationVelocity.theta = 0;
-			this.rotationVelocity.phi = 0;
+			this.rotationVelocity.x = 0;
+			this.rotationVelocity.y = 0;
 		};
 
 		const onMouseUp = () => {
@@ -213,18 +254,27 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			// Sensitivity for rotation
 			const rotateSpeed = 0.005;
 
-			// Update spherical coordinates
-			this.spherical.theta -= deltaX * rotateSpeed;
-			this.spherical.phi += deltaY * rotateSpeed;
+			// Create rotation quaternions
+			const rotationX = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(1, 0, 0),
+				deltaY * rotateSpeed,
+			);
+			const rotationY = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(0, 1, 0),
+				deltaX * rotateSpeed,
+			);
+
+			// Apply rotations to camera quaternion
+			this.cameraQuaternion.multiply(rotationX);
+			this.cameraQuaternion.multiply(rotationY);
 
 			// Update camera position
-			this.camera.position.setFromSpherical(this.spherical);
-			this.camera.lookAt(0, 0, 0);
+			this.updateCameraPosition();
 
 			// Calculate velocity for momentum (only if enough time has passed)
 			if (deltaTime > 10) {
-				this.rotationVelocity.theta = (deltaX * rotateSpeed) / (deltaTime / 16); // Normalized to 60fps
-				this.rotationVelocity.phi = (deltaY * rotateSpeed) / (deltaTime / 16);
+				this.rotationVelocity.x = (deltaX * rotateSpeed) / (deltaTime / 16); // Normalized to 60fps
+				this.rotationVelocity.y = (deltaY * rotateSpeed) / (deltaTime / 16);
 				this.lastMouseTime = currentTime;
 			}
 
@@ -239,35 +289,49 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		this.canvasRef.nativeElement.addEventListener('mousemove', onMouseMove);
 
 		// Add touch event listeners for mobile
-		this.canvasRef.nativeElement.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
-		this.canvasRef.nativeElement.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
-		this.canvasRef.nativeElement.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: false });
+		this.canvasRef.nativeElement.addEventListener('touchstart', this.onTouchStart.bind(this), {
+			passive: false,
+		});
+		this.canvasRef.nativeElement.addEventListener('touchmove', this.onTouchMove.bind(this), {
+			passive: false,
+		});
+		this.canvasRef.nativeElement.addEventListener('touchend', this.onTouchEnd.bind(this), {
+			passive: false,
+		});
 
 		// Add touch move for hover detection
-		this.canvasRef.nativeElement.addEventListener('touchmove', (event) => {
-			if (event.touches.length === 1) {
-				const touch = event.touches[0];
-				// Create a mouse event-like object for hover detection
-				const mouseEvent = {
-					clientX: touch.clientX,
-					clientY: touch.clientY
-				} as MouseEvent;
-				this.onMouseMove(mouseEvent);
-			}
-		}, { passive: false });
+		this.canvasRef.nativeElement.addEventListener(
+			'touchmove',
+			(event) => {
+				if (event.touches.length === 1) {
+					const touch = event.touches[0];
+					// Create a mouse event-like object for hover detection
+					const mouseEvent = {
+						clientX: touch.clientX,
+						clientY: touch.clientY,
+					} as MouseEvent;
+					this.onMouseMove(mouseEvent);
+				}
+			},
+			{ passive: false },
+		);
 
 		// Add touch start for hover detection
-		this.canvasRef.nativeElement.addEventListener('touchstart', (event) => {
-			if (event.touches.length === 1) {
-				const touch = event.touches[0];
-				// Create a mouse event-like object for hover detection
-				const mouseEvent = {
-					clientX: touch.clientX,
-					clientY: touch.clientY
-				} as MouseEvent;
-				this.onMouseMove(mouseEvent);
-			}
-		}, { passive: false });
+		this.canvasRef.nativeElement.addEventListener(
+			'touchstart',
+			(event) => {
+				if (event.touches.length === 1) {
+					const touch = event.touches[0];
+					// Create a mouse event-like object for hover detection
+					const mouseEvent = {
+						clientX: touch.clientX,
+						clientY: touch.clientY,
+					} as MouseEvent;
+					this.onMouseMove(mouseEvent);
+				}
+			},
+			{ passive: false },
+		);
 
 		// Add wheel event for trackpad swipe (globe spin)
 		const onWheel = (event: WheelEvent) => {
@@ -283,13 +347,27 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 					dPhi = event.deltaY * rotateSpeed;
 					dTheta = -event.deltaX * rotateSpeed;
 				}
-				this.spherical.theta += dTheta;
-				this.spherical.phi += dPhi;
-				this.camera.position.setFromSpherical(this.spherical);
-				this.camera.lookAt(0, 0, 0);
+
+				// Create rotation quaternions for wheel
+				const rotationX = new THREE.Quaternion().setFromAxisAngle(
+					new THREE.Vector3(1, 0, 0),
+					dPhi,
+				);
+				const rotationY = new THREE.Quaternion().setFromAxisAngle(
+					new THREE.Vector3(0, 1, 0),
+					dTheta,
+				);
+
+				// Apply rotations to camera quaternion
+				this.cameraQuaternion.multiply(rotationX);
+				this.cameraQuaternion.multiply(rotationY);
+
+				// Update camera position
+				this.updateCameraPosition();
+
 				// Store for momentum
-				this.lastWheelDelta.theta = dTheta;
-				this.lastWheelDelta.phi = dPhi;
+				this.lastWheelDelta.x = dTheta;
+				this.lastWheelDelta.y = dPhi;
 				this.lastWheelTime = Date.now();
 			}
 		};
@@ -330,19 +408,29 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			const damping = 0.96; // How quickly momentum fades (higher = longer momentum)
 
 			if (
-				Math.abs(this.rotationVelocity.theta) > 0.001 ||
-				Math.abs(this.rotationVelocity.phi) > 0.001
+				Math.abs(this.rotationVelocity.x) > 0.001 ||
+				Math.abs(this.rotationVelocity.y) > 0.001
 			) {
-				this.spherical.theta -= this.rotationVelocity.theta;
-				this.spherical.phi += this.rotationVelocity.phi;
+				// Create rotation quaternions for momentum
+				const rotationX = new THREE.Quaternion().setFromAxisAngle(
+					new THREE.Vector3(1, 0, 0),
+					this.rotationVelocity.y,
+				);
+				const rotationY = new THREE.Quaternion().setFromAxisAngle(
+					new THREE.Vector3(0, 1, 0),
+					this.rotationVelocity.x,
+				);
+
+				// Apply rotations to camera quaternion
+				this.cameraQuaternion.multiply(rotationX);
+				this.cameraQuaternion.multiply(rotationY);
+
+				// Update camera position
+				this.updateCameraPosition();
 
 				// Apply damping
-				this.rotationVelocity.theta *= damping;
-				this.rotationVelocity.phi *= damping;
-
-				// Update camera
-				this.camera.position.setFromSpherical(this.spherical);
-				this.camera.lookAt(0, 0, 0);
+				this.rotationVelocity.x *= damping;
+				this.rotationVelocity.y *= damping;
 			}
 		};
 	}
@@ -352,15 +440,29 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		if (now - this.lastWheelTime < 100) {
 			// Apply with damping
 			const damping = 0.96;
-			this.lastWheelDelta.theta *= damping;
-			this.lastWheelDelta.phi *= damping;
-			this.spherical.theta += this.lastWheelDelta.theta;
-			this.spherical.phi += this.lastWheelDelta.phi;
-			this.camera.position.setFromSpherical(this.spherical);
-			this.camera.lookAt(0, 0, 0);
+			this.lastWheelDelta.x *= damping;
+			this.lastWheelDelta.y *= damping;
+
+			// Create rotation quaternions for wheel momentum
+			const rotationX = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(1, 0, 0),
+				this.lastWheelDelta.y,
+			);
+			const rotationY = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(0, 1, 0),
+				this.lastWheelDelta.x,
+			);
+
+			// Apply rotations to camera quaternion
+			this.cameraQuaternion.multiply(rotationX);
+			this.cameraQuaternion.multiply(rotationY);
+
+			// Update camera position
+			this.updateCameraPosition();
+
 			if (
-				Math.abs(this.lastWheelDelta.theta) > 0.001 ||
-				Math.abs(this.lastWheelDelta.phi) > 0.001
+				Math.abs(this.lastWheelDelta.x) > 0.001 ||
+				Math.abs(this.lastWheelDelta.y) > 0.001
 			) {
 				requestAnimationFrame(this.applyWheelMomentum);
 			}
@@ -423,7 +525,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			const satellite: CategorySatellite = {
 				id: category.id,
 				name: category.name,
-				orbitRadius: window.innerWidth <= 768 ? (3 + index * 1.5) : (5 + index * 2), // Smaller orbits for mobile
+				orbitRadius: window.innerWidth <= 768 ? 3 + index * 1.5 : 5 + index * 2, // Smaller orbits for mobile
 				orbitSpeed: 0.001 / (1 + index * 0.05), // Restore original varying speed
 				rotationSpeed: 0.0003 + index * 0.0001, // Restore original varying rotation
 				orbitAngle: config.angle,
@@ -452,10 +554,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Assign userData to the group and all its children
 		satellite.group.userData['satellite'] = satellite;
 		satellite.mesh.userData['satellite'] = satellite;
-		
+
 		// Set userData on text group children
 		if (satellite.textGroup) {
-			satellite.textGroup.children.forEach(child => {
+			satellite.textGroup.children.forEach((child) => {
 				child.userData['satellite'] = satellite;
 			});
 		}
@@ -504,7 +606,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 		// Estimate font size in px for canvas
 		let baseFontSize = labelHeight * 0.8 * scale;
-		
+
 		let fontSizePx = baseFontSize;
 		if (textValue.length > 10) {
 			fontSizePx = Math.max(16, baseFontSize * (10 / textValue.length));
@@ -564,7 +666,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		// Background and border
 		const bgGeometry = new THREE.PlaneGeometry(boxWidthWorld, boxHeightWorld);
 		const borderGeometry = new THREE.PlaneGeometry(boxWidthWorld + 0.15, boxHeightWorld + 0.1);
-		
+
 		const bgMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
 		const background = new THREE.Mesh(bgGeometry, bgMaterial);
 		const borderMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -634,17 +736,29 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		});
 
 		// Add touch event support for mobile
-		this.canvasRef.nativeElement.addEventListener('touchstart', (event) => {
-			this.onTouchStart(event);
-		}, { passive: false });
+		this.canvasRef.nativeElement.addEventListener(
+			'touchstart',
+			(event) => {
+				this.onTouchStart(event);
+			},
+			{ passive: false },
+		);
 
-		this.canvasRef.nativeElement.addEventListener('touchmove', (event) => {
-			this.onTouchMove(event);
-		}, { passive: false });
+		this.canvasRef.nativeElement.addEventListener(
+			'touchmove',
+			(event) => {
+				this.onTouchMove(event);
+			},
+			{ passive: false },
+		);
 
-		this.canvasRef.nativeElement.addEventListener('touchend', (event) => {
-			this.onTouchEnd(event);
-		}, { passive: false });
+		this.canvasRef.nativeElement.addEventListener(
+			'touchend',
+			(event) => {
+				this.onTouchEnd(event);
+			},
+			{ passive: false },
+		);
 	}
 
 	private onMouseMove(event: MouseEvent) {
@@ -720,14 +834,19 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	}
 
 	private onMouseClick(event: MouseEvent) {
-		console.log('Mouse click detected. Hovered satellite:', this.hoveredSatellite?.name, 'Is zooming:', this.isZooming);
-		
+		console.log(
+			'Mouse click detected. Hovered satellite:',
+			this.hoveredSatellite?.name,
+			'Is zooming:',
+			this.isZooming,
+		);
+
 		if (this.hoveredSatellite && !this.isZooming) {
 			console.log('Zooming to satellite:', this.hoveredSatellite.name);
-			
+
 			// Apply immediate visual feedback
 			this.applyVisualFeedback(this.hoveredSatellite);
-			
+
 			// Small delay to show the feedback before zooming
 			setTimeout(() => {
 				if (this.hoveredSatellite) {
@@ -746,7 +865,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 				.map((satellite) => satellite.group)
 				.filter((group): group is THREE.Group => !!group);
 			const intersects = this.raycaster.intersectObjects(groups, true);
-			
+
 			if (intersects.length > 0) {
 				let intersectedSatellite: CategorySatellite | null = null;
 				for (const intersect of intersects) {
@@ -760,13 +879,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 					}
 					if (intersectedSatellite) break;
 				}
-				
+
 				if (intersectedSatellite && !this.isZooming) {
 					console.log('Fallback: Zooming to satellite:', intersectedSatellite.name);
-					
+
 					// Apply immediate visual feedback
 					this.applyVisualFeedback(intersectedSatellite);
-					
+
 					// Small delay to show the feedback before zooming
 					setTimeout(() => {
 						if (intersectedSatellite) {
@@ -823,21 +942,26 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 	onWindowResize() {
 		// Update camera aspect ratio
 		this.camera.aspect = window.innerWidth / window.innerHeight;
-		
+
 		// Adjust camera for mobile devices
 		if (window.innerWidth <= 768) {
 			this.camera.fov = 45; // Smaller FOV for mobile - more zoomed out
-			this.camera.position.set(0, 25, 35); // Further back and higher for mobile
 		} else {
 			this.camera.fov = 75; // Normal FOV for desktop
-			this.camera.position.set(0, 12, 18); // Normal position for desktop
 		}
-		
+
 		this.camera.updateProjectionMatrix();
 
-		// Update spherical coordinates to match new camera position
-		const radius = window.innerWidth <= 768 ? 35 : 18;
-		this.spherical.set(radius, Math.PI / 2, 0);
+		// Update camera position based on screen size
+		if (window.innerWidth <= 768) {
+			this.camera.position.copy(this.mobileDefaultCameraPosition);
+		} else {
+			this.camera.position.copy(this.defaultCameraPosition);
+		}
+		this.camera.lookAt(0, 0, 0);
+
+		// Calculate the correct quaternion for the new camera position
+		this.calculateQuaternionFromPosition(this.camera.position);
 
 		// Update renderer size with maintained pixel ratio
 		const pixelRatio = Math.min(window.devicePixelRatio * 1.5, 3);
@@ -972,14 +1096,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 		const easedProgress = this.easeInOutCubic(progress);
 
 		// Use appropriate default position based on screen size
-		const targetPosition = window.innerWidth <= 768 ? this.mobileDefaultCameraPosition : this.defaultCameraPosition;
+		const targetPosition =
+			window.innerWidth <= 768
+				? this.mobileDefaultCameraPosition
+				: this.defaultCameraPosition;
 
 		// Interpolate camera position back to default
-		this.camera.position.lerpVectors(
-			this.zoomTargetPosition,
-			targetPosition,
-			easedProgress,
-		);
+		this.camera.position.lerpVectors(this.zoomTargetPosition, targetPosition, easedProgress);
 		this.camera.lookAt(0, 0, 0);
 
 		if (progress < 1) {
@@ -988,17 +1111,17 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			this.isZooming = false;
 			this.isZoomed = false;
 			this.currentCategory = null;
-			
-			// Reset spherical coordinates to match the final camera position
-			this.spherical.setFromVector3(this.camera.position);
-			
+
+			// Calculate the correct quaternion for the final camera position
+			this.calculateQuaternionFromPosition(this.camera.position);
+
 			// Reset momentum
-			this.rotationVelocity.theta = 0;
-			this.rotationVelocity.phi = 0;
-			
+			this.rotationVelocity.x = 0;
+			this.rotationVelocity.y = 0;
+
 			// Reset all satellite colors
 			this.resetAllSatelliteColors();
-			
+
 			this.zoomStateChanged.emit(false);
 		}
 	}
@@ -1026,10 +1149,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 			this.isTouching = true;
 			this.touchStartTime = Date.now();
 			this.canvasRef.nativeElement.style.cursor = 'grabbing';
-			
+
 			// Stop momentum when user starts touching
-			this.rotationVelocity.theta = 0;
-			this.rotationVelocity.phi = 0;
+			this.rotationVelocity.x = 0;
+			this.rotationVelocity.y = 0;
 		}
 	}
 
@@ -1044,26 +1167,33 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 		// Check if this is a significant movement (more than 8px)
 		const totalMovement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-		if (totalMovement > 8) { // Reduced threshold for more responsive rotation
+		if (totalMovement > 8) {
+			// Reduced threshold for more responsive rotation
 			// This is a drag, not a tap - handle rotation
 			const rotateSpeed = 0.01; // Increased for more responsive rotation
 
-			// Update spherical coordinates
-			this.spherical.theta -= deltaX * rotateSpeed;
-			this.spherical.phi += deltaY * rotateSpeed;
+			// Create rotation quaternions for touch
+			const rotationX = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(1, 0, 0),
+				deltaY * rotateSpeed,
+			);
+			const rotationY = new THREE.Quaternion().setFromAxisAngle(
+				new THREE.Vector3(0, 1, 0),
+				deltaX * rotateSpeed,
+			);
 
-			// Clamp phi to prevent over-rotation
-			this.spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, this.spherical.phi));
+			// Apply rotations to camera quaternion
+			this.cameraQuaternion.multiply(rotationX);
+			this.cameraQuaternion.multiply(rotationY);
 
 			// Update camera position
-			this.camera.position.setFromSpherical(this.spherical);
-			this.camera.lookAt(0, 0, 0);
+			this.updateCameraPosition();
 
 			// Calculate velocity for momentum
 			const deltaTime = currentTime - this.lastMouseTime;
 			if (deltaTime > 10) {
-				this.rotationVelocity.theta = (deltaX * rotateSpeed) / (deltaTime / 16);
-				this.rotationVelocity.phi = (deltaY * rotateSpeed) / (deltaTime / 16);
+				this.rotationVelocity.x = (deltaX * rotateSpeed) / (deltaTime / 16);
+				this.rotationVelocity.y = (deltaY * rotateSpeed) / (deltaTime / 16);
 				this.lastMouseTime = currentTime;
 			}
 		} else {
@@ -1142,20 +1272,26 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 	private onTouchEnd(event: TouchEvent) {
 		event.preventDefault();
-		
+
 		// Check if this was a tap (quick touch with minimal movement)
 		const touchDuration = Date.now() - this.touchStartTime;
-		const hasMoved = this.touchStartX !== null && this.touchStartY !== null && this.lastTouchX !== null && this.lastTouchY !== null && 
-			(Math.abs(this.touchStartX - this.lastTouchX) > 10 || Math.abs(this.touchStartY - this.lastTouchY) > 10); // Reduced threshold
-		
-		if (touchDuration < 300 && !hasMoved && !this.isZooming) { // Reduced duration threshold
+		const hasMoved =
+			this.touchStartX !== null &&
+			this.touchStartY !== null &&
+			this.lastTouchX !== null &&
+			this.lastTouchY !== null &&
+			(Math.abs(this.touchStartX - this.lastTouchX) > 10 ||
+				Math.abs(this.touchStartY - this.lastTouchY) > 10); // Reduced threshold
+
+		if (touchDuration < 300 && !hasMoved && !this.isZooming) {
+			// Reduced duration threshold
 			// This was a tap - check if we have a hovered satellite
 			if (this.hoveredSatellite) {
 				console.log('Touch: Zooming to hovered satellite:', this.hoveredSatellite.name);
-				
+
 				// Apply immediate visual feedback
 				this.applyVisualFeedback(this.hoveredSatellite);
-				
+
 				// Small delay to show the feedback before zooming
 				setTimeout(() => {
 					if (this.hoveredSatellite) {
@@ -1167,7 +1303,7 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 				this.handleTouchClick(event);
 			}
 		}
-		
+
 		this.isTouching = false;
 		this.canvasRef.nativeElement.style.cursor = 'grab';
 		this.touchStartX = null;
@@ -1178,10 +1314,10 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 
 	private handleTouchClick(event: TouchEvent) {
 		console.log('Touch click detected. Is zooming:', this.isZooming);
-		
+
 		if (event.changedTouches.length === 1 && !this.isZooming) {
 			const touch = event.changedTouches[0];
-			
+
 			// Convert touch position to normalized device coordinates
 			this.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
 			this.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
@@ -1194,14 +1330,14 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 				.map((satellite) => satellite.group)
 				.filter((group): group is THREE.Group => !!group);
 			const intersects = this.raycaster.intersectObjects(groups, true);
-			
+
 			console.log('Touch intersects:', intersects.length);
-			
+
 			if (intersects.length > 0) {
 				// Find the closest intersection
 				const closestIntersect = intersects[0];
 				let intersectedSatellite: CategorySatellite | null = null;
-				
+
 				// Search up the object hierarchy to find the satellite
 				let obj: THREE.Object3D | null = closestIntersect.object;
 				while (obj) {
@@ -1211,13 +1347,13 @@ export class SoccerBallComponent implements OnInit, OnDestroy {
 					}
 					obj = obj.parent;
 				}
-				
+
 				if (intersectedSatellite) {
 					console.log('Touch: Zooming to satellite:', intersectedSatellite.name);
-					
+
 					// Apply immediate visual feedback
 					this.applyVisualFeedback(intersectedSatellite);
-					
+
 					// Small delay to show the feedback before zooming
 					setTimeout(() => {
 						if (intersectedSatellite) {

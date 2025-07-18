@@ -14,7 +14,9 @@
 	justify-content: space-between;
 	box-shadow: none;
 	pointer-events: none; // Allow soccer ball to receive events through header container
-	transition: transform 0.5s ease, opacity 0.5s ease;
+	transition:
+		transform 0.5s ease,
+		opacity 0.5s ease;
 
 	&.hidden {
 		transform: translateY(-100%);
@@ -250,7 +252,9 @@ app-menu {
 	}
 	.bb-header-title {
 		font-size: 2rem;
-		transition: opacity 0.5s ease, transform 0.5s ease;
+		transition:
+			opacity 0.5s ease,
+			transform 0.5s ease;
 
 		.bb-header.hidden & {
 			opacity: 0;

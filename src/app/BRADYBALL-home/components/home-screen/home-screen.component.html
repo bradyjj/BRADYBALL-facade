@@ -5,13 +5,10 @@
 		(bradyballClick)="onBradyballClick()"
 		(categorySelected)="onCategorySelected($event)"
 	></app-header>
-	<soccer-ball 
+	<soccer-ball
 		(zoomStateChanged)="onZoomStateChanged($event)"
 		(hideHeaderFooter)="onHideHeaderFooter()"
 		(showHeaderFooter)="onShowHeaderFooter()"
 	></soccer-ball>
-	<app-footer 
-		[isZoomed]="isZoomed"
-		[isHidden]="isHeaderFooterHidden"
-	></app-footer>
+	<app-footer [isZoomed]="isZoomed" [isHidden]="isHeaderFooterHidden"></app-footer>
 </div>
